@@ -1,5 +1,5 @@
-from fastapi import FastAPI
-from app.routes import music
+"""Entry point: `uvicorn main:app` (dev) or see README for production."""
 
-app= FastAPI()
-app.include_router(music.router, prefix="/api/musi")
+from app.main import create_app
+
+app = create_app()
