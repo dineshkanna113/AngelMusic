@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --surface-0: 12 13 16;
+    --surface-1: 20 21 26;
+    --surface-2: 30 32 38;
+    --surface-3: 46 48 56;
+    --line: 40 42 50;
+    --fg: 236 237 240;
+    --muted: 150 153 165;
+    --accent: 52 211 153;
+    --gold: 234 179 8;
+    --danger: 248 113 113;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      color-scheme: light;
+      --surface-0: 250 250 251;
+      --surface-1: 255 255 255;
+      --surface-2: 241 242 245;
+      --surface-3: 222 224 230;
+      --line: 228 229 234;
+      --fg: 20 21 26;
+      --muted: 98 102 115;
+      --accent: 5 150 105;
+      --gold: 161 98 7;
+      --danger: 220 38 38;
+    }
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-surface-0 font-sans text-fg;
+  }
+
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-accent;
+  }
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded-md border border-line bg-surface-2 px-3 py-2 text-sm text-fg placeholder:text-muted
+      focus:border-accent/60 focus:outline-none;
+  }
+
+  .btn-primary {
+    @apply rounded-md bg-accent px-4 py-2 text-sm font-semibold text-surface-0 transition-opacity hover:opacity-90
+      disabled:opacity-50;
+  }
+
+  .btn-ghost {
+    @apply rounded-md px-2.5 py-1 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-fg disabled:opacity-50;
+  }
+
+  /* Seek slider is invisible; the styled track underneath shows progress + buffered ranges. */
+  .seek {
+    @apply cursor-pointer appearance-none bg-transparent opacity-0 disabled:cursor-default;
+  }
+  .seek:hover,
+  .seek:focus-visible {
+    @apply opacity-100;
+  }
+  .seek::-webkit-slider-runnable-track {
+    @apply h-4 bg-transparent;
+  }
+  .seek::-moz-range-track {
+    @apply bg-transparent;
+  }
+  .seek::-webkit-slider-thumb {
+    @apply mt-1 h-3 w-3 appearance-none rounded-full bg-fg;
+  }
+  .seek::-moz-range-thumb {
+    @apply h-3 w-3 rounded-full border-0 bg-fg;
+  }
+
+  .volume {
+    @apply h-1 cursor-pointer appearance-none rounded-full bg-surface-3 accent-accent;
+  }
+  .volume::-webkit-slider-thumb {
+    @apply h-3 w-3 appearance-none rounded-full bg-fg;
+  }
+  .volume::-moz-range-thumb {
+    @apply h-3 w-3 rounded-full border-0 bg-fg;
+  }
+}
+
+@layer components {
+  .btn-secondary {
+    @apply rounded-md border border-line px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-surface-2
+      disabled:opacity-50;
+  }
+}
