@@ -1,0 +1,23 @@
+# HTTPS terminator in front of the app. Caddy gets and renews the Let's Encrypt certificate
+# for {$DOMAIN} by itself once DNS points at this server and ports 80/443 are open.
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	# Compresses JSON, HTML, JS and CSS only; audio is already compressed and must keep
+	# byte-exact range responses, so it is never re-encoded.
+	encode zstd gzip
+
+	reverse_proxy app:8000 {
+		# Stream audio and upload chunks straight through instead of buffering them.
+		flush_interval -1
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	# No access log: stream URLs carry short-lived tokens in the query string.
+}
