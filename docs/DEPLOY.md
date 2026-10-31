@@ -67,7 +67,7 @@ sudo chown ubuntu:ubuntu /srv/angelmusic/app
 ## 3. Deploy
 
 ```bash
-git clone https://github.com/dineshkanna113/angelmusic.git /srv/angelmusic/app
+git clone https://github.com/dineshkanna113/AngelMusic.git /srv/angelmusic/app
 cd /srv/angelmusic/app/deploy
 cp .env.example .env
 python3 -c "import secrets; print(secrets.token_urlsafe(48))"   # paste as SECRET_KEY
