@@ -2,8 +2,8 @@
 // there, so saved tracks keep working on a plane, in a tunnel or on a flaky connection.
 import { API_BASE, coverUrl, streamToken } from "./api";
 
-const CACHE = "ls-offline-v1";
-const META_KEY = "ls.offline.meta";
+const CACHE = "am-offline-v1";
+const META_KEY = "am.offline.meta";
 const audioKey = (id) => `/offline/audio/${id}`;
 const coverKey = (id) => `/offline/cover/${id}`;
 

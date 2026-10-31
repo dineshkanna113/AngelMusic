@@ -36,7 +36,7 @@ def _password(args) -> str:
 
 
 def main(argv=None) -> None:
-    parser = argparse.ArgumentParser(prog="python -m app.manage", description="AngelStream server admin")
+    parser = argparse.ArgumentParser(prog="python -m app.manage", description="AngelMusic server admin")
     sub = parser.add_subparsers(dest="command", required=True)
     create = sub.add_parser("create-user", help="add a user")
     create.add_argument("username")

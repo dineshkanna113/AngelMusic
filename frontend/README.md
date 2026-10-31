@@ -1,7 +1,7 @@
-# AngelStream — frontend
+# AngelMusic — frontend
 
-React + Vite + Tailwind client for the lossless streaming server in `../lossless-stream-backend`
-(see that README for the full setup and production deployment).
+The AngelMusic web app (React + Vite + Tailwind). The API is in `../backend`; see the
+[root README](../README.md) for local setup and [docs/DEPLOY.md](../docs/DEPLOY.md) for production.
 
 ```bash
 npm install

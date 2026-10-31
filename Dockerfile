@@ -1,11 +1,10 @@
-# Build from the folder that contains both repos side by side:
-#   docker build -f lossless-stream-backend/Dockerfile -t angelstream .
-# (deploy/docker-compose.yml does this for you.)
+# The whole app in one image: the built web app served by the API.
+#   docker build -t angelmusic .        (deploy/docker-compose.yml does this for you)
 FROM node:20-alpine AS frontend
 WORKDIR /web
-COPY lossless-stream-frontend/package.json lossless-stream-frontend/package-lock.json ./
+COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
-COPY lossless-stream-frontend/ ./
+COPY frontend/ ./
 RUN npm run build
 
 FROM python:3.12-slim
@@ -13,10 +12,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
     APP_ENV=production AUDIO_DIR=/music DATABASE_PATH=/data/app.db FRONTEND_DIST=/app/static \
     STAGING_DIR=/data/staging REMOVED_DIR=/data/removed
 WORKDIR /app
-COPY lossless-stream-backend/requirements.txt ./
+COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
-COPY lossless-stream-backend/app ./app
-COPY lossless-stream-backend/main.py ./
+COPY backend/app ./app
+COPY backend/main.py ./
 COPY --from=frontend /web/dist ./static
 # Runs as uid 10001; the host folders mounted at /data and /music must be writable by it.
 RUN useradd --system --uid 10001 app && mkdir -p /data /music && chown app /data /music

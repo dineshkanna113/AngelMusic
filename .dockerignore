@@ -1,0 +1,17 @@
+# Keeps secrets, local data and dependencies out of the image build.
+**/node_modules
+**/dist
+**/env
+**/venv
+**/.venv
+**/__pycache__
+**/.pytest_cache
+.git
+**/.env
+**/.env.*
+!**/.env.example
+**/data
+audio-library
+music
+deploy
+docs

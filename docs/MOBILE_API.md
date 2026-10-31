@@ -1,4 +1,4 @@
-# AngelStream API for mobile apps
+# AngelMusic API for mobile apps
 
 Everything the web app does goes through this JSON API, so a native app (iOS, Android,
 Flutter, React Native) has the same capabilities. The full schema is in
@@ -32,7 +32,7 @@ GET  /api/tracks                 with If-None-Match: <stored ETag>  -> 304 = lib
 ## Authentication
 
 ```
-POST /api/auth/login     {"username", "password", "device": "Pixel 8 · AngelStream 1.0"}
+POST /api/auth/login     {"username", "password", "device": "Pixel 8 · AngelMusic 1.0"}
 POST /api/auth/register  same body; only when /api/config says registration_open
 -> 200 {
      "access_token": "...", "expires_in": 3600,

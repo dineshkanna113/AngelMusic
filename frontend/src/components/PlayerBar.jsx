@@ -125,7 +125,7 @@ export default function PlayerBar() {
   }, []);
 
   useEffect(() => {
-    document.title = track ? `${state.playing ? "▶ " : ""}${track.title} · ${track.artist}` : "AngelStream";
+    document.title = track ? `${state.playing ? "▶ " : ""}${track.title} · ${track.artist}` : "AngelMusic";
   }, [track, state.playing]);
 
   if (!track) return null;

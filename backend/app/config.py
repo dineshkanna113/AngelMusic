@@ -34,7 +34,7 @@ class Settings:
     audio_dir: Path = field(default_factory=lambda: _path("AUDIO_DIR", BASE_DIR.parent / "audio-library"))
     database_path: Path = field(default_factory=lambda: _path("DATABASE_PATH", BASE_DIR / "data" / "app.db"))
     frontend_dist: Path = field(
-        default_factory=lambda: _path("FRONTEND_DIST", BASE_DIR.parent / "lossless-stream-frontend" / "dist")
+        default_factory=lambda: _path("FRONTEND_DIST", BASE_DIR.parent / "frontend" / "dist")
     )
     cors_origins: list[str] = field(
         default_factory=lambda: [

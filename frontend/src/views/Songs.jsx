@@ -25,7 +25,7 @@ function readPref(key, fallback) {
 
 export default function Songs() {
   const { tracks } = useLibrary();
-  const [sort, setSort] = useState(() => readPref("ls.songs.sort", "album"));
+  const [sort, setSort] = useState(() => readPref("am.songs.sort", "album"));
   const [filter, setFilter] = useState("all");
 
   const list = useMemo(() => {
@@ -39,7 +39,7 @@ export default function Songs() {
   const changeSort = (v) => {
     setSort(v);
     try {
-      localStorage.setItem("ls.songs.sort", v);
+      localStorage.setItem("am.songs.sort", v);
     } catch {
       // not persisted
     }

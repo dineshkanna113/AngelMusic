@@ -33,7 +33,7 @@ PASSWORD = Field(min_length=8, max_length=128)
 
 
 REFRESH_GRACE_SECONDS = 60
-DEVICE = Field(default=None, max_length=120, description="Shown in the sessions list, e.g. 'Pixel 8 · AngelStream 1.2'")
+DEVICE = Field(default=None, max_length=120, description="Shown in the sessions list, e.g. 'Pixel 8 · AngelMusic 1.2'")
 
 
 class Credentials(BaseModel):

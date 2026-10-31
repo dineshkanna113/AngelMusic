@@ -1,8 +1,15 @@
-# AngelStream — lossless streaming server
+# AngelMusic
 
-Streams your own FLAC/WAV/AIFF/ALAC library to the browser, byte-for-byte, with no transcoding.
-The frontend lives in `../lossless-stream-frontend`. In production this server also serves the built frontend,
-so there's a single origin and no CORS.
+A music streaming service for your own library: FLAC, WAV, AIFF and ALAC played byte-for-byte, with no transcoding,
+in the browser, in Subsonic apps, and (next) in the AngelMusic mobile app.
+
+```
+backend/    FastAPI API, library scanner, upload pipeline, Subsonic API      (Python 3.12)
+frontend/   Web app: player, library, mixes, uploads, admin                  (React 19, Vite, Tailwind)
+deploy/     Production stack: Docker Compose + Caddy (HTTPS)                 -> docs/DEPLOY.md
+docs/       DEPLOY.md (AWS), MOBILE_API.md (for app developers), openapi.json
+Dockerfile  One image: the built web app served by the API, same origin, no CORS
+```
 
 ## What it does differently
 
@@ -46,17 +53,20 @@ so there's a single origin and no CORS.
 
 ## Run locally
 
+Put some music in `audio-library/` at the repository root (it's git-ignored), then:
+
 ```bash
-python -m venv venv && venv/Scripts/activate        # macOS/Linux: source venv/bin/activate
+cd backend
+python -m venv .venv && .venv/Scripts/activate      # macOS/Linux: source .venv/bin/activate
 pip install -r requirements-dev.txt
 cp .env.example .env                                  # set SECRET_KEY; for dev, APP_ENV=development
 uvicorn main:app --reload --port 8000
 ```
 
-Frontend dev server (hot reload, proxies `/api` to :8000):
+Web app with hot reload (proxies `/api` to :8000), in a second terminal:
 
 ```bash
-cd ../lossless-stream-frontend && npm install && npm run dev   # http://localhost:5173
+cd frontend && npm install && npm run dev            # http://localhost:5173
 ```
 
 The first account you create becomes the admin. After that, sign-ups follow `ALLOW_REGISTRATION`.
@@ -65,19 +75,22 @@ The library is scanned on startup. Changed files are re-read incrementally, and 
 ## Tests
 
 ```bash
-pytest -q
+cd backend && pytest -q
+cd frontend && npm run lint && npm run build
 ```
+
+CI runs both, then builds the Docker image (`.github/workflows/ci.yml`).
 
 ## Production
 
-**AWS:** follow [DEPLOY.md](DEPLOY.md): one EC2 instance, Docker Compose, Caddy for automatic HTTPS, the database and
+**AWS:** follow [docs/DEPLOY.md](docs/DEPLOY.md): one EC2 instance, Docker Compose, Caddy for automatic HTTPS, the database and
 music on an EBS volume, nightly database backups to S3. The stack is in [`deploy/`](deploy/).
 
 Notes for any host:
 
 - `SECRET_KEY` is required when `APP_ENV=production`. Changing it signs everyone out.
 - On a production server nobody can register until the first admin exists; create it with
-  `python -m app.manage create-user <name> --admin`. Sign-up stays closed unless `ALLOW_REGISTRATION=true`.
+  `python -m app.manage create-user <name> --admin` (from `backend/`). Sign-up stays closed unless `ALLOW_REGISTRATION=true`.
 - `<audio>` can't send headers, so streams use a short-lived (6 h), stream-only token in the query string. Access logs
   are disabled in the container and in the Caddyfile so those tokens aren't logged.
 - Don't let a proxy gzip `audio/*` responses. It breaks Range requests. (The Caddyfile only compresses text and JSON.)

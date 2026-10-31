@@ -1,6 +1,6 @@
 {
-  "name": "AngelStream",
-  "short_name": "AngelStream",
+  "name": "AngelMusic",
+  "short_name": "AngelMusic",
   "description": "Lossless audio streaming from your own library.",
   "start_url": "./#/",
   "scope": "./",

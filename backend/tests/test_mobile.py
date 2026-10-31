@@ -14,7 +14,7 @@ def bearer(token):
 
 def test_refresh_rotates_and_detects_reuse(client):
     session = client.post("/api/auth/register", json={"username": "admin", "password": "correct-horse",
-                                                      "device": "Pixel 8 · AngelStream 1.0"}).json()
+                                                      "device": "Pixel 8 · AngelMusic 1.0"}).json()
     assert session["refresh_token"] and session["expires_in"] == 3600
     first = session["refresh_token"]
     new = client.post("/api/auth/refresh", json={"refresh_token": first})
