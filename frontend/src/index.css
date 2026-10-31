@@ -1,40 +1,16 @@
+/* Hallmark · shape: app screen · genre: atmospheric · theme: Ribbon (deal 3/3, seed self-hosted-lossless-music-streaming-6df1·6aa84632·2026-10-31·r0) · redesign: full
+ * nav: kept (sidebar, 9 destinations + playlists) · signature: the player as a machined instrument, a sunk seek slot lit to the playhead and the file's resolution set as a figure · states: loading, empty, error, full · ribbon: two-in-the-morning (dark), dawn (light)
+ * axes: light/grotesk-sans/chromatic-teal · posture: committed · contrast: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P3 H- E3 S3 R2 V3 · weakest: R, covers carry every colour so the chrome stays one amber signal on blue-black */
+@import "./tokens.css";
+@import "./base.css" layer(base);
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    color-scheme: dark;
-    --surface-0: 12 13 16;
-    --surface-1: 20 21 26;
-    --surface-2: 30 32 38;
-    --surface-3: 46 48 56;
-    --line: 40 42 50;
-    --fg: 236 237 240;
-    --muted: 150 153 165;
-    --accent: 52 211 153;
-    --gold: 234 179 8;
-    --danger: 248 113 113;
-  }
-
-  @media (prefers-color-scheme: light) {
-    :root {
-      color-scheme: light;
-      --surface-0: 250 250 251;
-      --surface-1: 255 255 255;
-      --surface-2: 241 242 245;
-      --surface-3: 222 224 230;
-      --line: 228 229 234;
-      --fg: 20 21 26;
-      --muted: 98 102 115;
-      --accent: 5 150 105;
-      --gold: 161 98 7;
-      --danger: 220 38 38;
-    }
-  }
-
   html {
-    -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -42,61 +18,120 @@
     @apply bg-surface-0 font-sans text-fg;
   }
 
-  :focus-visible {
-    @apply outline outline-2 outline-offset-2 outline-accent;
+  h1,
+  h2,
+  h3 {
+    max-width: none;
   }
 }
 
 @layer components {
   .input {
-    @apply w-full rounded-md border border-line bg-surface-2 px-3 py-2 text-sm text-fg placeholder:text-muted
+    @apply h-10 w-full rounded-part border border-line bg-surface-1 px-3 text-sm text-fg placeholder:text-muted
       focus:border-accent/60 focus:outline-none;
+    box-shadow: inset 0 1px 2px color-mix(in oklab, var(--color-scrim) 40%, transparent);
+    transition: border-color var(--dur-micro) var(--ease-out);
   }
 
+  /* Machined pills: lit from above, pressed 1px down. The primary is the one lit part. */
+  .btn-primary,
+  .btn-secondary {
+    @apply inline-flex h-10 items-center justify-center gap-1.5 rounded-pill px-5 text-sm font-medium
+      disabled:cursor-default disabled:opacity-50;
+    transition: transform var(--dur-micro) var(--ease-out), filter var(--dur-micro) var(--ease-out);
+  }
   .btn-primary {
-    @apply rounded-md bg-accent px-4 py-2 text-sm font-semibold text-surface-0 transition-opacity hover:opacity-90
-      disabled:opacity-50;
+    @apply bg-accent text-accent-ink shadow-part;
+  }
+  .btn-secondary {
+    @apply border border-line text-fg shadow-part;
+    background: linear-gradient(var(--color-paper-3), var(--color-paper-2));
+  }
+  .btn-primary:hover:not(:disabled),
+  .btn-secondary:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+  .btn-primary:active:not(:disabled),
+  .btn-secondary:active:not(:disabled) {
+    transform: translateY(1px);
   }
 
   .btn-ghost {
-    @apply rounded-md px-2.5 py-1 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-fg disabled:opacity-50;
+    @apply inline-flex h-8 items-center rounded-pill px-3 text-sm text-muted hover:bg-surface-2 hover:text-fg
+      disabled:opacity-50;
+    transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
   }
 
-  /* Seek slider is invisible; the styled track underneath shows progress + buffered ranges. */
+  /* A panel lit from above: the player, menus, dialogs. */
+  .panel {
+    @apply rounded-card border border-line shadow-panel;
+    background: linear-gradient(var(--color-paper-3), var(--color-paper-2));
+  }
+
+  /* The seek slot: a sunk bed with a tick scale; its glow fills to the playhead. */
+  .slot {
+    @apply relative h-1.5 overflow-hidden rounded-pill;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), color-mix(in oklab, var(--color-muted) 35%, transparent) calc(10% - 1px) 10%),
+      var(--color-paper);
+    box-shadow: inset 0 1px 2px color-mix(in oklab, var(--color-scrim) 80%, transparent);
+  }
+  .slot-fill {
+    @apply absolute inset-y-0 left-0 rounded-pill bg-accent;
+    box-shadow: 0 0 10px color-mix(in oklab, var(--color-accent) 60%, transparent);
+  }
+
+  /* The range input sits over the slot: invisible track, a knurled metal cap on hover/focus. */
   .seek {
     @apply cursor-pointer appearance-none bg-transparent opacity-0 disabled:cursor-default;
+    transition: opacity var(--dur-micro) var(--ease-out);
   }
   .seek:hover,
-  .seek:focus-visible {
+  .seek:focus-visible,
+  .seek:active {
     @apply opacity-100;
   }
   .seek::-webkit-slider-runnable-track {
-    @apply h-4 bg-transparent;
+    @apply h-5 bg-transparent;
   }
   .seek::-moz-range-track {
     @apply bg-transparent;
   }
   .seek::-webkit-slider-thumb {
-    @apply mt-1 h-3 w-3 appearance-none rounded-full bg-fg;
+    @apply mt-0.5 h-4 w-2.5 appearance-none rounded-part;
+    background: linear-gradient(var(--metal-hi), var(--metal-lo));
+    box-shadow: var(--edge-light), var(--shadow-part), inset 0 -2px 0 var(--color-accent);
   }
   .seek::-moz-range-thumb {
-    @apply h-3 w-3 rounded-full border-0 bg-fg;
+    @apply h-4 w-2.5 rounded-part border-0;
+    background: linear-gradient(var(--metal-hi), var(--metal-lo));
+    box-shadow: var(--edge-light), var(--shadow-part), inset 0 -2px 0 var(--color-accent);
+  }
+
+  /* Time bubble while scrubbing (after Watermelon's scrub slider, on a native range input). */
+  .scrub-bubble {
+    @apply pointer-events-none absolute -top-9 -translate-x-1/2 rounded-part px-2 py-1 text-xs font-medium tabular-nums text-fg shadow-part;
+    background: linear-gradient(var(--metal-hi), var(--metal-lo));
   }
 
   .volume {
-    @apply h-1 cursor-pointer appearance-none rounded-full bg-surface-3 accent-accent;
+    @apply h-1.5 cursor-pointer appearance-none rounded-pill;
+    background: linear-gradient(90deg, var(--color-accent) var(--level, 100%), var(--color-paper) var(--level, 100%));
+    box-shadow: inset 0 1px 2px color-mix(in oklab, var(--color-scrim) 80%, transparent);
   }
   .volume::-webkit-slider-thumb {
-    @apply h-3 w-3 appearance-none rounded-full bg-fg;
+    @apply h-4 w-2.5 appearance-none rounded-part;
+    background: linear-gradient(var(--metal-hi), var(--metal-lo));
+    box-shadow: var(--edge-light), var(--shadow-part);
   }
   .volume::-moz-range-thumb {
-    @apply h-3 w-3 rounded-full border-0 bg-fg;
+    @apply h-4 w-2.5 rounded-part border-0;
+    background: linear-gradient(var(--metal-hi), var(--metal-lo));
+    box-shadow: var(--edge-light), var(--shadow-part);
   }
-}
 
-@layer components {
-  .btn-secondary {
-    @apply rounded-md border border-line px-4 py-2 text-sm font-semibold text-fg transition-colors hover:bg-surface-2
-      disabled:opacity-50;
+  /* Meta lines: parts set apart by space, never joined with dots. */
+  .meta {
+    @apply flex flex-wrap items-baseline gap-x-3 gap-y-0.5;
   }
 }

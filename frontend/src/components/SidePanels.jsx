@@ -11,7 +11,7 @@ function PanelFrame({ title, actions, children }) {
   return (
     <aside className="fixed inset-x-0 bottom-[var(--player-h)] top-0 z-30 flex flex-col border-l border-line bg-surface-1 lg:static lg:inset-auto lg:z-auto lg:w-96 lg:shrink-0">
       <div className="flex items-center gap-2 border-b border-line px-4 py-3">
-        <h2 className="flex-1 text-sm font-semibold">{title}</h2>
+        <h2 className="font-display flex-1 text-sm">{title}</h2>
         {actions}
         <button type="button" aria-label="Close panel" onClick={() => ui.closePanel()} className="grid h-8 w-8 place-items-center rounded-full text-muted hover:text-fg">
           <CloseIcon className="h-4 w-4" />
@@ -67,9 +67,9 @@ function QueuePanel() {
       {!current && <p className="p-4 text-sm text-muted">The queue is empty. Play something, or use “Add to queue”.</p>}
       {current && (
         <>
-          <h3 className="px-4 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wide text-muted">Now playing</h3>
+          <h3 className="px-4 pb-1 pt-3 text-xs font-medium text-muted">Now playing</h3>
           <ul><QueueRow track={current} index={index} current token={token} /></ul>
-          <h3 className="px-4 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wide text-muted">
+          <h3 className="px-4 pb-1 pt-4 text-xs font-medium text-muted">
             Up next {upcoming.length > 0 && `· ${upcoming.length}`}
           </h3>
           {upcoming.length === 0 && <p className="px-4 text-sm text-muted">Nothing queued.</p>}
@@ -81,7 +81,7 @@ function QueuePanel() {
           </ul>
           {history.length > 0 && (
             <>
-              <h3 className="px-4 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wide text-muted">Played</h3>
+              <h3 className="px-4 pb-1 pt-4 text-xs font-medium text-muted">Played</h3>
               <ul className="opacity-60">
                 {history.map((t, i) => <QueueRow key={`${t.id}-${i}`} track={t} index={i} token={token} isFirst={i === 0} />)}
               </ul>
@@ -165,7 +165,7 @@ function LyricsPanel() {
   }
 
   return (
-    <PanelFrame title={track ? `Lyrics · ${track.title}` : "Lyrics"}>
+    <PanelFrame title={track ? `Lyrics: ${track.title}` : "Lyrics"}>
       <div ref={containerRef} onWheel={() => (userScrolled.current = Date.now())} onTouchMove={() => (userScrolled.current = Date.now())}>
         {body}
       </div>

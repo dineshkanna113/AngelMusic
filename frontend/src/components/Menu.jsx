@@ -63,7 +63,7 @@ export function Menu({ trigger, label = "More options", children, className = ""
             role="menu"
             onClick={(e) => e.stopPropagation()}
             style={pos ?? { top: -9999, left: -9999 }}
-            className="fixed z-50 max-h-[70vh] min-w-[13rem] overflow-y-auto rounded-lg border border-line bg-surface-1 py-1 shadow-2xl"
+            className="fixed z-50 max-h-[70vh] min-w-[13rem] overflow-y-auto panel py-1 "
           >
             {typeof children === "function" ? children(() => setOpen(false)) : children}
           </div>,
@@ -96,5 +96,5 @@ export function MenuItem({ icon: Icon, children, onSelect, close, danger = false
 export const MenuSeparator = () => <div className="my-1 border-t border-line" />;
 
 export const MenuLabel = ({ children }) => (
-  <div className="px-3 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-muted">{children}</div>
+  <div className="px-3 pb-1 pt-2 text-xs font-medium text-muted">{children}</div>
 );

@@ -31,10 +31,10 @@ export default function Home() {
 
   return (
     <>
-      <h1 className="mb-6 text-2xl font-bold tracking-tight">{greeting}</h1>
+      <h1 className="font-display mb-6 text-2xl">{greeting}</h1>
       {offlineMode && (
         <p className="mb-6 rounded-md bg-gold/10 px-3 py-2 text-sm text-gold">
-          You're offline. Only tracks saved for offline are playable. <a className="underline" href={href("downloads")}>See downloads</a>
+          You’re offline. Only tracks saved for offline are playable. <a className="underline" href={href("downloads")}>See downloads</a>
         </p>
       )}
       {mixes.length > 0 && (

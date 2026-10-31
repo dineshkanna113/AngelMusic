@@ -8,6 +8,7 @@ import { STATUS_LABELS, uploadAudioUrl, uploadCoverUrl } from "../lib/uploads";
 import { confirmDialog, Modal, mount, promptDialog } from "./Dialog";
 import { DiscIcon, MoreIcon, PlayIcon, TrashIcon } from "./Icons";
 import { Menu, MenuItem, MenuSeparator } from "./Menu";
+import Meta from "./Meta";
 import QualityBadge from "./QualityBadge";
 
 const FIELDS = [
@@ -35,7 +36,7 @@ function TagEditor({ upload, onDone }) {
   };
 
   return (
-    <Modal title={`Edit tags · ${upload.filename}`} onClose={() => onDone(null)} wide>
+    <Modal title={`Edit tags for ${upload.filename}`} onClose={() => onDone(null)} wide>
       <form onSubmit={save} className="grid grid-cols-2 gap-3">
         {FIELDS.map(([k, label]) => (
           <label key={k} className={`space-y-1 ${["title", "artist", "album", "album_artist"].includes(k) ? "col-span-2" : ""}`}>
@@ -85,7 +86,7 @@ const pickReleaseTime = () => mount((done) => <ScheduleDialog onDone={done} />);
 
 const STATUS_TONE = {
   invalid: "bg-danger/15 text-danger", declined: "bg-danger/15 text-danger", removed: "bg-danger/15 text-danger",
-  pending: "bg-gold/15 text-gold", scheduled: "bg-accent/15 text-accent", published: "bg-accent/15 text-accent",
+  pending: "bg-gold/15 text-gold", scheduled: "bg-accent-soft text-fg", published: "bg-accent/15 text-accent",
 };
 
 export const hasErrors = (u) => u.issues.some((i) => i.level === "error");
@@ -156,13 +157,13 @@ export default function UploadRow({ upload: u, admin = false, onChange, selected
             </span>
             {u.technical && <QualityBadge track={u.technical} />}
           </div>
-          <p className="truncate text-xs text-muted">
-            {md ? [md.artist || "No artist", md.album || "No album", md.year].filter(Boolean).join(" · ") : "Checking file…"}
-          </p>
-          <p className="truncate text-[11px] text-muted">
-            {u.filename} · {formatSize(u.size)}{u.technical ? ` · ${formatTime(u.technical.duration)}` : ""}
-            {admin && u.uploader ? ` · by ${u.uploader}` : ""} · {when(u.created_at)}
-          </p>
+          {md
+            ? <Meta className="text-xs text-muted" parts={[md.artist || "No artist", md.album || "No album", md.year]} />
+            : <p className="text-xs text-muted">Checking file…</p>}
+          <Meta className="text-xs text-muted" parts={[
+            <span key="f" className="truncate">{u.filename}</span>, formatSize(u.size),
+            u.technical && formatTime(u.technical.duration), admin && u.uploader && `by ${u.uploader}`, when(u.created_at),
+          ]} />
           {u.issues.length > 0 && (
             <ul className="mt-1.5 space-y-0.5">
               {u.issues.map((i) => (
@@ -177,7 +178,9 @@ export default function UploadRow({ upload: u, admin = false, onChange, selected
           )}
           {u.status === "scheduled" && <p className="mt-1 text-xs text-accent">Goes live {when(u.release_at)}</p>}
           {u.review_note && <p className="mt-1 text-xs text-muted">Reviewer note: {u.review_note}</p>}
-          {u.status === "published" && <p className="mt-1 text-xs text-muted">Live since {when(u.published_at)}{u.reviewer ? ` · approved by ${u.reviewer}` : ""}</p>}
+          {u.status === "published" && (
+            <Meta className="mt-1 text-xs text-muted" parts={[`Live since ${when(u.published_at)}`, u.reviewer && `approved by ${u.reviewer}`]} />
+          )}
           {previewing && token && (
             <audio className="mt-2 h-9 w-full max-w-md" controls autoPlay preload="metadata" src={uploadAudioUrl(u.id, token)} />
           )}

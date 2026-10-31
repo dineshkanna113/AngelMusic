@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatBitrate, formatRate, formatResolution, formatSize } from "../lib/format";
 import { outputSampleRate } from "../lib/player";
+import Meta from "./Meta";
 
 function Row({ label, value, note, tone = "text-fg" }) {
   return (
@@ -34,21 +35,21 @@ export default function SignalPath({ track, state, gainDb, onClose }) {
     <div
       role="dialog"
       aria-label="Signal path"
-      className="absolute bottom-full right-0 mb-3 w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-line bg-surface-1 p-4 shadow-2xl"
+      className="panel absolute bottom-full right-0 z-[var(--z-dropdown)] mb-3 w-[min(22rem,calc(100vw-2rem))] p-4"
     >
-      <h2 className="mb-1 text-sm font-semibold">Signal path</h2>
+      <h2 className="font-display mb-1 text-sm">Signal path</h2>
       <dl className="divide-y divide-line">
         <Row
           label="Source"
-          value={`${track.codec.toUpperCase()} · ${formatResolution(track)}`}
-          note={`${track.channels ?? "?"} ch · ${formatBitrate(track.bitrate)} · ${formatSize(track.size)}`}
+          value={`${track.codec.toUpperCase()}, ${formatResolution(track)}`}
+          note={<Meta className="justify-end" parts={[`${track.channels ?? "?"} ch`, formatBitrate(track.bitrate), formatSize(track.size)]} />}
           tone={track.lossless ? "text-accent" : "text-fg"}
         />
         <Row label="Delivery" value="Original file, untouched" note="No transcoding. Byte-range streamed, so seeking is instant." />
         <Row
           label="Output device"
           value={deviceRate ? formatRate(deviceRate) : "Unknown"}
-          tone={resampled ? "text-gold" : "text-accent"}
+          tone={resampled ? "text-gold" : "text-fg"}
           note={
             resampled
               ? `Browser resamples ${formatRate(track.sample_rate)} → ${formatRate(deviceRate)}. For a native match, set your OS output device to ${formatRate(track.sample_rate)}.`
@@ -60,10 +61,10 @@ export default function SignalPath({ track, state, gainDb, onClose }) {
         <Row
           label="Level"
           value={attenuated ? "Digitally attenuated" : "Unity gain"}
-          tone={attenuated ? "text-gold" : "text-accent"}
+          tone={attenuated ? "text-gold" : "text-fg"}
           note={
             attenuated
-              ? `Volume ${Math.round(state.volume * 100)}%${gainDb ? ` · ReplayGain ${gainDb.toFixed(1)} dB` : ""}${state.muted ? " · muted" : ""}. Set 100% and ReplayGain off for an unaltered signal.`
+              ? `Volume ${Math.round(state.volume * 100)}%${gainDb ? `, ReplayGain ${gainDb.toFixed(1)} dB` : ""}${state.muted ? ", muted" : ""}. Set 100% and ReplayGain off for an unaltered signal.`
               : "Samples reach the mixer unaltered."
           }
         />

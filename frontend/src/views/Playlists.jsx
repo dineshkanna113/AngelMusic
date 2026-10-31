@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import CollectionActions from "../components/CollectionActions";
+import Meta from "../components/Meta";
 import Cover from "../components/Cover";
 import { confirmDialog, promptDialog } from "../components/Dialog";
 import { PageHeader } from "../components/Grid";
@@ -8,7 +9,7 @@ import { MenuItem, MenuSeparator } from "../components/Menu";
 import TrackList from "../components/TrackList";
 import { newPlaylistWith } from "../components/TrackMenu";
 import { api } from "../lib/api";
-import { formatTime } from "../lib/format";
+import { formatTime, plural } from "../lib/format";
 import { useStreamTokenValue } from "../lib/hooks";
 import { library, useLibrary } from "../lib/library";
 import { href, navigate } from "../lib/router";
@@ -36,9 +37,9 @@ export function Playlists() {
           <li key={pl.id} className="min-w-0">
             <a href={href("playlist", pl.id)} className="block">
               <Cover track={pl.cover_track_id ? byId.get(pl.cover_track_id) : null} token={token}
-                className="aspect-square w-full" rounded="rounded-lg" />
+                className="aspect-square w-full" rounded="rounded-part" />
               <p className="mt-2 truncate text-sm font-medium">{pl.name}</p>
-              <p className="truncate text-xs text-muted">{pl.track_count} tracks · {formatTime(pl.duration)}</p>
+              <Meta className="text-xs text-muted" parts={[plural(pl.track_count, "track"), formatTime(pl.duration)]} />
             </a>
           </li>
         ))}
@@ -99,11 +100,11 @@ export function PlaylistView({ id }) {
   return (
     <>
       <div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-end">
-        <Cover track={cover} token={token} className="aspect-square w-48" rounded="rounded-xl" eager />
+        <Cover track={cover} token={token} className="aspect-square w-48" rounded="rounded-card" eager />
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted">Playlist</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">{pl.name}</h1>
-          <p className="mt-1 text-sm text-muted">{pl.tracks.length} tracks · {formatTime(pl.duration)}</p>
+          <p className="text-xs font-medium text-muted">Playlist</p>
+          <h1 className="font-display mt-1 text-3xl">{pl.name}</h1>
+          <Meta className="mt-1 text-sm text-muted" parts={[plural(pl.tracks.length, "track"), formatTime(pl.duration)]} />
           <div className="mt-4">
             <CollectionActions tracks={pl.tracks}>
               {(close) => (

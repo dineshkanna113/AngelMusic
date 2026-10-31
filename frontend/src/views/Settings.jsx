@@ -11,8 +11,8 @@ import { toast, toastError } from "../lib/toast";
 
 function Card({ title, description, children }) {
   return (
-    <section className="mb-6 rounded-xl border border-line bg-surface-1 p-5">
-      <h2 className="text-base font-semibold">{title}</h2>
+    <section className="mb-8 border-t border-line pt-6">
+      <h2 className="font-display text-base">{title}</h2>
       {description && <p className="mt-1 text-sm text-muted">{description}</p>}
       <div className="mt-4">{children}</div>
     </section>

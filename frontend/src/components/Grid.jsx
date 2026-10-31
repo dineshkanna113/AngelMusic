@@ -1,8 +1,10 @@
 import { useStreamTokenValue } from "../lib/hooks";
+import { plural } from "../lib/format";
 import { useLibrary } from "../lib/library";
 import { player } from "../lib/player";
 import { href } from "../lib/router";
 import Cover from "./Cover";
+import Meta from "./Meta";
 import { PlayIcon } from "./Icons";
 import { canPlay } from "./TrackList";
 
@@ -19,7 +21,7 @@ export function AlbumGrid({ albums, emptyText = "No albums." }) {
         <li key={a.id} className="group min-w-0">
           <div className="relative">
             <a href={href("album", a.id)} className="block" tabIndex={-1} aria-hidden="true">
-              <Cover track={a.cover} token={token} className="aspect-square w-full" rounded="rounded-lg" />
+              <Cover track={a.cover} token={token} className="aspect-square w-full" rounded="rounded-part" />
             </a>
             {!offlineMode && (
               <button
@@ -34,11 +36,11 @@ export function AlbumGrid({ albums, emptyText = "No albums." }) {
           </div>
           <a href={href("album", a.id)} className="block">
             <p className="mt-2 truncate text-sm font-medium">{a.name}</p>
-            <p className="truncate text-xs text-muted">
-              {a.artist}
-              {a.year ? ` · ${a.year}` : ""}
-              {a.hires && <span className="ml-1.5 font-mono text-[10px] text-gold">HI-RES</span>}
-            </p>
+            <Meta className="text-xs text-muted" parts={[
+              <span key="a" className="truncate">{a.artist}</span>,
+              a.year,
+              a.hires && <span key="h" className="text-accent">Hi-Res</span>,
+            ]} />
           </a>
         </li>
       ))}
@@ -57,7 +59,7 @@ export function ArtistGrid({ artists }) {
             <Cover track={ar.cover} token={token} className="mx-auto aspect-square w-full" rounded="rounded-full" />
             <p className="mt-2 truncate text-sm font-medium">{ar.name}</p>
             <p className="truncate text-xs text-muted">
-              {ar.albums.length} album{ar.albums.length === 1 ? "" : "s"} · {ar.track_count} tracks
+              <Meta className="justify-center" parts={[plural(ar.albums.length, "album"), plural(ar.track_count, "track")]} />
             </p>
           </a>
         </li>
@@ -66,12 +68,16 @@ export function ArtistGrid({ artists }) {
   );
 }
 
+/** subtitle: a string, or a list of parts set as a meta line. */
+/** subtitle: a string, or a list of parts set as a meta line. */
 export function PageHeader({ title, subtitle, children }) {
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div className="min-w-0">
-        <h1 className="truncate text-2xl font-bold tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-0.5 text-sm text-muted">{subtitle}</p>}
+        <h1 className="font-display truncate text-2xl">{title}</h1>
+        {subtitle && (
+          <p className="mt-1 text-sm text-muted">{Array.isArray(subtitle) ? <Meta parts={subtitle} /> : subtitle}</p>
+        )}
       </div>
       {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
     </div>
@@ -82,7 +88,7 @@ export function Section({ title, action, children }) {
   return (
     <section className="mb-10">
       <div className="mb-3 flex items-baseline justify-between gap-3">
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+        <h2 className="font-display text-lg">{title}</h2>
         {action}
       </div>
       {children}

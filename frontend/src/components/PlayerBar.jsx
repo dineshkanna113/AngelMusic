@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { formatTime, isHiRes } from "../lib/format";
+import { formatRate, formatTime, isHiRes } from "../lib/format";
 import { usePlayer, useStreamTokenValue } from "../lib/hooks";
 import { library, useLibrary } from "../lib/library";
 import { player } from "../lib/player";
@@ -8,7 +8,7 @@ import { ui, usePanel } from "../lib/ui";
 import Cover from "./Cover";
 import {
   HeartIcon, HeartOutlineIcon, LyricsIcon, MoonIcon, MuteIcon, NextIcon, PauseIcon, PlayIcon, PrevIcon, QueueIcon,
-  RepeatIcon, ShuffleIcon, VolumeIcon, WaveIcon,
+  RepeatIcon, ShuffleIcon, VolumeIcon,
 } from "./Icons";
 import { Menu, MenuItem, MenuLabel } from "./Menu";
 import SignalPath from "./SignalPath";
@@ -27,15 +27,16 @@ function SeekBar({ state }) {
   };
 
   return (
-    <div className="flex items-center gap-2 text-[11px] tabular-nums text-muted">
+    <div className="flex items-center gap-3 text-xs tabular-nums text-muted">
       <span className="w-10 text-right">{formatTime(value)}</span>
-      <div className="relative h-4 flex-1">
-        <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 overflow-hidden rounded-full bg-surface-3">
+      <div className="relative h-5 flex-1">
+        <div className="slot absolute inset-x-0 top-1/2 -translate-y-1/2">
           {state.buffered.map(([s, e]) => (
-            <div key={s} className="absolute inset-y-0 bg-muted/30" style={{ left: pct(s), width: pct(e - s) }} />
+            <div key={s} className="absolute inset-y-0 bg-muted/25" style={{ left: pct(s), width: pct(e - s) }} />
           ))}
-          <div className="absolute inset-y-0 left-0 bg-accent" style={{ width: pct(value) }} />
+          <div className="slot-fill" style={{ width: pct(value) }} />
         </div>
+        {drag !== null && <span className="scrub-bubble" style={{ left: pct(drag) }}>{formatTime(drag)}</span>}
         <input
           type="range"
           aria-label="Seek"
@@ -65,7 +66,7 @@ function SleepTimer({ sleep }) {
         <span className="relative">
           <MoonIcon className="h-4 w-4" />
           {sleep && (
-            <span className="absolute -right-2.5 -top-2 rounded bg-accent px-1 text-[9px] font-bold leading-3 text-surface-0">
+            <span className="absolute -right-2.5 -top-2 rounded-part bg-accent px-1 text-[9px] font-semibold leading-3 text-accent-ink">
               {remaining ?? "end"}
             </span>
           )}
@@ -75,7 +76,7 @@ function SleepTimer({ sleep }) {
     >
       {(close) => (
         <>
-          <MenuLabel>Sleep timer{remaining !== null ? ` · ${remaining} min left` : sleep ? " · end of track" : ""}</MenuLabel>
+          <MenuLabel>{remaining !== null ? `Sleep timer, ${remaining} min left` : sleep ? "Sleep timer, end of track" : "Sleep timer"}</MenuLabel>
           {[15, 30, 45, 60, 90].map((m) => (
             <MenuItem key={m} close={close} onSelect={() => player.setSleepTimer(m)}>{m} minutes</MenuItem>
           ))}
@@ -125,7 +126,7 @@ export default function PlayerBar() {
   }, []);
 
   useEffect(() => {
-    document.title = track ? `${state.playing ? "▶ " : ""}${track.title} · ${track.artist}` : "AngelMusic";
+    document.title = track ? `${state.playing ? "Playing: " : ""}${track.title}, ${track.artist}` : "AngelMusic";
   }, [track, state.playing]);
 
   if (!track) return null;
@@ -134,15 +135,15 @@ export default function PlayerBar() {
   const repeatLabel = { off: "Repeat off", all: "Repeat all", one: "Repeat one" }[state.repeat];
 
   return (
-    <div className="border-t border-line bg-surface-1">
+    <div className="border-t border-line shadow-panel" style={{ background: "linear-gradient(var(--color-paper-3), var(--color-paper-2))" }}>
       {state.error && <p role="alert" className="bg-danger/15 px-4 py-1.5 text-center text-xs text-danger">{state.error}</p>}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-3 py-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1fr)] md:px-4 md:py-2.5">
         <div className="flex min-w-0 items-center gap-3">
           <a href={href("album", track.album_id)} aria-label="Go to album">
-            <Cover track={track} token={token} className="h-12 w-12" eager />
+            <Cover track={track} token={token} className="h-14 w-14" rounded="rounded-part" eager />
           </a>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{track.title}</p>
+            <p className="truncate font-display text-base">{track.title}</p>
             <a href={href("artist", track.artist_id)} className="block truncate text-xs text-muted hover:text-fg hover:underline">{track.artist}</a>
           </div>
           <button type="button" onClick={() => library.toggleFavorite(track)} disabled={offlineMode}
@@ -155,8 +156,8 @@ export default function PlayerBar() {
         {/* Mobile: compact play/next on the first row */}
         <div className="flex items-center md:hidden">
           <button type="button" onClick={() => player.togglePlay()} aria-label={state.playing ? "Pause" : "Play"}
-            className="relative grid h-10 w-10 place-items-center rounded-full bg-fg text-surface-0">
-            {state.buffering && <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-accent" />}
+            className="relative grid h-11 w-11 place-items-center rounded-full bg-accent text-accent-ink shadow-part active:translate-y-px">
+            {state.buffering && <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-accent-ink" />}
             {state.playing ? <PauseIcon /> : <PlayIcon className="ml-0.5 h-5 w-5" />}
           </button>
           <button type="button" className={iconBtn} onClick={() => player.next()} aria-label="Next"><NextIcon /></button>
@@ -170,8 +171,8 @@ export default function PlayerBar() {
             </button>
             <button type="button" className={iconBtn} onClick={() => player.previous()} aria-label="Previous"><PrevIcon /></button>
             <button type="button" onClick={() => player.togglePlay()} aria-label={state.playing ? "Pause" : "Play"}
-              className="relative grid h-10 w-10 place-items-center rounded-full bg-fg text-surface-0 transition-transform hover:scale-105">
-              {state.buffering && <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-accent" />}
+              className="relative grid h-11 w-11 place-items-center rounded-full bg-accent text-accent-ink shadow-part transition-transform duration-micro ease-out hover:brightness-110 active:translate-y-px">
+              {state.buffering && <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-accent-ink" />}
               {state.playing ? <PauseIcon /> : <PlayIcon className="ml-0.5 h-5 w-5" />}
             </button>
             <button type="button" className={iconBtn} onClick={() => player.next()} aria-label="Next"><NextIcon /></button>
@@ -190,14 +191,13 @@ export default function PlayerBar() {
             onClick={() => setShowPath((v) => !v)}
             aria-expanded={showPath}
             title="Signal path"
-            className={`flex items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[10px] ${
-              isHiRes(track) ? "border-gold/50 text-gold" : track.lossless ? "border-accent/40 text-accent" : "border-line text-muted"
-            }`}
+            aria-label={`Signal path: ${track.codec.toUpperCase()}${track.bit_depth ? ` ${track.bit_depth}-bit` : ""} ${formatRate(track.sample_rate)}`}
+            className="group flex items-baseline gap-2 rounded-part px-2 py-1 hover:bg-surface-3/60"
           >
-            <WaveIcon className="h-3 w-3" />
-            {track.codec.toUpperCase()}
-            {track.bit_depth ? ` ${track.bit_depth}/` : " "}
-            {track.sample_rate ? +(track.sample_rate / 1000).toFixed(1) : ""}
+            <span className={`font-display text-xl leading-none tabular-nums ${isHiRes(track) ? "text-accent" : "text-fg"}`}>
+              {track.bit_depth ? `${track.bit_depth}/` : ""}{track.sample_rate ? +(track.sample_rate / 1000).toFixed(1) : "?"}
+            </span>
+            <span className="text-xs text-muted group-hover:text-fg">{track.codec.toUpperCase()}</span>
           </button>
           <div className="flex items-center">
             <button type="button" className={`${iconBtn} md:hidden ${state.shuffle ? "!text-accent" : ""}`} onClick={() => player.toggleShuffle()}
@@ -215,7 +215,8 @@ export default function PlayerBar() {
               {state.muted || state.volume === 0 ? <MuteIcon className="h-4 w-4" /> : <VolumeIcon className="h-4 w-4" />}
             </button>
             <input type="range" aria-label="Volume" min={0} max={1} step={0.01} value={state.muted ? 0 : state.volume}
-              onChange={(e) => player.setVolume(Number(e.target.value))} className="volume hidden w-24 lg:block" />
+              onChange={(e) => player.setVolume(Number(e.target.value))} className="volume hidden w-24 lg:block"
+              style={{ "--level": `${(state.muted ? 0 : state.volume) * 100}%` }} />
           </div>
           {showPath && <SignalPath track={track} state={state} gainDb={gainDb} onClose={() => setShowPath(false)} />}
         </div>

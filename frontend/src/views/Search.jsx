@@ -29,7 +29,7 @@ export default function Search({ query }) {
   const empty = !results.artists.length && !results.albums.length && !results.tracks.length;
   return (
     <>
-      <h1 className="mb-6 text-2xl font-bold tracking-tight">Results for “{query}”</h1>
+      <h1 className="font-display mb-6 text-2xl">Results for “{query}”</h1>
       {empty && <p className="text-sm text-muted">No matches.</p>}
       {results.tracks.length > 0 && <Section title="Songs"><TrackList tracks={results.tracks} /></Section>}
       {results.albums.length > 0 && <Section title="Albums"><AlbumGrid albums={results.albums} /></Section>}

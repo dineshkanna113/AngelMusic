@@ -1,12 +1,12 @@
 {
   "name": "AngelMusic",
   "short_name": "AngelMusic",
-  "description": "Lossless audio streaming from your own library.",
+  "description": "AngelMusic: your own music library, streamed lossless.",
   "start_url": "./#/",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0c0d10",
-  "theme_color": "#0c0d10",
+  "background_color": "#0a0f18",
+  "theme_color": "#0a0f18",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },

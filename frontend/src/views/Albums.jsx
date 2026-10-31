@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import CollectionActions from "../components/CollectionActions";
+import Meta from "../components/Meta";
 import Cover from "../components/Cover";
 import { AlbumGrid, ArtistGrid, PageHeader, Select } from "../components/Grid";
 import TrackList from "../components/TrackList";
-import { formatResolution, formatTime } from "../lib/format";
+import { formatResolution, formatTime, plural } from "../lib/format";
 import { useStreamTokenValue } from "../lib/hooks";
 import { useLibrary } from "../lib/library";
 import { href } from "../lib/router";
@@ -44,7 +45,7 @@ export function Artists() {
 function qualitySummary(tracks) {
   const res = [...new Set(tracks.map(formatResolution))];
   const codecs = [...new Set(tracks.map((t) => t.codec.toUpperCase()))];
-  return `${codecs.join("/")} · ${res.length === 1 ? res[0] : "mixed resolution"}`;
+  return [codecs.join(" and "), res.length === 1 ? res[0] : "mixed resolution"];
 }
 
 export function AlbumView({ id }) {
@@ -57,23 +58,21 @@ export function AlbumView({ id }) {
   return (
     <>
       <div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-end">
-        <Cover track={album.cover} token={token} className="aspect-square w-48 sm:w-56" rounded="rounded-xl" eager />
+        <Cover track={album.cover} token={token} className="aspect-square w-48 sm:w-56" rounded="rounded-card" eager />
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted">Album</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">{album.name}</h1>
-          <p className="mt-2 text-sm">
-            <a className="font-medium hover:underline" href={href("artist", album.artist_id)}>{album.artist}</a>
-            <span className="text-muted">
-              {album.year ? ` · ${album.year}` : ""} · {album.tracks.length} tracks · {formatTime(album.duration)}
-            </span>
-          </p>
-          <p className={`mt-1 font-mono text-xs ${album.hires ? "text-gold" : "text-accent"}`}>{qualitySummary(album.tracks)}</p>
+          <p className="text-xs font-medium text-muted">Album</p>
+          <h1 className="font-display mt-1 text-3xl">{album.name}</h1>
+          <Meta className="mt-2 text-sm text-muted" parts={[
+            <a key="a" className="font-medium text-fg hover:underline" href={href("artist", album.artist_id)}>{album.artist}</a>,
+            album.year, plural(album.tracks.length, "track"), formatTime(album.duration),
+          ]} />
+          <Meta className={`mt-1 text-xs tabular-nums ${album.hires ? "text-accent" : "text-fg-2"}`} parts={qualitySummary(album.tracks)} />
           <div className="mt-4"><CollectionActions tracks={album.tracks} /></div>
         </div>
       </div>
       {[...discs].sort().map((disc) => (
         <div key={disc}>
-          {discs.size > 1 && <h3 className="mb-1 mt-4 px-2 text-xs font-semibold uppercase tracking-wide text-muted">Disc {disc}</h3>}
+          {discs.size > 1 && <h3 className="mb-1 mt-4 px-2 text-xs font-medium text-muted">Disc {disc}</h3>}
           <TrackList tracks={album.tracks.filter((t) => (t.disc_no ?? 1) === disc)} numbering="track" showAlbum={false} showCover={false} />
         </div>
       ))}
@@ -94,19 +93,19 @@ export function ArtistView({ id }) {
       <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end">
         <Cover track={artist.cover} token={token} className="aspect-square w-40" rounded="rounded-full" eager />
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted">Artist</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">{artist.name}</h1>
-          <p className="mt-1 text-sm text-muted">{artist.albums.length} albums · {artist.track_count} tracks</p>
+          <p className="text-xs font-medium text-muted">Artist</p>
+          <h1 className="font-display mt-1 text-3xl">{artist.name}</h1>
+          <Meta className="mt-1 text-sm text-muted" parts={[plural(artist.albums.length, "album"), plural(artist.track_count, "track")]} />
           <div className="mt-4"><CollectionActions tracks={all} /></div>
         </div>
       </div>
       {top.some((t) => t.play_count > 0) && (
         <section className="mb-8">
-          <h2 className="mb-2 text-lg font-semibold">Most played</h2>
+          <h2 className="font-display mb-2 text-lg">Most played</h2>
           <TrackList tracks={top} />
         </section>
       )}
-      <h2 className="mb-3 text-lg font-semibold">Albums</h2>
+      <h2 className="font-display mb-3 text-lg">Albums</h2>
       <AlbumGrid albums={artist.albums} />
     </>
   );
@@ -120,7 +119,7 @@ export function Favorites() {
   );
   return (
     <>
-      <PageHeader title="Favorites" subtitle={`${favs.length} tracks · no limit`} />
+      <PageHeader title="Favorites" subtitle={[plural(favs.length, "track"), "no limit"]} />
       <div className="mb-4"><CollectionActions tracks={favs} /></div>
       <TrackList tracks={favs} emptyText="Tap the heart on any track to save it here." />
     </>

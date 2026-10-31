@@ -63,7 +63,7 @@ const Row = memo(function Row({
       )}
       <span className="hidden items-center gap-2 md:flex">
         {saved && <OfflineIcon className="h-3.5 w-3.5 text-accent" title="Available offline" />}
-        {saving && <span className="font-mono text-[10px] text-muted">{Math.round(saving * 100)}%</span>}
+        {saving && <span className="text-[11px] tabular-nums text-muted">{Math.round(saving * 100)}%</span>}
         <QualityBadge track={track} />
       </span>
       <button

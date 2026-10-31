@@ -39,10 +39,10 @@ export default function Login() {
 
   return (
     <main className="grid min-h-dvh place-items-center bg-surface-0 px-4">
-      <form onSubmit={submit} className="w-full max-w-sm space-y-5 rounded-xl border border-line bg-surface-1 p-7 shadow-2xl">
+      <form onSubmit={submit} className="panel w-full max-w-sm space-y-5 p-7">
         <div className="flex items-center gap-2.5">
           <WaveIcon className="h-6 w-6 text-accent" />
-          <h1 className="text-lg font-semibold tracking-tight">AngelMusic</h1>
+          <h1 className="font-display text-lg">AngelMusic</h1>
         </div>
         <p className="text-sm text-muted">
           {awaitingAdmin

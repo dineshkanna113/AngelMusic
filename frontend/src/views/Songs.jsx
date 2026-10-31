@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import CollectionActions from "../components/CollectionActions";
 import { PageHeader, Select } from "../components/Grid";
 import TrackList from "../components/TrackList";
-import { formatTime, isHiRes } from "../lib/format";
+import { formatTime, isHiRes, plural } from "../lib/format";
 import { useLibrary } from "../lib/library";
 
 const SORTS = {
@@ -47,7 +47,7 @@ export default function Songs() {
 
   return (
     <>
-      <PageHeader title="Songs" subtitle={`${list.length} tracks · ${formatTime(list.reduce((s, t) => s + t.duration, 0))}`}>
+      <PageHeader title="Songs" subtitle={[plural(list.length, "track"), formatTime(list.reduce((s, t) => s + t.duration, 0))]}>
         <Select label="Show" value={filter} onChange={setFilter}
           options={[["all", "All"], ["lossless", "Lossless"], ["hires", "Hi-Res only"]]} />
         <Select label="Sort" value={sort} onChange={changeSort}

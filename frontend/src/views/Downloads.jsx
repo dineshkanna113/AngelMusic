@@ -36,8 +36,12 @@ export default function Downloads() {
     <>
       <PageHeader
         title="Downloads"
-        subtitle={`${plural(tracks.length, "track")} on this device${usage ? ` · ${formatSize(usage.saved)}` : ""}${
-          usage?.quota ? ` · ${formatSize(usage.quota - (usage.used ?? 0))} free` : ""}${pending ? ` · ${pending} downloading` : ""}`}
+        subtitle={[
+          `${plural(tracks.length, "track")} on this device`,
+          usage && formatSize(usage.saved),
+          usage?.quota && `${formatSize(usage.quota - (usage.used ?? 0))} free`,
+          pending && `${pending} downloading`,
+        ]}
       >
         {tracks.length > 0 && <button type="button" className="btn-ghost" onClick={clear}>Remove all</button>}
       </PageHeader>

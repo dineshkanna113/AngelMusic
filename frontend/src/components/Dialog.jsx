@@ -8,15 +8,15 @@ export function Modal({ title, children, onClose, wide = false }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-[60] grid place-items-center bg-black/50 p-4" onPointerDown={onClose}>
+    <div className="fixed inset-0 z-[60] grid place-items-center bg-scrim/60 p-4" onPointerDown={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
         onPointerDown={(e) => e.stopPropagation()}
-        className={`w-full ${wide ? "max-w-lg" : "max-w-sm"} max-h-[90dvh] overflow-y-auto rounded-xl border border-line bg-surface-1 p-5 shadow-2xl`}
+        className={`w-full ${wide ? "max-w-lg" : "max-w-sm"} max-h-[90dvh] overflow-y-auto panel p-5`}
       >
-        <h2 className="mb-3 text-base font-semibold">{title}</h2>
+        <h2 className="font-display mb-3 text-base">{title}</h2>
         {children}
       </div>
     </div>
@@ -55,7 +55,7 @@ function ConfirmDialog({ title, message, confirmLabel = "Delete", onDone }) {
       <p className="mb-5 text-sm text-muted">{message}</p>
       <div className="flex justify-end gap-2">
         <button type="button" className="btn-ghost" onClick={() => onDone(false)}>Cancel</button>
-        <button type="button" className="btn-primary !bg-danger" onClick={() => onDone(true)} autoFocus>
+        <button type="button" className="btn-primary !bg-danger !text-surface-0" onClick={() => onDone(true)} autoFocus>
           {confirmLabel}
         </button>
       </div>

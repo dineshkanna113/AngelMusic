@@ -44,8 +44,8 @@ export function StatusTabs({ counts, value, onChange, order }) {
     <div role="tablist" className="mb-3 flex flex-wrap gap-1.5">
       {[["", "All", total], ...order.map((s) => [s, STATUS_LABELS[s], counts?.[s] ?? 0])].map(([s, label, n]) => (
         <button key={s} type="button" role="tab" aria-selected={value === s} onClick={() => onChange(s)}
-          className={`rounded-full px-3 py-1 text-xs ${value === s ? "bg-fg text-surface-0" : "bg-surface-2 text-muted hover:text-fg"}`}>
-          {label}{n ? ` · ${n}` : ""}
+          className={`rounded-pill px-3 py-1 text-xs ${value === s ? "bg-fg text-surface-0" : "bg-surface-2 text-muted hover:text-fg"}`}>
+          {label}{n ? <span className="ml-1.5 tabular-nums opacity-70">{n}</span> : null}
         </button>
       ))}
     </div>
@@ -61,12 +61,12 @@ function DropZone({ onFiles }) {
       onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
       onDragLeave={() => setDragging(false)}
       onDrop={async (e) => { e.preventDefault(); setDragging(false); onFiles(await filesFromDrop(e.dataTransfer)); }}
-      className={`grid place-items-center rounded-xl border-2 border-dashed px-6 py-10 text-center text-sm transition-colors ${dragging ? "border-accent bg-accent/5" : "border-line"}`}
+      className={`grid place-items-center rounded-card border-2 border-dashed px-6 py-10 text-center text-sm transition-colors ${dragging ? "border-accent bg-accent/5" : "border-line"}`}
     >
       <UploadIcon className="mb-2 h-7 w-7 text-muted" />
       <p className="font-medium">Drop audio files or whole album folders here</p>
       <p className="mt-1 text-xs text-muted">
-        {AUDIO_EXTENSIONS.join(" ")} · large files resume automatically if the connection drops
+        {AUDIO_EXTENSIONS.join(" ")}. Large files resume by themselves if the connection drops.
       </p>
       <div className="mt-4 flex gap-2">
         <button type="button" className="btn-secondary" onClick={() => files.current.click()}>Choose files</button>
@@ -85,9 +85,9 @@ function Transfers() {
   if (!items.length) return null;
   const finished = items.some((i) => ["done", "canceled"].includes(i.state));
   return (
-    <section className="mt-5 rounded-xl border border-line bg-surface-1 p-4">
+    <section className="panel mt-5 p-4">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Transfers</h2>
+        <h2 className="font-display text-sm">Transfers</h2>
         {finished && <button type="button" className="text-xs text-muted hover:text-fg" onClick={() => uploads.clearFinished()}>Clear finished</button>}
       </div>
       <ul className="space-y-2.5">
@@ -95,7 +95,7 @@ function Transfers() {
           const pct = i.size ? i.received / i.size : 0;
           const label = {
             queued: "Waiting", uploading: `${Math.round(pct * 100)}%`, retrying: `Reconnecting… ${Math.round(pct * 100)}%`,
-            done: "Sent · checking", failed: i.error, canceled: "Canceled",
+            done: "Sent, checking", failed: i.error, canceled: "Canceled",
           }[i.state];
           return (
             <li key={i.key} className="text-xs">
@@ -111,8 +111,9 @@ function Transfers() {
                 )}
               </div>
               {["uploading", "retrying", "queued"].includes(i.state) && (
-                <div className="mt-1 h-1 overflow-hidden rounded-full bg-surface-3">
-                  <div className={`h-full transition-[width] ${i.state === "retrying" ? "bg-gold" : "bg-accent"}`} style={{ width: `${pct * 100}%` }} />
+                <div className="slot mt-1.5">
+                  <div className={`h-full origin-left transition-transform duration-short ease-out ${i.state === "retrying" ? "bg-gold" : "bg-accent"}`}
+                    style={{ transform: `scaleX(${pct})` }} />
                 </div>
               )}
             </li>
@@ -136,7 +137,7 @@ export default function Upload() {
     };
   }, [load]);
 
-  if (!user.can_upload) return <p className="text-sm text-muted">You don't have upload access. Ask an admin for the uploader role.</p>;
+  if (!user.can_upload) return <p className="text-sm text-muted">You don’t have upload access. Ask an admin for the uploader role.</p>;
 
   const add = (files) => {
     const audio = files.filter((f) => isAudioFile(f.name));
@@ -158,7 +159,7 @@ export default function Upload() {
         </label>
       )}
       <Transfers />
-      <h2 className="mb-3 mt-8 text-lg font-semibold tracking-tight">Your uploads</h2>
+      <h2 className="font-display mb-3 mt-8 text-lg">Your uploads</h2>
       <StatusTabs counts={data?.counts} value={status} onChange={setStatus}
         order={["invalid", "pending", "scheduled", "published", "declined"]} />
       {data && !data.uploads.length && <p className="py-6 text-sm text-muted">Nothing here yet.</p>}

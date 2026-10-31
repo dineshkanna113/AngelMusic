@@ -76,7 +76,7 @@ export function Sidebar() {
       {user?.can_upload && <NavLink to="upload" label="Upload" icon={UploadIcon} active={section === "upload"} />}
       {user?.is_admin && <NavLink to="review" label="Review" icon={CheckIcon} active={section === "review"} badge={pending} />}
       <div className="mt-5 flex items-center justify-between px-3">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">Your playlists</span>
+        <span className="text-xs font-medium text-muted">Your playlists</span>
         <button type="button" aria-label="New playlist" onClick={() => newPlaylistWith([])}
           className="grid h-6 w-6 place-items-center rounded text-muted hover:bg-surface-2 hover:text-fg">
           <PlusIcon className="h-4 w-4" />
@@ -155,7 +155,7 @@ export function TopBar() {
         {scanning && <span className="text-xs text-muted">Scanning…</span>}
         <Menu
           label="Account"
-          trigger={<span className="grid h-8 w-8 place-items-center rounded-full bg-surface-3 text-xs font-semibold uppercase">{session?.user?.username?.[0]}</span>}
+          trigger={<span className="grid h-8 w-8 place-items-center rounded-full bg-surface-3 text-xs font-semibold">{session?.user?.username?.[0]?.toUpperCase()}</span>}
           className="rounded-full"
         >
           {(close) => (
@@ -180,8 +180,8 @@ export function Toasts() {
     <div aria-live="polite" className="pointer-events-none fixed inset-x-0 top-3 z-[70] flex flex-col items-center gap-2 px-4">
       {toasts.map((t) => (
         <div key={t.id} role={t.tone === "error" ? "alert" : "status"}
-          className={`pointer-events-auto max-w-md rounded-lg px-4 py-2 text-sm shadow-xl ${
-            t.tone === "error" ? "bg-danger text-white" : "bg-fg text-surface-0"
+          className={`pointer-events-auto max-w-md rounded-pill px-4 py-2 text-sm shadow-part ${
+            t.tone === "error" ? "bg-danger text-surface-0" : "bg-fg text-surface-0"
           }`}>
           {t.message}
         </div>
