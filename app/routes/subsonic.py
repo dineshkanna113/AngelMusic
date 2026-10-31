@@ -490,7 +490,7 @@ def h_lyrics_by_song(req, p, user, conn):
 
 def h_user(req, p, user, conn):
     return {"user": {"username": user["username"], "scrobblingEnabled": True, "adminRole": user["is_admin"],
-                     "settingsRole": True, "downloadRole": True, "uploadRole": user["is_admin"], "playlistRole": True,
+                     "settingsRole": True, "downloadRole": True, "uploadRole": False, "playlistRole": True,
                      "coverArtRole": True, "commentRole": False, "podcastRole": False, "streamRole": True,
                      "jukeboxRole": False, "shareRole": False, "videoConversionRole": False, "folder": [1]}}
 

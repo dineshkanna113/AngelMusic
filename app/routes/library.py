@@ -1,21 +1,15 @@
-import logging
-import re
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Request, Response, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from fastapi.responses import FileResponse
-from starlette.concurrency import run_in_threadpool
 
 from .. import queries
-from ..library import MIME_BY_EXT, read_cover, read_lyrics
+from ..http import etag_json
+from ..library import read_cover, read_lyrics
 from ..security import admin_user, current_user, stream_user
 
 router = APIRouter(prefix="/api", tags=["library"])
-log = logging.getLogger(__name__)
-
-UPLOAD_SUBDIR = "Uploads"
-_UNSAFE = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 
 
 def _row(request: Request, track_id: str):
@@ -37,7 +31,7 @@ def _file(request: Request, row) -> Path:
 def list_tracks(request: Request, user: dict = Depends(current_user)):
     with request.app.state.db.connect() as conn:
         tracks = queries.tracks(conn, user["id"])
-    return {"tracks": tracks, "scanning": request.app.state.library.scanning}
+    return etag_json(request, {"tracks": tracks, "scanning": request.app.state.library.scanning})
 
 
 @router.get("/tracks/{track_id}")
@@ -52,13 +46,13 @@ def get_track(track_id: str, request: Request, user: dict = Depends(current_user
 @router.get("/albums")
 def list_albums(request: Request, user: dict = Depends(current_user)):
     with request.app.state.db.connect() as conn:
-        return {"albums": queries.albums(queries.tracks(conn, user["id"]))}
+        return etag_json(request, {"albums": queries.albums(queries.tracks(conn, user["id"]))})
 
 
 @router.get("/artists")
 def list_artists(request: Request, user: dict = Depends(current_user)):
     with request.app.state.db.connect() as conn:
-        return {"artists": queries.artists(queries.albums(queries.tracks(conn, user["id"])))}
+        return etag_json(request, {"artists": queries.artists(queries.albums(queries.tracks(conn, user["id"])))})
 
 
 @router.get("/tracks/{track_id}/lyrics")
@@ -73,44 +67,6 @@ def lyrics(track_id: str, request: Request, _user: dict = Depends(current_user))
 def rescan(request: Request, background: BackgroundTasks, _admin: dict = Depends(admin_user)):
     background.add_task(request.app.state.library.scan)
     return {"status": "scheduled"}
-
-
-def _upload_target(audio_dir: Path, filename: str) -> Path:
-    name = _UNSAFE.sub("_", Path(filename or "").name).strip(" .")
-    if not name or Path(name).suffix.lower() not in MIME_BY_EXT:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Unsupported file type: {filename!r}")
-    folder = audio_dir / UPLOAD_SUBDIR
-    folder.mkdir(parents=True, exist_ok=True)
-    target, stem, suffix, n = folder / name, Path(name).stem, Path(name).suffix, 1
-    while target.exists():
-        n += 1
-        target = folder / f"{stem} ({n}){suffix}"
-    return target
-
-
-@router.post("/library/upload", status_code=status.HTTP_201_CREATED)
-async def upload(request: Request, files: list[UploadFile] = File(...), _admin: dict = Depends(admin_user)):
-    settings = request.app.state.settings
-    limit = settings.max_upload_mb * 1024 * 1024
-    saved = []
-    for f in files:
-        target = _upload_target(settings.audio_dir, f.filename)
-        written = 0
-        try:
-            with target.open("wb") as out:
-                while chunk := await f.read(1024 * 1024):
-                    written += len(chunk)
-                    if written > limit:
-                        raise HTTPException(status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                                            f"{f.filename} exceeds {settings.max_upload_mb} MB")
-                    out.write(chunk)
-        except BaseException:
-            target.unlink(missing_ok=True)
-            raise
-        saved.append(target.name)
-        log.info("Uploaded %s (%d bytes)", target, written)
-    result = await run_in_threadpool(request.app.state.library.scan)
-    return {"saved": saved, "scan": result}
 
 
 @router.get("/stream/{track_id}")

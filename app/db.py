@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
     is_admin          INTEGER NOT NULL DEFAULT 0,
     token_version     INTEGER NOT NULL DEFAULT 0,
     app_password_enc  TEXT,
+    can_upload        INTEGER NOT NULL DEFAULT 0,
     created_at        TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -83,12 +84,59 @@ CREATE TABLE IF NOT EXISTS plays (
     played_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_plays_user ON plays(user_id, played_at);
+
+-- One row per signed-in device. The refresh token is "<id>.<secret>"; only a hash of the
+-- secret is stored, and it rotates on every refresh.
+CREATE TABLE IF NOT EXISTS sessions (
+    id            TEXT PRIMARY KEY,
+    user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    secret_hash   TEXT NOT NULL,
+    prev_hash     TEXT,
+    rotated_at    TEXT,
+    device        TEXT NOT NULL DEFAULT '',
+    created_at    TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_used_at  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at    TEXT NOT NULL,
+    revoked_at    TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+
+-- Upload ingestion: each row is one file moving through
+-- uploading -> processing -> invalid | pending -> scheduled -> published (-> removed), or declined.
+CREATE TABLE IF NOT EXISTS uploads (
+    id            TEXT PRIMARY KEY,
+    user_id       INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    filename      TEXT NOT NULL,
+    size          INTEGER NOT NULL,
+    received      INTEGER NOT NULL DEFAULT 0,
+    status        TEXT NOT NULL,
+    auto_publish  INTEGER NOT NULL DEFAULT 0,
+    sha256        TEXT,
+    meta          TEXT,
+    edits         TEXT NOT NULL DEFAULT '{}',
+    issues        TEXT NOT NULL DEFAULT '[]',
+    release_at    TEXT,
+    reviewer_id   INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    review_note   TEXT NOT NULL DEFAULT '',
+    reviewed_at   TEXT,
+    track_id      TEXT,
+    rel_path      TEXT,
+    published_at  TEXT,
+    created_at    TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_uploads_status ON uploads(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_uploads_user ON uploads(user_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_uploads_sha ON uploads(sha256);
 """
 
 # Columns added to user tables after the first release: (table, column, definition).
 ADDED_COLUMNS = [
     ("users", "token_version", "INTEGER NOT NULL DEFAULT 0"),
     ("users", "app_password_enc", "TEXT"),
+    ("users", "can_upload", "INTEGER NOT NULL DEFAULT 0"),
+    ("sessions", "prev_hash", "TEXT"),
+    ("sessions", "rotated_at", "TEXT"),
 ]
 
 

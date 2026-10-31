@@ -34,7 +34,13 @@ so there's a single origin and no CORS.
 - **Downloads:** download the original file of any track.
 - **Native apps:** per-user Subsonic *app password* (Settings → Subsonic apps). The account password is never accepted by
   third-party apps.
-- **Admin:** upload music by drag-and-drop, rescan, manage users (add, reset password, admin role, delete).
+- **Made for you:** Daily Mixes per taste, On Repeat, Rediscover, Discover, Hi-Res and decade mixes, and track radio,
+  built per user from their own plays and favorites.
+- **Uploads with review:** resumable chunked uploads (files and whole folders), content-sniffed validation, exact and
+  likely-duplicate detection, tag editing, an admin review queue with preview, scheduled releases, and takedowns.
+- **Roles:** listener, uploader (submits music for review) and admin.
+- **Mobile-ready API:** 1-hour access tokens with rotating refresh tokens, per-device sessions, account deletion,
+  `/api/config` for version checks, ETags on the library. See [docs/MOBILE_API.md](docs/MOBILE_API.md).
 - **Security:** bcrypt passwords, revocable sessions (password change and "sign out everywhere" invalidate all tokens),
   login throttling, stream-only short-lived media tokens, path-traversal-safe file access, no framing.
 
@@ -64,23 +70,20 @@ pytest -q
 
 ## Production
 
-```bash
-# from the folder containing both repos
-docker build -f lossless-stream-backend/Dockerfile -t angelstream .
-docker run -d -p 8000:8000 \
-  -e SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')" \
-  -v /path/to/music:/music:ro -v angelstream-data:/data angelstream
-```
+**AWS:** follow [DEPLOY.md](DEPLOY.md): one EC2 instance, Docker Compose, Caddy for automatic HTTPS, the database and
+music on an EBS volume, nightly database backups to S3. The stack is in [`deploy/`](deploy/).
 
-Put it behind a TLS reverse proxy (Caddy, nginx). Notes:
+Notes for any host:
 
 - `SECRET_KEY` is required when `APP_ENV=production`. Changing it signs everyone out.
-- `<audio>` can't send headers, so streams use a short-lived (6 h), stream-only token in the query string. The long-lived
-  access token never appears in URLs. Access logs are disabled in the container so those tokens aren't logged.
-- Don't let the proxy gzip `audio/*` responses. It breaks Range requests.
-- Login throttling is in-memory per process. Run one worker, or put rate limiting in the proxy.
-- Offline downloads and the PWA need HTTPS (browsers only allow Cache Storage and service workers in secure contexts).
-- `MAX_UPLOAD_MB` (default 2048) caps a single uploaded file. Raise your proxy's body-size limit to match.
+- On a production server nobody can register until the first admin exists; create it with
+  `python -m app.manage create-user <name> --admin`. Sign-up stays closed unless `ALLOW_REGISTRATION=true`.
+- `<audio>` can't send headers, so streams use a short-lived (6 h), stream-only token in the query string. Access logs
+  are disabled in the container and in the Caddyfile so those tokens aren't logged.
+- Don't let a proxy gzip `audio/*` responses. It breaks Range requests. (The Caddyfile only compresses text and JSON.)
+- Run one worker: SQLite, upload locks and the release scheduler live in the process.
+- Offline downloads and the PWA need HTTPS.
+- `MAX_UPLOAD_MB` (default 2048) caps one file; uploads arrive in 8 MB chunks, so proxies need no special body limit.
 
 ## API
 
@@ -88,20 +91,26 @@ Put it behind a TLS reverse proxy (Caddy, nginx). Notes:
 | --- | --- | --- |
 | GET | `/api/health` | — |
 | GET | `/api/auth/status` | — |
-| POST | `/api/auth/register`, `/api/auth/login` | — |
+| GET | `/api/config` | — |
+| POST | `/api/auth/register`, `/api/auth/login`, `/api/auth/refresh` | — |
 | GET | `/api/auth/me` | Bearer |
 | POST | `/api/auth/stream-token` | Bearer |
 | GET | `/api/tracks`, `/api/tracks/{id}` | Bearer |
-| POST | `/api/auth/password`, `/api/auth/logout-all` | Bearer |
+| POST | `/api/auth/password`, `/api/auth/logout`, `/api/auth/logout-all` | Bearer |
+| GET/DELETE | `/api/auth/sessions`, `/api/auth/sessions/{id}` | Bearer |
+| DELETE | `/api/auth/account` | Bearer + password |
 | GET/POST/DELETE | `/api/auth/app-password` | Bearer |
 | GET | `/api/albums`, `/api/artists`, `/api/tracks/{id}/lyrics` | Bearer |
 | GET/PUT/DELETE | `/api/favorites`, `/api/favorites/{id}` | Bearer |
 | GET/POST/PATCH/DELETE | `/api/playlists`, `/api/playlists/{id}`, `POST /api/playlists/{id}/tracks` | Bearer |
 | GET/POST/DELETE | `/api/history` | Bearer |
-| POST | `/api/library/rescan`, `/api/library/upload` | Bearer (admin) |
+| POST | `/api/library/rescan` | Bearer (admin) |
+| POST/GET/PATCH/DELETE | `/api/uploads`, `/api/uploads/{id}`, `PUT /api/uploads/{id}/content` | Bearer (uploader) |
+| POST | `/api/uploads/{id}/approve`, `/api/uploads/{id}/decline`, `DELETE /api/tracks/{id}` | Bearer (admin) |
+| GET | `/api/uploads/{id}/audio?t=`, `/api/uploads/{id}/cover?t=` | stream token (owner or admin) |
 | GET/POST/PATCH/DELETE | `/api/users`, `/api/users/{id}` | Bearer (admin) |
 | GET | `/api/stream/{id}?t=`, `/api/download/{id}?t=` | stream token, supports `Range` |
 | GET | `/api/tracks/{id}/cover?t=` | stream token |
 | GET/POST | `/rest/*` (Subsonic 1.16.1 + OpenSubsonic `songLyrics`, `formPost`) | username + app password (`p`, `enc:`, or `t`+`s`) |
 
-Interactive docs are at `/api/docs` when not in production.
+Interactive docs are at `/api/docs` when not in production; the schema is committed at [docs/openapi.json](docs/openapi.json).

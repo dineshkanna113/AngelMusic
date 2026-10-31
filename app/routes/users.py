@@ -15,16 +15,18 @@ class NewUser(BaseModel):
     username: str = USERNAME
     password: str = PASSWORD
     is_admin: bool = False
+    can_upload: bool = False
 
 
 class UserPatch(BaseModel):
     password: str | None = Field(default=None, min_length=8, max_length=128)
     is_admin: bool | None = None
+    can_upload: bool | None = None  # uploader role: may submit music for review
 
 
 def _public(row) -> dict:
     return {"id": row["id"], "username": row["username"], "is_admin": bool(row["is_admin"]),
-            "created_at": row["created_at"]}
+            "can_upload": bool(row["is_admin"] or row["can_upload"]), "created_at": row["created_at"]}
 
 
 def _admin_count(conn) -> int:
@@ -41,8 +43,8 @@ def list_users(request: Request, _admin: dict = Depends(admin_user)):
 def create_user(body: NewUser, request: Request, _admin: dict = Depends(admin_user)):
     with request.app.state.db.connect() as conn:
         try:
-            cur = conn.execute("INSERT INTO users (username, password_hash, is_admin) VALUES (?, ?, ?)",
-                               (body.username, hash_password(body.password), int(body.is_admin)))
+            cur = conn.execute("INSERT INTO users (username, password_hash, is_admin, can_upload) VALUES (?, ?, ?, ?)",
+                               (body.username, hash_password(body.password), int(body.is_admin), int(body.can_upload)))
         except sqlite3.IntegrityError:
             raise HTTPException(status.HTTP_409_CONFLICT, "Username already taken")
         return _public(conn.execute("SELECT * FROM users WHERE id = ?", (cur.lastrowid,)).fetchone())
@@ -58,10 +60,14 @@ def update_user(user_id: int, body: UserPatch, request: Request, admin: dict = D
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "Can't remove the last admin")
         if body.is_admin is not None:
             conn.execute("UPDATE users SET is_admin = ? WHERE id = ?", (int(body.is_admin), user_id))
+        if body.can_upload is not None:
+            conn.execute("UPDATE users SET can_upload = ? WHERE id = ?", (int(body.can_upload), user_id))
         if body.password is not None:
             # Resetting a password signs that user out everywhere.
             conn.execute("UPDATE users SET password_hash = ?, token_version = token_version + 1 WHERE id = ?",
                          (hash_password(body.password), user_id))
+            conn.execute("UPDATE sessions SET revoked_at = CURRENT_TIMESTAMP WHERE user_id = ? AND revoked_at IS NULL",
+                         (user_id,))
         return _public(conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone())
 
 

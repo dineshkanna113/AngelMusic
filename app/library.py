@@ -11,6 +11,7 @@ import threading
 from pathlib import Path
 
 import mutagen
+from mutagen import id3
 from mutagen.aiff import AIFF
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
@@ -187,7 +188,8 @@ def _folder_cover(path: Path) -> Path | None:
     return None
 
 
-def read_metadata(path: Path, rel_path: str) -> dict | None:
+def read_metadata(path: Path, rel_path: str, display_name: Path | None = None) -> dict | None:
+    """display_name: the file name to derive a title from when the tags have none (staged uploads)."""
     try:
         audio = mutagen.File(path)
     except Exception as exc:  # corrupt files must not abort the scan
@@ -222,7 +224,7 @@ def read_metadata(path: Path, rel_path: str) -> dict | None:
         rg = lambda k: _gain(get(k))  # noqa: E731
 
     if not title:
-        title, fallback_artist = _title_from_filename(path)
+        title, fallback_artist = _title_from_filename(display_name or path)
         artist = artist or fallback_artist
 
     stat = path.stat()
@@ -282,6 +284,50 @@ def read_cover(path: Path) -> tuple[bytes, str] | None:
     return None
 
 
+# Editable tag fields -> (Vorbis comment, ID3 frame, MP4 atom).
+TAG_FIELDS = {
+    "title": ("title", id3.TIT2, "©nam"),
+    "artist": ("artist", id3.TPE1, "©ART"),
+    "album": ("album", id3.TALB, "©alb"),
+    "album_artist": ("albumartist", id3.TPE2, "aART"),
+    "genre": ("genre", id3.TCON, "©gen"),
+    "year": ("date", id3.TDRC, "©day"),
+    "track_no": ("tracknumber", id3.TRCK, "trkn"),
+    "disc_no": ("discnumber", id3.TPOS, "disk"),
+}
+
+
+def write_tags(path: Path, fields: dict) -> None:
+    """Write edited metadata into the file itself, so it survives rescans and moves to other players.
+    An empty value removes the tag. Audio data is never touched."""
+    audio = mutagen.File(path)
+    if audio is None:
+        raise ValueError("Unrecognised audio file")
+    if audio.tags is None:
+        audio.add_tags()
+    tags = audio.tags
+    for name, value in fields.items():
+        vorbis, frame, atom = TAG_FIELDS[name]
+        empty = value is None or str(value).strip() == ""
+        if isinstance(audio, MP4):
+            if empty:
+                tags.pop(atom, None)
+            elif atom in ("trkn", "disk"):
+                tags[atom] = [(int(value), 0)]
+            else:
+                tags[atom] = [str(value)]
+        elif hasattr(tags, "getall"):  # ID3: mp3, wav, aiff
+            tags.delall(frame.__name__)
+            if not empty:
+                tags.add(frame(encoding=3, text=[str(value)]))
+        else:  # Vorbis comments: flac, ogg, opus
+            if empty:
+                tags.pop(vorbis, None)
+            else:
+                tags[vorbis] = [str(value)]
+    audio.save()
+
+
 COLUMNS = (
     "id", "rel_path", "size", "mtime_ns", "title", "artist", "album", "album_artist", "genre", "year",
     "track_no", "disc_no", "duration", "codec", "mime", "sample_rate", "bit_depth", "channels", "bitrate",
@@ -307,6 +353,20 @@ class Library:
         if not path.is_relative_to(self.audio_dir) or not path.is_file():
             return None
         return path
+
+    def index_file(self, path: Path) -> str | None:
+        """Index one file without walking the whole library (used when an upload is published)."""
+        rel_path = path.resolve().relative_to(self.audio_dir).as_posix()
+        meta = read_metadata(path, rel_path)
+        if meta is None:
+            return None
+        with self.db.connect() as conn:
+            conn.execute(_UPSERT, [meta[c] for c in COLUMNS])
+        return meta["id"]
+
+    def unindex(self, rel_path: str) -> None:
+        with self.db.connect() as conn:
+            conn.execute("DELETE FROM tracks WHERE rel_path = ?", (rel_path,))
 
     def scan(self) -> dict:
         """Incremental scan: only files whose size or mtime changed are re-read."""

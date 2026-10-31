@@ -1,0 +1,50 @@
+# Production stack for one server (e.g. an AWS EC2 instance). See DEPLOY.md.
+#   cd lossless-stream-backend/deploy && cp .env.example .env  (fill it in)
+#   docker compose up -d --build
+name: angelstream
+
+services:
+  app:
+    build:
+      context: ../..                      # the folder holding both repos
+      dockerfile: lossless-stream-backend/Dockerfile
+    image: angelstream:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      APP_ENV: production
+      PUBLIC_URL: https://${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ${DATA_DIR:-/srv/angelstream/data}:/data       # database, staged uploads, removed tracks, backups
+      - ${MUSIC_DIR:-/srv/angelstream/music}:/music    # the library (published uploads land in Uploads/)
+    expose:
+      - "8000"                            # reachable only from Caddy, never from the internet
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  caddy:
+    image: caddy:2.8.4-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"                     # HTTP/3
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data                  # TLS certificates: keep this volume
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+volumes:
+  caddy_data:
+  caddy_config:

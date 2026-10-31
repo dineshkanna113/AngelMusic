@@ -43,10 +43,23 @@ class Settings:
             if o.strip()
         ]
     )
-    allow_registration: bool = field(default_factory=lambda: _bool("ALLOW_REGISTRATION", True))
-    access_token_ttl: int = field(default_factory=lambda: int(os.getenv("ACCESS_TOKEN_TTL", str(7 * 24 * 3600))))
+    # Open sign-up is on by default for local use, off by default in production.
+    allow_registration: bool = field(
+        default_factory=lambda: _bool("ALLOW_REGISTRATION", os.getenv("APP_ENV", "development").lower() != "production")
+    )
+    # Access tokens are short-lived; apps renew them with the refresh token, which rotates on use.
+    access_token_ttl: int = field(default_factory=lambda: int(os.getenv("ACCESS_TOKEN_TTL", "3600")))
+    refresh_token_ttl: int = field(default_factory=lambda: int(os.getenv("REFRESH_TOKEN_TTL", str(60 * 24 * 3600))))
     stream_token_ttl: int = field(default_factory=lambda: int(os.getenv("STREAM_TOKEN_TTL", str(6 * 3600))))
     max_upload_mb: int = field(default_factory=lambda: int(os.getenv("MAX_UPLOAD_MB", "2048")))
+    # Uploads wait here (outside the library, so listeners never see them) until approved.
+    staging_dir: Path = field(default_factory=lambda: _path("STAGING_DIR", BASE_DIR / "data" / "staging"))
+    # Taken-down tracks are moved here rather than deleted, so a takedown can be undone.
+    removed_dir: Path = field(default_factory=lambda: _path("REMOVED_DIR", BASE_DIR / "data" / "removed"))
+    min_free_mb: int = field(default_factory=lambda: int(os.getenv("MIN_FREE_MB", "1024")))
+    # Mobile apps compare their version with this (GET /api/config) to ask users to update.
+    min_app_version: str = field(default_factory=lambda: os.getenv("MIN_APP_VERSION", "1.0.0"))
+    public_url: str = field(default_factory=lambda: os.getenv("PUBLIC_URL", "").rstrip("/"))
     scan_on_startup: bool = field(default_factory=lambda: _bool("SCAN_ON_STARTUP", True))
 
     @property

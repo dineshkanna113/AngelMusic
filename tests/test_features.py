@@ -99,20 +99,6 @@ def test_user_admin(client):
     assert client.delete(f"/api/users/{uid}", headers=h).status_code == 204
 
 
-def test_upload_adds_track(client, audio_dir, tmp_path):
-    h = auth_headers(client)
-    src = tmp_path / "up.wav"
-    write_wav(src)
-    res = client.post("/api/library/upload", headers=h,
-                      files=[("files", ("../../evil name.wav", src.read_bytes(), "audio/wav"))])
-    assert res.status_code == 201, res.text
-    assert res.json()["saved"] == ["evil name.wav"]
-    assert (audio_dir / "Uploads" / "evil name.wav").is_file()
-    assert len(tracks(client, h)) == 2
-    bad = client.post("/api/library/upload", headers=h, files=[("files", ("x.exe", b"MZ", "application/octet-stream"))])
-    assert bad.status_code == 400
-
-
 def test_download_sets_filename(client):
     h = auth_headers(client)
     tid = tracks(client, h)[0]["id"]

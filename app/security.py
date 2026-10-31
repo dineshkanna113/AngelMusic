@@ -31,7 +31,7 @@ def verify_password(password: str, hashed: str) -> bool:
         return False
 
 
-def create_token(secret: str, user: dict, kind: str, ttl: int) -> str:
+def create_token(secret: str, user: dict, kind: str, ttl: int, sid: str | None = None) -> str:
     now = int(time.time())
     payload = {
         "sub": str(user["id"]),
@@ -41,6 +41,8 @@ def create_token(secret: str, user: dict, kind: str, ttl: int) -> str:
         "iat": now,
         "exp": now + ttl,
     }
+    if sid:
+        payload["sid"] = sid  # ties the token to a device session, so revoking the device revokes it
     return jwt.encode(payload, secret, algorithm=ALGORITHM)
 
 
@@ -59,23 +61,29 @@ def user_dict(row) -> dict:
         "id": row["id"],
         "username": row["username"],
         "is_admin": bool(row["is_admin"]),
+        "can_upload": bool(row["is_admin"] or row["can_upload"]),
         "token_version": row["token_version"],
     }
 
 
 def public_user(user: dict) -> dict:
-    return {k: user[k] for k in ("id", "username", "is_admin")}
+    return {k: user[k] for k in ("id", "username", "is_admin", "can_upload")}
 
 
 def _load_user(request: Request, payload: dict) -> dict:
     with request.app.state.db.connect() as conn:
         row = conn.execute(
-            "SELECT id, username, is_admin, token_version FROM users WHERE id = ?", (int(payload["sub"]),)
+            "SELECT id, username, is_admin, can_upload, token_version FROM users WHERE id = ?", (int(payload["sub"]),)
         ).fetchone()
-    # A bumped token_version (password change, "sign out everywhere") revokes older tokens.
-    if row is None or row["token_version"] != payload.get("ver", 0):
+        sid = payload.get("sid")
+        revoked = sid is not None and conn.execute(
+            "SELECT 1 FROM sessions WHERE id = ? AND user_id = ? AND revoked_at IS NULL", (sid, row["id"] if row else 0)
+        ).fetchone() is None
+    # A bumped token_version (password change, "sign out everywhere") or a revoked device
+    # session invalidates tokens immediately, not when they expire.
+    if row is None or revoked or row["token_version"] != payload.get("ver", 0):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Session expired, please sign in again")
-    return user_dict(row)
+    return {**user_dict(row), "sid": sid}
 
 
 def current_user(
@@ -90,6 +98,13 @@ def current_user(
 def admin_user(user: dict = Depends(current_user)) -> dict:
     if not user["is_admin"]:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Admin only")
+    return user
+
+
+def uploader_user(user: dict = Depends(current_user)) -> dict:
+    """Admins, plus users an admin has given the uploader role. Their uploads still go to review."""
+    if not user["can_upload"]:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "You don't have upload access")
     return user
 
 
@@ -109,6 +124,10 @@ def stream_user(request: Request, t: str = Query(..., description="Stream token"
 def _fernet(secret_key: str) -> Fernet:
     key = hashlib.sha256(f"app-password:{secret_key}".encode()).digest()
     return Fernet(base64.urlsafe_b64encode(key))
+
+
+def hash_secret(secret: str) -> str:
+    return hashlib.sha256(secret.encode()).hexdigest()
 
 
 def new_app_password() -> str:
