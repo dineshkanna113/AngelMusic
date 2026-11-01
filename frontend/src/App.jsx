@@ -11,6 +11,7 @@ import { useRoute } from "./lib/router";
 import { AlbumView, Albums, ArtistView, Artists, Favorites } from "./views/Albums";
 import Downloads from "./views/Downloads";
 import Home from "./views/Home";
+import NowPlaying from "./views/NowPlaying";
 import { MixView } from "./views/Mixes";
 import { PlaylistView, Playlists, Recent } from "./views/Playlists";
 import Search from "./views/Search";
@@ -35,6 +36,7 @@ function View() {
     case "search": return <Search query={params[0] ?? ""} />;
     case "downloads": return <Downloads />;
     case "settings": return <Settings />;
+    case "now": return <NowPlaying />;
     case "upload": return <Upload />;
     case "review": return <Review />;
     default: return <Home />;

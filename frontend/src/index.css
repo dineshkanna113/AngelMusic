@@ -4,6 +4,13 @@
 @import "./tokens.css";
 @import "./base.css" layer(base);
 
+/* --ambient is registered as a colour so the bloom interpolates between covers. */
+@property --ambient {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #251a30;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,6 +22,11 @@
 
   body {
     @apply bg-surface-0 font-sans text-fg;
+  }
+
+  /* The one orchestrated moment: the cover's colour blooms in on a track change. */
+  :root {
+    transition: --ambient var(--dur-bloom) var(--ease-in-out);
   }
 
   /* Heads: Bricolage at a condensed width and heavy weight; the type is the grandeur. */
@@ -138,6 +150,12 @@
   }
   .volume::-moz-range-thumb {
     @apply h-3.5 w-3.5 rounded-full border-0 bg-fg;
+  }
+
+  .stage {
+    background:
+      radial-gradient(90% 70% at 25% 30%, color-mix(in oklab, var(--ambient) 85%, transparent), transparent 70%),
+      linear-gradient(180deg, color-mix(in oklab, var(--ambient) 45%, var(--color-night)), var(--color-night) 85%);
   }
 
   /* Meta lines: parts set apart by space, never joined with dots. */

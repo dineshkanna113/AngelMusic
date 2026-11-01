@@ -4,7 +4,7 @@ import { offline } from "../lib/offline";
 import { DiscIcon } from "./Icons";
 
 /** Cover art for a track; falls back to the offline copy when the network fails. */
-export default function Cover({ track, token, className = "h-10 w-10", eager = false, rounded = "rounded" }) {
+export default function Cover({ track, token, className = "h-10 w-10", eager = false, rounded = "rounded", onImage }) {
   const [src, setSrc] = useState(null);
   const [failed, setFailed] = useState(false);
 
@@ -38,6 +38,7 @@ export default function Cover({ track, token, className = "h-10 w-10", eager = f
           loading={eager ? "eager" : "lazy"}
           decoding="async"
           className="h-full w-full object-cover"
+          onLoad={onImage && ((e) => onImage(e.currentTarget))}
           onError={onError}
         />
       ) : (

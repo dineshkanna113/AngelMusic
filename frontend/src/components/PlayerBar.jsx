@@ -3,7 +3,8 @@ import { formatRate, formatTime, isHiRes } from "../lib/format";
 import { usePlayer, useStreamTokenValue } from "../lib/hooks";
 import { library, useLibrary } from "../lib/library";
 import { player } from "../lib/player";
-import { href } from "../lib/router";
+import { ambient } from "../lib/ambient";
+import { href, navigate } from "../lib/router";
 import { ui, usePanel } from "../lib/ui";
 import Cover from "./Cover";
 import {
@@ -125,6 +126,11 @@ export default function PlayerBar() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // No art: the stage falls back to the default colour instead of keeping the last cover's.
+  useEffect(() => {
+    if (track && !track.has_cover) ambient.reset();
+  }, [track]);
+
   useEffect(() => {
     document.title = track ? `${state.playing ? "Playing: " : ""}${track.title}, ${track.artist}` : "Yaapu";
   }, [track, state.playing]);
@@ -139,11 +145,13 @@ export default function PlayerBar() {
       {state.error && <p role="alert" className="bg-danger/15 px-4 py-1.5 text-center text-xs text-danger">{state.error}</p>}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-3 py-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1fr)] md:px-4 md:py-2.5">
         <div className="flex min-w-0 items-center gap-3">
-          <a href={href("album", track.album_id)} aria-label="Go to album">
-            <Cover track={track} token={token} className="h-14 w-14" rounded="rounded-sm" eager />
+          <a href={href("now")} aria-label="Open Now Playing">
+            <Cover track={track} token={token} className="h-14 w-14" rounded="rounded-sm" eager onImage={ambient.fromImage} />
           </a>
           <div className="min-w-0">
-            <p className="title-display truncate text-lg">{track.title}</p>
+            <button type="button" onClick={() => navigate("now")} className="block max-w-full text-left">
+              <span className="title-display block truncate text-lg hover:underline">{track.title}</span>
+            </button>
             <a href={href("artist", track.artist_id)} className="block truncate text-xs text-muted hover:text-fg hover:underline">{track.artist}</a>
           </div>
           <button type="button" onClick={() => library.toggleFavorite(track)} disabled={offlineMode}
