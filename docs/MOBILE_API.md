@@ -88,6 +88,26 @@ GET  /api/tracks/{track_id}/cover?t=<token>  embedded or folder art
   `/api/history` when back online.
 - Gapless: prepare the next item in the player's queue (ExoPlayer playlists, AVQueuePlayer).
 
+## Social
+
+| Call | Notes |
+|---|---|
+| `GET /api/people?q=` | Find people by username or display name. Items are `PersonCard`: `id, username, display_name, avatar_url, is_following, follows_you`. |
+| `GET /api/people/{username}` | Profile: `bio, followers, following, is_private, is_self, top_artists, playlists`. `top_artists` and `playlists` are `null` when a private profile hides them (only mutual friends see them). |
+| `PUT/DELETE /api/people/{username}/follow` | Idempotent. Mutual follows are friends. |
+| `GET /api/people/{username}/followers`, `/following` | Lists of `PersonCard`. |
+| `PATCH /api/me/profile` | `display_name` (≤40), `bio` (≤160), `is_private`, `share_activity`. |
+| `POST /api/me/avatar` (multipart `file`), `DELETE /api/me/avatar` | PNG, JPEG or WebP up to 2 MB. Avatar URLs are public and never change; a new upload gets a new URL. |
+| `PUT/DELETE /api/artists/{id}/follow`, `GET /api/me/artists` | Followed artists; `/api/artists` items carry `following`. |
+| `POST /api/presence {"track_id" or null}` | Send on track change and every 60 s while playing; `null` on pause. |
+| `GET /api/activity` | Friends' listening: `{person, track, live, at}`, live (heartbeat < 2 min) first. Poll every 20-30 s while visible. |
+
+Playlists carry `visibility` (`private`/`public`), `collaborative`, `owner` and the caller's `role`
+(`owner`, `member`, `viewer`). Owners `PATCH` visibility and collaboration and manage members with
+`GET/POST /api/playlists/{id}/members` and `DELETE /api/playlists/{id}/members/{username}`
+(only people you follow or who follow you). Members can reorder and add tracks; viewers read
+public playlists. A playlist you can't see is a 404.
+
 ## Uploading (users with `can_upload`)
 
 Resumable, chunked (tus-style). Files go to review; nothing is public until an admin approves.

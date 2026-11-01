@@ -158,3 +158,53 @@ def test_activity_respects_privacy_and_follows(client, people):
 
 def test_presence_unknown_track(client, people):
     assert client.post("/api/presence", json={"track_id": "nope"}, headers=people["asha"]).status_code == 404
+
+
+# ---- public and collaborative playlists -------------------------------------------------
+
+def make_playlist(client, h, name="Road trip"):
+    ids = [t["id"] for t in tracks(client, h)]
+    return client.post("/api/playlists", json={"name": name, "track_ids": ids}, headers=h).json()
+
+
+def test_collaborator_can_edit_tracks_not_settings(client, people, audio_dir):
+    from .conftest import write_wav
+    write_wav(audio_dir / "Second.wav")
+    client.app.state.library.scan()
+    pl = make_playlist(client, people["asha"])
+    pid = pl["id"]
+    follow(client, people["bala"], "asha")
+    assert client.post(f"/api/playlists/{pid}/members", json={"username": "bala"}, headers=people["asha"]).status_code == 409
+    client.patch(f"/api/playlists/{pid}", json={"collaborative": True}, headers=people["asha"])
+    assert client.post(f"/api/playlists/{pid}/members", json={"username": "bala"}, headers=people["asha"]).status_code == 204
+    # Only people connected to the owner can be added.
+    assert client.post(f"/api/playlists/{pid}/members", json={"username": "chitra"}, headers=people["asha"]).status_code == 400
+
+    mine = client.get("/api/playlists", headers=people["bala"]).json()["playlists"]
+    assert [(p["id"], p["role"]) for p in mine] == [(pid, "member")]
+    ids = [t["id"] for t in client.get(f"/api/playlists/{pid}", headers=people["bala"]).json()["tracks"]]
+    reordered = client.patch(f"/api/playlists/{pid}", json={"track_ids": ids[::-1]}, headers=people["bala"])
+    assert reordered.status_code == 200 and [t["id"] for t in reordered.json()["tracks"]] == ids[::-1]
+    assert client.post(f"/api/playlists/{pid}/tracks", json={"track_ids": ids[:1]}, headers=people["bala"]).status_code == 200
+    assert client.patch(f"/api/playlists/{pid}", json={"name": "Mine now"}, headers=people["bala"]).status_code == 403
+    assert client.delete(f"/api/playlists/{pid}", headers=people["bala"]).status_code == 403
+    members = client.get(f"/api/playlists/{pid}/members", headers=people["bala"]).json()["people"]
+    assert [m["username"] for m in members] == ["bala"]
+
+    assert client.delete(f"/api/playlists/{pid}/members/bala", headers=people["asha"]).status_code == 204
+    assert client.get(f"/api/playlists/{pid}", headers=people["bala"]).status_code == 404
+
+
+def test_public_playlist_is_read_only_for_others(client, people):
+    pl = make_playlist(client, people["asha"])
+    pid = pl["id"]
+    assert client.get(f"/api/playlists/{pid}", headers=people["chitra"]).status_code == 404
+    client.patch(f"/api/playlists/{pid}", json={"visibility": "public"}, headers=people["asha"])
+    seen = client.get(f"/api/playlists/{pid}", headers=people["chitra"]).json()
+    assert seen["role"] == "viewer" and seen["owner"]["username"] == "asha" and seen["visibility"] == "public"
+    assert client.patch(f"/api/playlists/{pid}", json={"track_ids": []}, headers=people["chitra"]).status_code == 403
+    assert client.patch(f"/api/playlists/{pid}", json={"visibility": "nope"}, headers=people["asha"]).status_code == 422
+    assert [p["id"] for p in client.get("/api/people/asha", headers=people["chitra"]).json()["playlists"]] == [pid]
+    # The owner's view is unchanged.
+    own = client.get(f"/api/playlists/{pid}", headers=people["asha"]).json()
+    assert own["role"] == "owner" and own["collaborative"] is False

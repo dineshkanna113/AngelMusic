@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 from .. import queries
 from ..library import artist_key
 from ..security import current_user
-from .me import playlist_summary
+from .me import playlist_access, playlist_summary
 
 router = APIRouter(prefix="/api", tags=["social"])
 
@@ -33,6 +33,10 @@ LIVE_SECONDS = 120
 
 class PresenceBody(BaseModel):
     track_id: str | None = Field(default=None, max_length=64)
+
+
+class MemberBody(BaseModel):
+    username: str = Field(min_length=1, max_length=32)
 
 
 class ProfilePatch(BaseModel):
@@ -208,6 +212,45 @@ def friend_activity(request: Request, user: dict = Depends(current_user)):
     friends.sort(key=lambda f: f["at"] or "", reverse=True)  # stable sorts: recency, then live first
     friends.sort(key=lambda f: not f["live"])
     return {"friends": friends}
+
+
+# ---- collaborative playlists -------------------------------------------------------------
+
+@router.get("/playlists/{playlist_id}/members")
+def playlist_members(playlist_id: int, request: Request, user: dict = Depends(current_user)):
+    with request.app.state.db.connect() as conn:
+        _row, role = playlist_access(conn, user["id"], playlist_id)
+        if role == "viewer":
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Only collaborators can see who edits this playlist")
+        rows = conn.execute("""SELECT u.* FROM playlist_members m JOIN users u ON u.id = m.user_id
+                               WHERE m.playlist_id = ? ORDER BY m.added_at""", (playlist_id,)).fetchall()
+        return {"people": [person(conn, r, user["id"]) for r in rows]}
+
+
+@router.post("/playlists/{playlist_id}/members", status_code=status.HTTP_204_NO_CONTENT)
+def add_member(playlist_id: int, body: MemberBody, request: Request, user: dict = Depends(current_user)):
+    with request.app.state.db.connect() as conn:
+        row, role = playlist_access(conn, user["id"], playlist_id)
+        if role != "owner":
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Only the playlist's owner can add collaborators")
+        if not row["collaborative"]:
+            raise HTTPException(status.HTTP_409_CONFLICT, "Make the playlist collaborative first")
+        other = _user(conn, body.username)
+        # Only people you're connected to, so playlists can't be used to spam strangers.
+        if other["id"] == user["id"] or not (_follows(conn, user["id"], other["id"]) or _follows(conn, other["id"], user["id"])):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "You can add people you follow or who follow you")
+        conn.execute("INSERT OR IGNORE INTO playlist_members (playlist_id, user_id) VALUES (?, ?)", (playlist_id, other["id"]))
+
+
+@router.delete("/playlists/{playlist_id}/members/{username}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_member(playlist_id: int, username: str, request: Request, user: dict = Depends(current_user)):
+    with request.app.state.db.connect() as conn:
+        _row, role = playlist_access(conn, user["id"], playlist_id)
+        other = _user(conn, username)
+        # The owner removes anyone; a collaborator can leave.
+        if role != "owner" and other["id"] != user["id"]:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Only the playlist's owner can remove collaborators")
+        conn.execute("DELETE FROM playlist_members WHERE playlist_id = ? AND user_id = ?", (playlist_id, other["id"]))
 
 
 # ---- my profile -----------------------------------------------------------------------

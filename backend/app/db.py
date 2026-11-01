@@ -138,6 +138,14 @@ CREATE TABLE IF NOT EXISTS follows (
 );
 CREATE INDEX IF NOT EXISTS idx_follows_followee ON follows(followee_id);
 
+-- People who may edit a collaborative playlist besides its owner.
+CREATE TABLE IF NOT EXISTS playlist_members (
+    playlist_id INTEGER NOT NULL REFERENCES playlists(id) ON DELETE CASCADE,
+    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    added_at    TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (playlist_id, user_id)
+);
+
 -- What each person is playing right now (one row per user, replaced on every heartbeat).
 CREATE TABLE IF NOT EXISTS presence (
     user_id    INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
@@ -166,6 +174,7 @@ ADDED_COLUMNS = [
     ("users", "is_private", "INTEGER NOT NULL DEFAULT 0"),
     ("users", "share_activity", "INTEGER NOT NULL DEFAULT 1"),
     ("playlists", "visibility", "TEXT NOT NULL DEFAULT 'private'"),
+    ("playlists", "collaborative", "INTEGER NOT NULL DEFAULT 0"),
 ]
 
 
