@@ -10,7 +10,7 @@ function set(color) {
   const root = document.documentElement.style;
   if (color) {
     root.setProperty("--ambient", `rgb(${color.r} ${color.g} ${color.b})`);
-    root.setProperty("--ambient-ink", "var(--color-jasmine)");
+    root.setProperty("--ambient-ink", "var(--color-ink)");
   } else {
     root.removeProperty("--ambient");
     root.removeProperty("--ambient-ink");

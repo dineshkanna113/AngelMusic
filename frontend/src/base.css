@@ -1,9 +1,10 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { overflow-x: clip; }
-html { scrollbar-color: var(--color-dusk-3) var(--color-night); }
-body { margin: 0; background: var(--color-night); color: var(--color-jasmine); font-family: var(--font-body); font-size: var(--text-md); line-height: 1.55; -webkit-font-smoothing: antialiased; caret-color: var(--color-marigold); }
-::selection { background: color-mix(in oklab, var(--color-marigold) 35%, transparent); color: var(--color-jasmine); }
-:focus-visible { outline: 2px solid var(--color-marigold); outline-offset: 2px; }
+html { scrollbar-color: var(--color-surface-3) transparent; }
+body { margin: 0; background: var(--ground); background-color: var(--color-pearl); color: var(--color-ink); font-family: var(--font-body); font-size: var(--text-md); line-height: 1.55; -webkit-font-smoothing: antialiased; caret-color: var(--color-gum-ink); }
+::selection { background: var(--color-lime); color: var(--color-ink); }
+:focus-visible { outline: 3px solid var(--color-ink); outline-offset: 2px; }
+.on-ink :focus-visible, .on-ink:focus-visible { outline-color: var(--color-lime); }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
 h1, h2, h3 { margin: 0; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
 p { margin: 0; text-wrap: pretty; }

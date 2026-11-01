@@ -129,7 +129,7 @@
   }
   .seek::-webkit-slider-thumb {
     @apply mt-1 h-3.5 w-3.5 appearance-none rounded-full bg-fg;
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-marigold) 35%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-lime) 35%, transparent);
   }
   .seek::-moz-range-thumb {
     @apply h-3.5 w-3.5 rounded-full border-0 bg-fg;
@@ -143,7 +143,7 @@
 
   .volume {
     @apply h-1.5 cursor-pointer appearance-none rounded-pill;
-    background: linear-gradient(90deg, var(--color-jasmine) var(--level, 100%), var(--color-dusk-3) var(--level, 100%));
+    background: linear-gradient(90deg, var(--color-ink) var(--level, 100%), var(--color-surface-3) var(--level, 100%));
   }
   .volume::-webkit-slider-thumb {
     @apply h-3.5 w-3.5 appearance-none rounded-full bg-fg;
@@ -155,7 +155,7 @@
   .stage {
     background:
       radial-gradient(90% 70% at 25% 30%, color-mix(in oklab, var(--ambient) 85%, transparent), transparent 70%),
-      linear-gradient(180deg, color-mix(in oklab, var(--ambient) 45%, var(--color-night)), var(--color-night) 85%);
+      linear-gradient(180deg, color-mix(in oklab, var(--ambient) 45%, var(--color-pearl)), var(--color-pearl) 85%);
   }
 
   /* A friend listening right now: a kingfisher dot that breathes (still with reduced motion). */
@@ -165,7 +165,7 @@
   }
   @keyframes live-breathe {
     50% {
-      box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-kingfisher) 25%, transparent);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-gum) 25%, transparent);
     }
   }
 

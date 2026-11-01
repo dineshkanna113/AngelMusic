@@ -83,7 +83,7 @@ function ProfileCard({ username }) {
       </form>
       <div className="mt-6 grid max-w-xl gap-3 border-t border-line pt-5 text-sm">
         <label className="flex items-start gap-3">
-          <input type="checkbox" className="mt-1 h-4 w-4 accent-[var(--color-kingfisher)]" checked={!prof.is_private}
+          <input type="checkbox" className="mt-1 h-4 w-4 accent-[var(--color-gum-ink)]" checked={!prof.is_private}
             onChange={(e) => patch({ is_private: !e.target.checked }, e.target.checked ? "Your profile is public" : "Your profile is private")} />
           <span>
             <span className="block font-semibold">Public profile</span>
@@ -91,7 +91,7 @@ function ProfileCard({ username }) {
           </span>
         </label>
         <label className="flex items-start gap-3">
-          <input type="checkbox" className="mt-1 h-4 w-4 accent-[var(--color-kingfisher)]" checked={prof.share_activity}
+          <input type="checkbox" className="mt-1 h-4 w-4 accent-[var(--color-gum-ink)]" checked={prof.share_activity}
             onChange={async (e) => {
               const on = e.target.checked;
               await patch({ share_activity: on }, on ? "Friends can see what you play" : "Your listening is hidden");

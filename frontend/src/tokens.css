@@ -1,38 +1,51 @@
-/* Yaapu design tokens: "temple night". Dark only in Phase 1.
- * Marigold = play, primary actions, premium. Kingfisher = social and live only. */
+/* Yaapu design tokens: "Sticker chrome". Light, glossy, sticker-tilted. Light only.
+ * Lime = play and primary actions. Bubblegum = friends and live. Never white text on bubblegum. */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
   /* palette (spec) */
-  --color-night: #160f1e;
-  --color-dusk: #251a30;
-  --color-marigold: #ffb020;
-  --color-kingfisher: #19c2b8;
-  --color-jasmine: #f6efe3;
-  --color-mist: #a497b0;
+  --color-pearl: #f7f2ff;
+  --color-lilac: #e9e3ff;
+  --color-mint: #d6f7ee;
+  --color-ink: #19161f;
+  --color-lime: #c6ff3d;
+  --color-gum: #ff6fd8;
+  --color-gum-ink: #b0127a;
+  --color-muted: #5a5466;
+  --color-white: #ffffff;
+  /* sticker fills */
+  --color-sky: #9be7ff;
+  --color-peach: #ffd6a5;
 
-  /* derived steps */
-  --color-dusk-2: #322440;
-  --color-dusk-3: #3f2f50;
-  --color-line: #3a2c48;
-  --color-jasmine-2: #d8cddf;
-  --color-marigold-ink: #1e1406;
-  --color-marigold-soft: #4a3420;
-  --color-warn: #f5c451;
-  --color-error: #ff7a7a;
-  --color-scrim: #0d0812;
+  /* derived */
+  --color-surface-2: #f3effa;
+  --color-surface-3: #e7e2f0;
+  --color-line: #e3deec;
+  --color-ink-2: #3a3542;
+  --color-ink-soft: #2c2834;
+  --color-ink-muted: #bdb7c9;
+  --color-lime-soft: #ecffc2;
+  --color-warn: #9a5b00;
+  --color-error: #c2273b;
+  --color-scrim: #19161f;
 
-  /* the current cover's colour; set by lib/ambient.js, defaults to dusk/jasmine */
-  --ambient: var(--color-dusk);
-  --ambient-ink: var(--color-jasmine);
+  --ground: radial-gradient(120% 80% at 10% 0%, #fdf1ff 0%, var(--color-lilac) 45%, var(--color-mint) 100%) fixed;
 
-  --font-display: "Bricolage Grotesque", "Noto Sans Tamil", ui-sans-serif, system-ui, sans-serif;
+  /* the current cover's colour; set by lib/ambient.js; tints the Now Playing ground */
+  --ambient: var(--color-lilac);
+  --ambient-ink: var(--color-ink);
+
+  --font-display: "Syne", "Noto Sans Tamil", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Hanken Grotesk", "Noto Sans Tamil", ui-sans-serif, system-ui, sans-serif;
 
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 24px;
+  --radius-sm: 12px;
+  --radius-md: 22px;
+  --radius-lg: 30px;
   --radius-pill: 999px;
+
+  --shadow-sticker: 0 10px 18px -10px rgb(60 20 90 / 0.45);
+  --shadow-float: 0 22px 44px -16px rgb(25 22 31 / 0.65);
+  --shadow-card: 0 14px 28px -18px rgb(60 20 90 / 0.4);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
@@ -42,10 +55,8 @@
 
   --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.25rem;
   --text-xl: 1.563rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem; --text-4xl: 3.815rem;
-  --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px;
   --z-dropdown: 100; --z-modal: 400; --z-toast: 500;
 
-  --edge-light: inset 0 1px 0 rgb(255 255 255 / 0.06);
-  --shadow-part: 0 6px 14px -6px rgb(0 0 0 / 0.6);
-  --shadow-panel: 0 24px 48px -16px rgb(0 0 0 / 0.7);
+  /* height reserved under every page for the floating player pill */
+  --pill-space: 112px;
 }
