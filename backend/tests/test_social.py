@@ -114,3 +114,47 @@ def test_deleted_user_leaves_no_follow_rows(client, people):
     bala_id = client.get("/api/people/bala", headers=people["asha"]).json()["id"]
     client.delete(f"/api/users/{bala_id}", headers=people["admin"])
     assert client.get("/api/people/asha/following", headers=people["asha"]).json()["people"] == []
+
+
+# ---- presence and activity -------------------------------------------------------------
+
+def activity(client, h):
+    return {f["person"]["username"]: f for f in client.get("/api/activity", headers=h).json()["friends"]}
+
+
+def test_activity_live_and_last_played(client, people):
+    tid = tracks(client, people["bala"])[0]["id"]
+    follow(client, people["asha"], "bala")
+    follow(client, people["asha"], "chitra")
+    assert client.post("/api/presence", json={"track_id": tid}, headers=people["bala"]).status_code == 204
+    client.post("/api/history", json={"track_id": tid}, headers=people["chitra"])
+    feed = activity(client, people["asha"])
+    assert feed["bala"]["live"] is True and feed["bala"]["track"]["id"] == tid
+    assert feed["chitra"]["live"] is False and feed["chitra"]["track"]["id"] == tid
+    assert list(feed)[0] == "bala"  # live first
+
+    # Presence older than two minutes is no longer live.
+    with client.app.state.db.connect() as conn:
+        conn.execute("UPDATE presence SET updated_at = datetime('now', '-10 minutes')")
+    assert activity(client, people["asha"])["bala"]["live"] is False
+    # Pausing clears it too.
+    client.post("/api/presence", json={"track_id": tid}, headers=people["bala"])
+    client.post("/api/presence", json={"track_id": None}, headers=people["bala"])
+    assert activity(client, people["asha"])["bala"]["live"] is False
+
+
+def test_activity_respects_privacy_and_follows(client, people):
+    tid = tracks(client, people["bala"])[0]["id"]
+    client.post("/api/presence", json={"track_id": tid}, headers=people["bala"])
+    assert "bala" not in activity(client, people["asha"])  # not followed
+    follow(client, people["asha"], "bala")
+    client.patch("/api/me/profile", json={"share_activity": False}, headers=people["bala"])
+    assert "bala" not in activity(client, people["asha"])
+    client.patch("/api/me/profile", json={"share_activity": True, "is_private": True}, headers=people["bala"])
+    assert "bala" not in activity(client, people["asha"])  # private, one-way
+    follow(client, people["bala"], "asha")
+    assert "bala" in activity(client, people["asha"])  # friends
+
+
+def test_presence_unknown_track(client, people):
+    assert client.post("/api/presence", json={"track_id": "nope"}, headers=people["asha"]).status_code == 404

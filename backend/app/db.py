@@ -138,6 +138,13 @@ CREATE TABLE IF NOT EXISTS follows (
 );
 CREATE INDEX IF NOT EXISTS idx_follows_followee ON follows(followee_id);
 
+-- What each person is playing right now (one row per user, replaced on every heartbeat).
+CREATE TABLE IF NOT EXISTS presence (
+    user_id    INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    track_id   TEXT,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS artist_follows (
     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     artist_id  TEXT NOT NULL,

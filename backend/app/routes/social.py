@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, Upl
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from .. import queries
 from ..library import artist_key
 from ..security import current_user
 from .me import playlist_summary
@@ -25,6 +26,13 @@ _SIGNATURES = (
     (lambda h: h[:3] == b"\xff\xd8\xff", ".jpg"),
     (lambda h: h[:4] == b"RIFF" and h[8:12] == b"WEBP", ".webp"),
 )
+
+
+LIVE_SECONDS = 120
+
+
+class PresenceBody(BaseModel):
+    track_id: str | None = Field(default=None, max_length=64)
 
 
 class ProfilePatch(BaseModel):
@@ -152,6 +160,54 @@ def following(username: str, request: Request, user: dict = Depends(current_user
         rows = conn.execute("""SELECT u.* FROM follows f JOIN users u ON u.id = f.followee_id
                                WHERE f.follower_id = ? ORDER BY f.created_at DESC""", (row["id"],)).fetchall()
         return {"people": [person(conn, r, user["id"]) for r in rows]}
+
+
+# ---- presence and friend activity --------------------------------------------------------
+
+@router.post("/presence", status_code=status.HTTP_204_NO_CONTENT)
+def set_presence(body: PresenceBody, request: Request, user: dict = Depends(current_user)):
+    """Heartbeat from the player: the track now playing, or null when paused or stopped."""
+    with request.app.state.db.connect() as conn:
+        if body.track_id and conn.execute("SELECT 1 FROM tracks WHERE id = ?", (body.track_id,)).fetchone() is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Track not found")
+        conn.execute(
+            """INSERT INTO presence (user_id, track_id, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+               ON CONFLICT(user_id) DO UPDATE SET track_id = excluded.track_id, updated_at = excluded.updated_at""",
+            (user["id"], body.track_id),
+        )
+
+
+@router.get("/activity")
+def friend_activity(request: Request, user: dict = Depends(current_user)):
+    """What the people I follow are playing now, or played last. Live first, then most recent."""
+    with request.app.state.db.connect() as conn:
+        rows = conn.execute(
+            """SELECT u.*, p.track_id AS live_track, p.updated_at AS live_at,
+                      p.track_id IS NOT NULL AND p.updated_at >= datetime('now', ?) AS is_live
+               FROM follows f JOIN users u ON u.id = f.followee_id
+               LEFT JOIN presence p ON p.user_id = u.id
+               WHERE f.follower_id = ? AND u.share_activity""",
+            (f"-{LIVE_SECONDS} seconds", user["id"]),
+        ).fetchall()
+        friends = []
+        for row in rows:
+            if not can_see(conn, row, user["id"]):
+                continue
+            if row["is_live"]:
+                track_id, at = row["live_track"], row["live_at"]
+            else:
+                last = conn.execute("SELECT track_id, played_at FROM plays WHERE user_id = ? ORDER BY id DESC LIMIT 1",
+                                    (row["id"],)).fetchone()
+                track_id, at = (last["track_id"], last["played_at"]) if last else (None, None)
+            friends.append({
+                "person": person(conn, row, user["id"]),
+                "track": queries.track(conn, user["id"], track_id) if track_id else None,
+                "live": bool(row["is_live"]),
+                "at": at,
+            })
+    friends.sort(key=lambda f: f["at"] or "", reverse=True)  # stable sorts: recency, then live first
+    friends.sort(key=lambda f: not f["live"])
+    return {"friends": friends}
 
 
 # ---- my profile -----------------------------------------------------------------------
