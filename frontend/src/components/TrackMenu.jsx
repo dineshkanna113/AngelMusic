@@ -9,9 +9,10 @@ import { toast, toastError } from "../lib/toast";
 import { confirmDialog, promptDialog } from "./Dialog";
 import {
   AlbumIcon, ArtistIcon, DownloadIcon, HeartIcon, HeartOutlineIcon, MoreIcon, OfflineIcon, PlaylistIcon, PlusIcon,
-  QueueIcon, RadioIcon, TrashIcon,
+  QueueIcon, RadioIcon, ShareIcon, TrashIcon,
 } from "./Icons";
 import { playable } from "./Grid";
+import { shareTrack } from "./ShareDialog";
 import { Menu, MenuItem, MenuLabel, MenuSeparator } from "./Menu";
 
 export async function newPlaylistWith(tracks) {
@@ -111,6 +112,7 @@ export default function TrackMenu({ track, onRemove, removeLabel = "Remove from 
           }}>
             Start radio
           </MenuItem>
+          <MenuItem icon={ShareIcon} close={close} onSelect={() => shareTrack(live)}>Share…</MenuItem>
           <MenuItem
             icon={live.favorite ? HeartIcon : HeartOutlineIcon}
             close={close}

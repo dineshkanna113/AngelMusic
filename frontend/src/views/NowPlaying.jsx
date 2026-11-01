@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import Cover from "../components/Cover";
-import { DownIcon, HeartIcon, HeartOutlineIcon, LyricsIcon, NextIcon, PauseIcon, PlayIcon, PrevIcon, QueueIcon } from "../components/Icons";
+import { DownIcon, HeartIcon, HeartOutlineIcon, LyricsIcon, NextIcon, PauseIcon, PlayIcon, PrevIcon, QueueIcon, ShareIcon } from "../components/Icons";
+import { shareTrack } from "../components/ShareDialog";
 import Meta from "../components/Meta";
 import { formatResolution } from "../lib/format";
 import { usePlayer, useStreamTokenValue } from "../lib/hooks";
@@ -86,6 +87,9 @@ export default function NowPlaying() {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-2">
+            <button type="button" className="btn-social" onClick={() => shareTrack(live)}>
+              <ShareIcon className="h-4 w-4" /> Share
+            </button>
             <button type="button" className={`btn-secondary ${panel === "lyrics" ? "!border-accent" : ""}`}
               aria-pressed={panel === "lyrics"} onClick={() => ui.togglePanel("lyrics")}>
               <LyricsIcon className="h-4 w-4" /> Lyrics
