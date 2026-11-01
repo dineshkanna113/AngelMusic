@@ -14,7 +14,7 @@ def bearer(token):
 
 def test_refresh_rotates_and_detects_reuse(client):
     session = client.post("/api/auth/register", json={"username": "admin", "password": "correct-horse",
-                                                      "device": "Pixel 8 · AngelMusic 1.0"}).json()
+                                                      "device": "Pixel 8 · Yaapu 1.0"}).json()
     assert session["refresh_token"] and session["expires_in"] == 3600
     first = session["refresh_token"]
     new = client.post("/api/auth/refresh", json={"refresh_token": first})
@@ -66,6 +66,7 @@ def test_delete_account(client):
 def test_config_health_etag_and_request_id(client):
     cfg = client.get("/api/config").json()
     assert cfg["api_version"] == 1 and cfg["min_app_version"] and "uploads" in cfg["features"]
+    assert cfg["name"] == "Yaapu"
     health = client.get("/api/health")
     assert health.json()["status"] == "ok" and health.headers["x-request-id"]
     assert client.get("/api/health", headers={"X-Request-ID": "abc123"}).headers["x-request-id"] == "abc123"

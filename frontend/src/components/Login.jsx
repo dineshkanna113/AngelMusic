@@ -42,7 +42,7 @@ export default function Login() {
       <form onSubmit={submit} className="panel w-full max-w-sm space-y-5 p-7">
         <div className="flex items-center gap-2.5">
           <WaveIcon className="h-6 w-6 text-accent" />
-          <h1 className="font-display text-lg">AngelMusic</h1>
+          <h1 className="font-display text-lg">Yaapu</h1>
         </div>
         <p className="text-sm text-muted">
           {awaitingAdmin

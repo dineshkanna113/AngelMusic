@@ -1,4 +1,4 @@
-# Deploying AngelMusic on AWS
+# Deploying Yaapu on AWS
 
 One EC2 instance runs two containers: **Caddy** (HTTPS with automatic Let's Encrypt
 certificates) and the **app** (FastAPI API + the built web app + the Subsonic API). The

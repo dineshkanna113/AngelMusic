@@ -1,5 +1,5 @@
 // App-shell service worker: lets the installed app open with no connection.
-// Audio for offline use lives in its own cache ("am-offline-v1", managed by the page);
+// Audio for offline use lives in its own cache ("yp-offline-v1", managed by the page);
 // API and Subsonic requests always go to the network.
 const SHELL = "ls-shell-v1";
 

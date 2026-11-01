@@ -1,6 +1,6 @@
-# AngelMusic — frontend
+# Yaapu — frontend
 
-The AngelMusic web app (React + Vite + Tailwind). The API is in `../backend`; see the
+The Yaapu web app (React + Vite + Tailwind). The API is in `../backend`; see the
 [root README](../README.md) for local setup and [docs/DEPLOY.md](../docs/DEPLOY.md) for production.
 
 ```bash

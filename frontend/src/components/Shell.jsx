@@ -68,7 +68,7 @@ export function Sidebar() {
     <nav aria-label="Main" className="hidden w-60 shrink-0 flex-col gap-1 overflow-y-auto border-r border-line bg-surface-1/50 p-3 md:flex">
       <a href="#/" className="mb-4 flex items-center gap-2 px-3 pt-1">
         <WaveIcon className="h-5 w-5 text-accent" />
-        <span className="font-semibold tracking-tight">AngelMusic</span>
+        <span className="font-semibold tracking-tight">Yaapu</span>
       </a>
       {NAV.map(([to, label, Icon]) => (
         <NavLink key={to} to={to} label={label} icon={Icon} active={section === to} />

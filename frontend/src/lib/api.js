@@ -2,7 +2,7 @@
 // backend serves this app, so the default same-origin base works in both.
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? "").replace(/\/$/, "");
 
-const SESSION_KEY = "am.session";
+const SESSION_KEY = "yp.session";
 const listeners = new Set();
 
 export class ApiError extends Error {

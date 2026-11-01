@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "AngelMusic API",
+    "title": "Yaapu API",
     "version": "1.0.0"
   },
   "paths": {
@@ -2075,7 +2075,7 @@
               }
             ],
             "title": "Device",
-            "description": "Shown in the sessions list, e.g. 'Pixel 8 \u00b7 AngelMusic 1.2'"
+            "description": "Shown in the sessions list, e.g. 'Pixel 8 \u00b7 Yaapu 1.2'"
           }
         },
         "type": "object",
@@ -2147,7 +2147,7 @@
               }
             ],
             "title": "Device",
-            "description": "Shown in the sessions list, e.g. 'Pixel 8 \u00b7 AngelMusic 1.2'"
+            "description": "Shown in the sessions list, e.g. 'Pixel 8 \u00b7 Yaapu 1.2'"
           }
         },
         "type": "object",

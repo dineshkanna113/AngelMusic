@@ -89,7 +89,7 @@ def _to_xml(name: str, value: dict) -> ET.Element:
 
 
 def _envelope(status: str, payload: dict) -> dict:
-    return {"status": status, "version": API_VERSION, "type": "angelmusic", "serverVersion": "1.1.0",
+    return {"status": status, "version": API_VERSION, "type": "yaapu", "serverVersion": "1.1.0",
             "openSubsonic": True, **payload}
 
 

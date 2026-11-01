@@ -1,7 +1,7 @@
 {
-  "name": "AngelMusic",
-  "short_name": "AngelMusic",
-  "description": "AngelMusic: your own music library, streamed lossless.",
+  "name": "Yaapu",
+  "short_name": "Yaapu",
+  "description": "Yaapu: your own music library, streamed lossless.",
   "start_url": "./#/",
   "scope": "./",
   "display": "standalone",

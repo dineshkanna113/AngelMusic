@@ -33,7 +33,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.ingest.stop()
 
     app = FastAPI(
-        title="AngelMusic API",
+        title="Yaapu API",
         version=__version__,
         lifespan=lifespan,
         docs_url=None if settings.is_production else "/api/docs",
@@ -92,7 +92,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         with app.state.db.connect() as conn:
             has_users = conn.execute("SELECT 1 FROM users LIMIT 1").fetchone() is not None
         return {
-            "name": "AngelMusic",
+            "name": "Yaapu",
             "server_version": __version__,
             "api_version": API_VERSION,
             "min_app_version": settings.min_app_version,

@@ -134,6 +134,11 @@ def test_subsonic_auth(client):
     assert acct["subsonic-response"]["status"] == "failed"
 
 
+def test_subsonic_ping_type(client):
+    _, _, auth = _subsonic(client)
+    assert _ok(client.get("/rest/ping", params=auth))["type"] == "yaapu"
+
+
 def test_subsonic_xml_default(client):
     _, _, auth = _subsonic(client)
     res = client.get("/rest/getMusicFolders", params={k: v for k, v in auth.items() if k != "f"})

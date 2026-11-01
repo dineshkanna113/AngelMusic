@@ -1,5 +1,5 @@
 # The whole app in one image: the built web app served by the API.
-#   docker build -t angelmusic .        (deploy/docker-compose.yml does this for you)
+#   docker build -t yaapu .        (deploy/docker-compose.yml does this for you)
 FROM node:20-alpine AS frontend
 WORKDIR /web
 COPY frontend/package.json frontend/package-lock.json ./

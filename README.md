@@ -1,7 +1,7 @@
-# AngelMusic
+# Yaapu
 
 A music streaming service for your own library: FLAC, WAV, AIFF and ALAC played byte-for-byte, with no transcoding,
-in the browser, in Subsonic apps, and (next) in the AngelMusic mobile app.
+in the browser, in Subsonic apps, and (next) in the Yaapu mobile app.
 
 ```
 backend/    FastAPI API, library scanner, upload pipeline, Subsonic API      (Python 3.12)

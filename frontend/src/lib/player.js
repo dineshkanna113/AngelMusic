@@ -1,8 +1,8 @@
 import { coverUrl, streamToken, streamUrl } from "./api";
 import { offline } from "./offline";
 
-const PREFS_KEY = "am.player";
-const RESUME_KEY = "am.resume";
+const PREFS_KEY = "yp.player";
+const RESUME_KEY = "yp.resume";
 const MAX_RETRIES = 6;
 const STALL_TIMEOUT_MS = 10_000;
 // Start fetching the next track once the current one is fully buffered, or when this
