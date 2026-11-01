@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CollectionActions from "../components/CollectionActions";
+import FollowButton from "../components/FollowButton";
 import Meta from "../components/Meta";
 import Cover from "../components/Cover";
 import { AlbumGrid, ArtistGrid, PageHeader, Select } from "../components/Grid";
@@ -8,6 +9,8 @@ import { formatResolution, formatTime, plural } from "../lib/format";
 import { useStreamTokenValue } from "../lib/hooks";
 import { useLibrary } from "../lib/library";
 import { href } from "../lib/router";
+import { api } from "../lib/api";
+import { social } from "../lib/social";
 
 const ALBUM_SORTS = {
   artist: null,
@@ -81,6 +84,11 @@ export function AlbumView({ id }) {
 }
 
 export function ArtistView({ id }) {
+  const [following, setFollowing] = useState(null);
+  useEffect(() => {
+    setFollowing(null);
+    api("/api/me/artists").then((d) => setFollowing(d.artists.some((a) => a.id === id))).catch(() => {});
+  }, [id]);
   const { artists, tracks } = useLibrary();
   const token = useStreamTokenValue();
   const artist = artists.find((a) => a.id === id);
@@ -96,7 +104,13 @@ export function ArtistView({ id }) {
           <p className="text-xs font-medium text-muted">Artist</p>
           <h1 className="font-display mt-1 text-3xl">{artist.name}</h1>
           <Meta className="mt-1 text-sm text-muted" parts={[plural(artist.albums.length, "album"), plural(artist.track_count, "track")]} />
-          <div className="mt-4"><CollectionActions tracks={all} /></div>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <CollectionActions tracks={all} />
+            {following !== null && (
+              <FollowButton key={`${artist.id}-${following}`} following={following}
+                onToggle={(on) => social.followArtist(artist.id, on)} className="h-9 px-4" />
+            )}
+          </div>
         </div>
       </div>
       {top.some((t) => t.play_count > 0) && (

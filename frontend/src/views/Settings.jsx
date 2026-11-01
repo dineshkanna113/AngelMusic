@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { confirmDialog, promptDialog } from "../components/Dialog";
+import Avatar from "../components/Avatar";
 import { PageHeader } from "../components/Grid";
 import { TrashIcon, UploadIcon } from "../components/Icons";
 import { api, API_BASE, auth } from "../lib/api";
@@ -7,7 +8,104 @@ import { href } from "../lib/router";
 import { usePlayer, useSession } from "../lib/hooks";
 import { library } from "../lib/library";
 import { player } from "../lib/player";
+import { social } from "../lib/social";
 import { toast, toastError } from "../lib/toast";
+
+function ProfileCard({ username }) {
+  const [prof, setProf] = useState(null);
+  const [form, setForm] = useState({ display_name: "", bio: "" });
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    social.profile(username).then((p) => {
+      setProf(p);
+      setForm({ display_name: p.display_name === p.username ? "" : p.display_name, bio: p.bio });
+    }).catch(toastError);
+  }, [username]);
+  if (!prof) return null;
+
+  const patch = async (body, message) => {
+    try {
+      setProf(await social.updateProfile(body));
+      if (message) toast(message);
+    } catch (err) {
+      toastError(err);
+    }
+  };
+  const save = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    await patch(form, "Profile saved");
+    setBusy(false);
+  };
+  const pickAvatar = async (file) => {
+    if (!file) return;
+    try {
+      const { avatar_url } = await social.uploadAvatar(file);
+      setProf({ ...prof, avatar_url });
+      toast("Profile picture updated");
+    } catch (err) {
+      toastError(err);
+    }
+  };
+  const removeAvatar = async () => {
+    await social.removeAvatar().catch(toastError);
+    setProf({ ...prof, avatar_url: null });
+  };
+
+  return (
+    <Card title="Profile" description="How friends see you on Yaapu.">
+      <form onSubmit={save} className="grid max-w-xl gap-4">
+        <div className="flex items-center gap-4">
+          <Avatar person={prof} className="h-20 w-20 text-3xl" />
+          <div className="flex flex-wrap gap-2">
+            <label className="btn-secondary cursor-pointer">
+              Change picture
+              <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only"
+                onChange={(e) => { pickAvatar(e.target.files[0]); e.target.value = ""; }} />
+            </label>
+            {prof.avatar_url && <button type="button" className="btn-ghost" onClick={removeAvatar}>Remove</button>}
+          </div>
+        </div>
+        <label className="grid gap-1.5">
+          <span className="text-sm text-fg-2">Display name</span>
+          <input className="input" maxLength={40} placeholder={username} value={form.display_name}
+            onChange={(e) => setForm({ ...form, display_name: e.target.value })} />
+        </label>
+        <label className="grid gap-1.5">
+          <span className="text-sm text-fg-2">Bio <span className="text-muted">({160 - form.bio.length} left)</span></span>
+          <textarea className="input h-24 resize-none rounded-md py-3" maxLength={160} value={form.bio}
+            onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+        </label>
+        <div className="flex flex-wrap items-center gap-3">
+          <button className="btn-primary" disabled={busy}>Save profile</button>
+          <a className="btn-ghost" href={href("u", username)}>View profile</a>
+        </div>
+      </form>
+      <div className="mt-6 grid max-w-xl gap-3 border-t border-line pt-5 text-sm">
+        <label className="flex items-start gap-3">
+          <input type="checkbox" className="mt-1 h-4 w-4 accent-[var(--color-kingfisher)]" checked={!prof.is_private}
+            onChange={(e) => patch({ is_private: !e.target.checked }, e.target.checked ? "Your profile is public" : "Your profile is private")} />
+          <span>
+            <span className="block font-semibold">Public profile</span>
+            <span className="text-muted">Off: only friends (people you follow who follow you back) see your top artists, playlists and listening.</span>
+          </span>
+        </label>
+        <label className="flex items-start gap-3">
+          <input type="checkbox" className="mt-1 h-4 w-4 accent-[var(--color-kingfisher)]" checked={prof.share_activity}
+            onChange={async (e) => {
+              const on = e.target.checked;
+              await patch({ share_activity: on }, on ? "Friends can see what you play" : "Your listening is hidden");
+              if (!on) social.presence(null).catch(() => {});
+            }} />
+          <span>
+            <span className="block font-semibold">Share what I’m listening to</span>
+            <span className="text-muted">Friends see your current song and your last play.</span>
+          </span>
+        </label>
+      </div>
+    </Card>
+  );
+}
 
 function Card({ title, description, children }) {
   return (
@@ -294,6 +392,7 @@ export default function Settings() {
   return (
     <div className="max-w-3xl">
       <PageHeader title="Settings" subtitle={`Signed in as ${user.username}${user.is_admin ? " (admin)" : ""}`} />
+      <ProfileCard username={user.username} />
       <Card title="Playback">
         <div className="grid gap-5">
           <div>

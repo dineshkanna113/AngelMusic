@@ -100,7 +100,7 @@ def profile(conn, row, viewer_id: int) -> dict:
     if visible:
         playlists = [playlist_summary(conn, p) for p in conn.execute(
             "SELECT * FROM playlists WHERE user_id = ? AND visibility = 'public' ORDER BY updated_at DESC", (row["id"],))]
-    return {
+    result = {
         **person(conn, row, viewer_id),
         "bio": row["bio"],
         "followers": count("SELECT COUNT(*) FROM follows WHERE followee_id = ?"),
@@ -110,6 +110,9 @@ def profile(conn, row, viewer_id: int) -> dict:
         "top_artists": _top_artists(conn, row["id"]) if visible else None,
         "playlists": playlists,
     }
+    if row["id"] == viewer_id:
+        result["share_activity"] = bool(row["share_activity"])  # only you see your own setting
+    return result
 
 
 # ---- people ---------------------------------------------------------------------------

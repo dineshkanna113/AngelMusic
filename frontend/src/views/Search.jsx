@@ -1,7 +1,9 @@
-import { useDeferredValue, useMemo } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { AlbumGrid, ArtistGrid, Section } from "../components/Grid";
 import TrackList from "../components/TrackList";
 import { useLibrary } from "../lib/library";
+import { social } from "../lib/social";
+import { PeopleList } from "./Profile";
 
 // Accent- and case-insensitive: "beyonce" finds "Beyoncé".
 const fold = (s) => (s || "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
@@ -10,6 +12,17 @@ export default function Search({ query }) {
   const { tracks, albums, artists } = useLibrary();
   const q = useDeferredValue(fold(query).trim());
   const words = q.split(/\s+/).filter(Boolean);
+  const [people, setPeople] = useState([]);
+  useEffect(() => {
+    const term = query.trim().replace(/^@/, "");
+    if (!term) return setPeople([]);
+    let live = true;
+    const t = setTimeout(() => social.search(term).then((p) => live && setPeople(p)).catch(() => {}), 250);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [query]);
   const hit = (...fields) => {
     const hay = fold(fields.join(" "));
     return words.every((w) => hay.includes(w));
@@ -26,11 +39,12 @@ export default function Search({ query }) {
   }, [q, tracks, albums, artists]);
 
   if (!results) return <p className="text-sm text-muted">Type to search songs, albums and artists.</p>;
-  const empty = !results.artists.length && !results.albums.length && !results.tracks.length;
+  const empty = !results.artists.length && !results.albums.length && !results.tracks.length && !people.length;
   return (
     <>
       <h1 className="font-display mb-6 text-2xl">Results for “{query}”</h1>
       {empty && <p className="text-sm text-muted">No matches.</p>}
+      {people.length > 0 && <Section title="People"><PeopleList people={people.slice(0, 6)} /></Section>}
       {results.tracks.length > 0 && <Section title="Songs"><TrackList tracks={results.tracks} /></Section>}
       {results.albums.length > 0 && <Section title="Albums"><AlbumGrid albums={results.albums} /></Section>}
       {results.artists.length > 0 && <Section title="Artists"><ArtistGrid artists={results.artists} /></Section>}

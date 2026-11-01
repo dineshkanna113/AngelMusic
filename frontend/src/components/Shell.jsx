@@ -172,6 +172,7 @@ export function TopBar() {
           {(close) => (
             <>
               <div className="px-3 py-2 text-xs text-muted">Signed in as <span className="text-fg">{session?.user?.username}</span></div>
+              <MenuItem icon={ArtistIcon} close={close} onSelect={() => navigate("u", session.user.username)}>Your profile</MenuItem>
               <MenuItem icon={SettingsIcon} close={close} onSelect={() => navigate("settings")}>Settings</MenuItem>
               <MenuItem icon={SongsIcon} close={close} onSelect={() => navigate("recent")}>Recently played</MenuItem>
               {session?.user?.can_upload && <MenuItem icon={UploadIcon} close={close} onSelect={() => navigate("upload")}>Upload music</MenuItem>}

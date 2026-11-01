@@ -12,6 +12,7 @@ import { AlbumView, Albums, ArtistView, Artists, Favorites } from "./views/Album
 import Downloads from "./views/Downloads";
 import Home from "./views/Home";
 import NowPlaying from "./views/NowPlaying";
+import Profile from "./views/Profile";
 import { MixView } from "./views/Mixes";
 import { PlaylistView, Playlists, Recent } from "./views/Playlists";
 import Search from "./views/Search";
@@ -37,6 +38,7 @@ function View() {
     case "downloads": return <Downloads />;
     case "settings": return <Settings />;
     case "now": return <NowPlaying />;
+    case "u": return <Profile username={params[0]} />;
     case "upload": return <Upload />;
     case "review": return <Review />;
     default: return <Home />;

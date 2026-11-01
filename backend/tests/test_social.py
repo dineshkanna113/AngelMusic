@@ -85,6 +85,8 @@ def test_profile_patch_validation(client, people):
     me = client.patch("/api/me/profile", json={"bio": "Late-night playlists.", "share_activity": False},
                       headers=people["asha"]).json()
     assert me["bio"] == "Late-night playlists." and me["is_self"] is True
+    assert me["share_activity"] is False
+    assert "share_activity" not in client.get("/api/people/asha", headers=people["bala"]).json()
 
 
 def test_avatar_upload(client, people):
