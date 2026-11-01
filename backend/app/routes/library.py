@@ -52,7 +52,11 @@ def list_albums(request: Request, user: dict = Depends(current_user)):
 @router.get("/artists")
 def list_artists(request: Request, user: dict = Depends(current_user)):
     with request.app.state.db.connect() as conn:
-        return etag_json(request, {"artists": queries.artists(queries.albums(queries.tracks(conn, user["id"])))})
+        artists = queries.artists(queries.albums(queries.tracks(conn, user["id"])))
+        followed = {r[0] for r in conn.execute("SELECT artist_id FROM artist_follows WHERE user_id = ?", (user["id"],))}
+        for artist in artists:
+            artist["following"] = artist["id"] in followed
+        return etag_json(request, {"artists": artists})
 
 
 @router.get("/tracks/{track_id}/lyrics")

@@ -128,6 +128,22 @@ CREATE TABLE IF NOT EXISTS uploads (
 CREATE INDEX IF NOT EXISTS idx_uploads_status ON uploads(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_uploads_user ON uploads(user_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_uploads_sha ON uploads(sha256);
+
+-- Social graph: one-way follows (mutual = friends) and followed artists.
+CREATE TABLE IF NOT EXISTS follows (
+    follower_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    followee_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (follower_id, followee_id)
+);
+CREATE INDEX IF NOT EXISTS idx_follows_followee ON follows(followee_id);
+
+CREATE TABLE IF NOT EXISTS artist_follows (
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    artist_id  TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, artist_id)
+);
 """
 
 # Columns added to user tables after the first release: (table, column, definition).
@@ -137,6 +153,12 @@ ADDED_COLUMNS = [
     ("users", "can_upload", "INTEGER NOT NULL DEFAULT 0"),
     ("sessions", "prev_hash", "TEXT"),
     ("sessions", "rotated_at", "TEXT"),
+    ("users", "display_name", "TEXT NOT NULL DEFAULT ''"),
+    ("users", "bio", "TEXT NOT NULL DEFAULT ''"),
+    ("users", "avatar", "TEXT"),
+    ("users", "is_private", "INTEGER NOT NULL DEFAULT 0"),
+    ("users", "share_activity", "INTEGER NOT NULL DEFAULT 1"),
+    ("playlists", "visibility", "TEXT NOT NULL DEFAULT 'private'"),
 ]
 
 
