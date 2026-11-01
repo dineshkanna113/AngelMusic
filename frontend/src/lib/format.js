@@ -22,4 +22,14 @@ export const formatBitrate = (bps) => (bps ? `${Math.round(bps / 1000)} kbps` : 
 export const formatSize = (bytes) =>
   bytes >= 1024 ** 3 ? `${(bytes / 1024 ** 3).toFixed(1)} GB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
+/** "just now", "5 min ago", "3 h ago", "2 d ago" from a UTC SQLite timestamp or ISO string. */
+export function timeAgo(value, now = Date.now()) {
+  const t = Date.parse(value.includes("T") ? value : `${value.replace(" ", "T")}Z`);
+  const s = Math.max(0, Math.round((now - t) / 1000));
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
+  return `${Math.floor(s / 86400)} d ago`;
+}
+
 export const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;

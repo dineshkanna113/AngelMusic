@@ -158,6 +158,17 @@
       linear-gradient(180deg, color-mix(in oklab, var(--ambient) 45%, var(--color-night)), var(--color-night) 85%);
   }
 
+  /* A friend listening right now: a kingfisher dot that breathes (still with reduced motion). */
+  .live-dot {
+    @apply block h-3 w-3 rounded-full border-2 border-surface-1 bg-social;
+    animation: live-breathe 2.4s var(--ease-in-out) infinite;
+  }
+  @keyframes live-breathe {
+    50% {
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-kingfisher) 25%, transparent);
+    }
+  }
+
   /* Meta lines: parts set apart by space, never joined with dots. */
   .meta {
     @apply flex flex-wrap items-baseline gap-x-3 gap-y-0.5;

@@ -6,7 +6,7 @@ import { player } from "../lib/player";
 import { href, navigate, useRoute } from "../lib/router";
 import { useToasts } from "../lib/toast";
 import {
-  AlbumIcon, ArtistIcon, CheckIcon, HeartIcon, HomeIcon, OfflineIcon, PlaylistIcon, PlusIcon, SearchIcon, SettingsIcon,
+  AlbumIcon, ArtistIcon, CheckIcon, FriendsIcon, HeartIcon, HomeIcon, OfflineIcon, PlaylistIcon, PlusIcon, SearchIcon, SettingsIcon,
   SongsIcon, UploadIcon,
 } from "./Icons";
 import { Menu, MenuItem } from "./Menu";
@@ -21,6 +21,7 @@ const NAV = [
   ["favorites", "Favorites", HeartIcon],
   ["playlists", "Playlists", PlaylistIcon],
   ["downloads", "Downloads", OfflineIcon],
+  ["friends", "Friends", FriendsIcon],
 ];
 
 /** Pending-review count for the admin badge, refreshed every minute and on navigation. */
@@ -115,7 +116,7 @@ export function MobileNav() {
   const { section } = useRoute();
   return (
     <nav aria-label="Main" className="flex border-t border-line bg-surface-1 md:hidden">
-      {[NAV[0], NAV[1], NAV[2], NAV[5], ["settings", "Settings", SettingsIcon]].map(([to, label, Icon]) => (
+      {[NAV[0], NAV[1], ["friends", "Friends", FriendsIcon], NAV[5], ["settings", "Settings", SettingsIcon]].map(([to, label, Icon]) => (
         <NavLink key={to} to={to} label={label} icon={Icon} active={section === to} compact />
       ))}
     </nav>

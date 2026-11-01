@@ -3,13 +3,16 @@ import Login from "./components/Login";
 import PlayerBar from "./components/PlayerBar";
 import { MobileNav, Sidebar, Toasts, TopBar } from "./components/Shell";
 import SidePanel from "./components/SidePanels";
+import FriendsRail from "./components/FriendsRail";
 import { api, auth } from "./lib/api";
 import { useSession, useStreamTokenRefresh } from "./lib/hooks";
+import { social } from "./lib/social";
 import { library } from "./lib/library";
 import { player } from "./lib/player";
 import { useRoute } from "./lib/router";
 import { AlbumView, Albums, ArtistView, Artists, Favorites } from "./views/Albums";
 import Downloads from "./views/Downloads";
+import Friends from "./views/Friends";
 import Home from "./views/Home";
 import NowPlaying from "./views/NowPlaying";
 import Profile from "./views/Profile";
@@ -39,6 +42,7 @@ function View() {
     case "settings": return <Settings />;
     case "now": return <NowPlaying />;
     case "u": return <Profile username={params[0]} />;
+    case "friends": return <Friends />;
     case "upload": return <Upload />;
     case "review": return <Review />;
     default: return <Home />;
@@ -69,6 +73,26 @@ function Authenticated() {
     if (!path.startsWith("/search")) mainRef.current?.scrollTo(0, 0);
   }, [path]);
 
+  // Presence heartbeat: friends see what's playing. Sent on change and every minute while playing.
+  useEffect(() => {
+    let current;
+    const send = () => social.presence(current ?? null).catch(() => {});
+    const onChange = () => {
+      const s = player.getSnapshot();
+      const next = s.playing ? s.queue[s.index]?.id : undefined;
+      if (next !== current) {
+        current = next;
+        send();
+      }
+    };
+    const unsubscribe = player.subscribe(onChange);
+    const timer = setInterval(() => current && send(), 60_000);
+    return () => {
+      unsubscribe();
+      clearInterval(timer);
+    };
+  }, []);
+
   // Expose the footer height so overlay panels on small screens stop above it.
   useEffect(() => {
     const el = footerRef.current;
@@ -89,6 +113,7 @@ function Authenticated() {
           </main>
         </div>
         <SidePanel />
+        <FriendsRail />
       </div>
       <footer ref={footerRef}>
         <PlayerBar />
