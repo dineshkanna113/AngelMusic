@@ -90,7 +90,7 @@ export default function Profile({ username }) {
           {prof.bio && <p className="mt-3 max-w-xl text-fg-2">{prof.bio}</p>}
           <div className="mt-4 flex flex-wrap items-center gap-5 text-sm">
             <button type="button" className="hover:underline" onClick={() => setTab("followers")}>
-              <span className="font-semibold tabular-nums text-fg">{prof.followers}</span> <span className="text-muted">followers</span>
+              <span className="font-semibold tabular-nums text-fg">{prof.followers}</span> <span className="text-muted">{prof.followers === 1 ? "follower" : "followers"}</span>
             </button>
             <button type="button" className="hover:underline" onClick={() => setTab("following")}>
               <span className="font-semibold tabular-nums text-fg">{prof.following}</span> <span className="text-muted">following</span>

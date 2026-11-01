@@ -45,9 +45,9 @@ export function FriendsList({ friends }) {
     );
   }
   return (
-    <ul className="grid gap-1">
+    <ul className="grid min-w-0 gap-1">
       {friends.map(({ person, track, live, at }) => (
-        <li key={person.username} className="flex items-center gap-3 rounded-md px-1 py-2 hover:bg-surface-2/60">
+        <li key={person.username} className="flex min-w-0 items-center gap-3 rounded-md px-1 py-2 hover:bg-surface-2/60">
           <a href={href("u", person.username)} className="relative shrink-0" aria-label={`${person.display_name}’s profile`}>
             <Avatar person={person} className="h-11 w-11 text-sm" ring={false} />
             {live && <span className="live-dot absolute -bottom-0.5 -right-0.5" aria-hidden="true" />}
@@ -62,7 +62,7 @@ export function FriendsList({ friends }) {
                 className="flex w-full min-w-0 items-center gap-2 text-left text-xs text-muted hover:text-fg"
                 aria-label={`Play ${track.title} by ${track.artist}`}>
                 <Cover track={track} token={token} className="h-6 w-6" rounded="rounded-sm" />
-                <span className="truncate"><span className="text-fg-2">{track.title}</span>, {track.artist}</span>
+                <span className="min-w-0 truncate"><span className="text-fg-2">{track.title}</span>, {track.artist}</span>
               </button>
             ) : (
               <p className="text-xs text-muted">Nothing played yet</p>

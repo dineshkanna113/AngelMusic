@@ -104,6 +104,7 @@ export function Sidebar() {
               }`}
             >
               {pl.name}
+              {pl.collaborative && <FriendsIcon aria-label="Shared" className="ml-1.5 inline h-3.5 w-3.5 align-[-2px] text-social" />}
             </a>
           </li>
         ))}
