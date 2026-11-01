@@ -1,36 +1,42 @@
 /** @type {import('tailwindcss').Config} */
-// Every colour is a Ribbon token from src/tokens.css. color-mix keeps opacity modifiers
-// (bg-accent/15) working on top of oklch values.
-const token = (name) => `color-mix(in oklab, var(--color-${name}) calc(<alpha-value> * 100%), transparent)`;
+// Every colour is a Yaapu token from src/tokens.css. color-mix keeps opacity modifiers
+// (bg-accent/15) working on top of the CSS variables.
+const token = (name) => `color-mix(in oklab, var(--${name}) calc(<alpha-value> * 100%), transparent)`;
 
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        "surface-0": token("paper"),
-        "surface-1": token("paper-2"),
-        "surface-2": token("paper-3"),
-        "surface-3": token("paper-4"),
-        line: token("rule"),
-        fg: token("ink"),
-        "fg-2": token("ink-2"),
-        muted: token("muted"),
-        accent: token("accent"),
-        "accent-soft": token("accent-soft"),
-        "accent-ink": token("accent-ink"),
-        gold: token("warn"),
-        danger: token("error"),
-        scrim: token("scrim"),
+        "surface-0": token("color-night"),
+        "surface-1": token("color-dusk"),
+        "surface-2": token("color-dusk-2"),
+        "surface-3": token("color-dusk-3"),
+        line: token("color-line"),
+        fg: token("color-jasmine"),
+        "fg-2": token("color-jasmine-2"),
+        muted: token("color-mist"),
+        accent: token("color-marigold"),
+        "accent-soft": token("color-marigold-soft"),
+        "accent-ink": token("color-marigold-ink"),
+        social: token("color-kingfisher"),
+        gold: token("color-warn"),
+        danger: token("color-error"),
+        scrim: token("color-scrim"),
+        ambient: token("ambient"),
       },
       fontFamily: {
         sans: ["var(--font-body)"],
         display: ["var(--font-display)"],
       },
       borderRadius: {
-        card: "var(--radius-card)",
-        part: "var(--radius-part)",
+        sm: "var(--radius-sm)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
         pill: "var(--radius-pill)",
+        // Ribbon names kept as aliases until Task 3 moves components to sm/md/lg.
+        part: "var(--radius-sm)",
+        card: "var(--radius-lg)",
       },
       boxShadow: {
         part: "var(--edge-light), var(--shadow-part)",
@@ -43,7 +49,7 @@ export default {
       transitionDuration: {
         micro: "120ms",
         short: "220ms",
-        long: "420ms",
+        bloom: "700ms",
       },
     },
   },

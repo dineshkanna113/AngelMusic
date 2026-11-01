@@ -1,50 +1,57 @@
-/* Ribbon tokens (Hallmark scaffold, app scope) plus the shared scale.
- * Night (two-in-the-morning) is the default; the dawn colourway follows a light OS setting. */
+/* Yaapu design tokens: "temple night". Dark only in Phase 1.
+ * Marigold = play, primary actions, premium. Kingfisher = social and live only. */
 :root {
   color-scheme: dark;
-  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
-  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.2rem; --text-xl: 1.44rem; --text-2xl: 1.728rem; --text-3xl: 2.074rem;
-  --text-display-s: 1.44rem; --text-display: 1.728rem; --text-section: 1.2rem; --text-title: 1rem; --text-lead: 1rem;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --ease-in: cubic-bezier(0.7, 0, 0.84, 0); --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --dur-micro: 120ms; --dur-short: 220ms; --dur-long: 420ms;
-  --container: 1440px; --gutter: 64px; --gap-columns: 32px; --section-gap-s: 120px; --section-gap: 144px; --section-gap-l: 176px;
-  --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
-  --font-display: "Instrument Sans", ui-sans-serif, system-ui, sans-serif; --font-body: "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-outlier: "JetBrains Mono", ui-monospace, monospace;
-  --radius-card: 20px; --radius-part: 6px; --radius-pill: 999px; --rule-hair: 1px;
-  --shadow-card: none;
-  --tracking-display: -0.035em; --display-weight: 400;
 
-  /* two-in-the-morning: a blue-black night, pale warm ink, one lit window of amber */
-  --color-paper: oklch(13.2% 0.022 258); --color-paper-2: oklch(16.4% 0.022 258); --color-paper-3: oklch(19.6% 0.022 258);
-  --color-paper-4: oklch(23.5% 0.022 258);
-  --color-ink: oklch(93.5% 0.012 85); --color-ink-2: oklch(84% 0.014 85); --color-muted: oklch(72% 0.02 255);
-  --color-rule: oklch(27% 0.022 258); --color-rule-2: oklch(22% 0.022 258);
-  --color-accent: oklch(82% 0.095 68); --color-accent-soft: oklch(34% 0.05 68); --color-accent-ink: oklch(20% 0.03 62);
-  --color-focus: oklch(82% 0.095 68);
-  --color-warn: oklch(80% 0.11 95); --color-error: oklch(70% 0.16 25); --color-success: oklch(76% 0.11 160);
-  --color-scrim: oklch(8% 0.02 258);
-  --metal-hi: oklch(44% 0.012 255); --metal-lo: oklch(25% 0.014 255);
-  --edge-light: inset 0 1px 0 oklch(100% 0 0 / 0.07);
-  --shadow-part: 0 1px 0 oklch(0% 0 0 / 0.5), 0 10px 18px -6px oklch(0% 0 0 / 0.55);
-  --shadow-panel: 0 1px 0 oklch(0% 0 0 / 0.45), 0 24px 48px -16px oklch(0% 0 0 / 0.7);
-}
+  /* palette (spec) */
+  --color-night: #160f1e;
+  --color-dusk: #251a30;
+  --color-marigold: #ffb020;
+  --color-kingfisher: #19c2b8;
+  --color-jasmine: #f6efe3;
+  --color-mist: #a497b0;
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color-scheme: light;
-    /* dawn: warm off-white, ink, a deep teal signal */
-    --color-paper: oklch(98.2% 0.008 82); --color-paper-2: oklch(95.8% 0.011 82); --color-paper-3: oklch(92.3% 0.014 82);
-    --color-paper-4: oklch(88.5% 0.016 82);
-    --color-ink: oklch(18% 0.006 80); --color-ink-2: oklch(30% 0.008 80); --color-muted: oklch(47% 0.012 80);
-    --color-rule: oklch(89.5% 0.011 82); --color-rule-2: oklch(93.5% 0.009 82);
-    --color-accent: oklch(44% 0.075 190); --color-accent-soft: oklch(92% 0.028 190); --color-accent-ink: oklch(98% 0.006 85);
-    --color-focus: oklch(52% 0.09 190);
-    --color-warn: oklch(52% 0.12 70); --color-error: oklch(52% 0.19 27); --color-success: oklch(50% 0.12 150);
-    --color-scrim: oklch(18% 0.006 80);
-    --metal-hi: oklch(97% 0.006 85); --metal-lo: oklch(85% 0.01 85);
-    --edge-light: inset 0 1px 0 oklch(100% 0 0 / 0.5);
-    --shadow-part: 0 1px 0 oklch(20% 0.01 80 / 0.25), 0 10px 18px -6px oklch(20% 0.01 80 / 0.3);
-    --shadow-panel: 0 1px 0 oklch(20% 0.01 80 / 0.2), 0 24px 48px -16px oklch(20% 0.02 80 / 0.35);
-  }
+  /* derived steps */
+  --color-dusk-2: #322440;
+  --color-dusk-3: #3f2f50;
+  --color-line: #3a2c48;
+  --color-jasmine-2: #d8cddf;
+  --color-marigold-ink: #1e1406;
+  --color-marigold-soft: #4a3420;
+  --color-warn: #f5c451;
+  --color-error: #ff7a7a;
+  --color-scrim: #0d0812;
+
+  /* the current cover's colour; set by lib/ambient.js, defaults to dusk/jasmine */
+  --ambient: var(--color-dusk);
+  --ambient-ink: var(--color-jasmine);
+
+  --font-display: "Bricolage Grotesque", "Noto Sans Tamil", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Hanken Grotesk", "Noto Sans Tamil", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-bloom: 700ms;
+
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.25rem;
+  --text-xl: 1.563rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem; --text-4xl: 3.815rem;
+  --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px;
+  --z-dropdown: 100; --z-modal: 400; --z-toast: 500;
+
+  /* TEMPORARY: Ribbon names still read by component CSS until Task 3 rewrites it. */
+  --color-paper: var(--color-night); --color-paper-2: var(--color-dusk); --color-paper-3: var(--color-dusk-2);
+  --color-ink: var(--color-jasmine); --color-muted: var(--color-mist); --color-accent: var(--color-marigold);
+  --color-focus: var(--color-marigold);
+  --metal-hi: var(--color-dusk-3); --metal-lo: var(--color-dusk-2);
+  --edge-light: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --shadow-part: 0 6px 14px -6px rgb(0 0 0 / 0.6);
+  --shadow-panel: 0 24px 48px -16px rgb(0 0 0 / 0.7);
+  --gutter: 64px;
 }

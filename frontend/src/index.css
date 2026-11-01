@@ -1,7 +1,4 @@
-/* Hallmark · shape: app screen · genre: atmospheric · theme: Ribbon (deal 3/3, seed self-hosted-lossless-music-streaming-6df1·6aa84632·2026-10-31·r0) · redesign: full
- * nav: kept (sidebar, 9 destinations + playlists) · signature: the player as a machined instrument, a sunk seek slot lit to the playhead and the file's resolution set as a figure · states: loading, empty, error, full · ribbon: two-in-the-morning (dark), dawn (light)
- * axes: light/grotesk-sans/chromatic-teal · posture: committed · contrast: pass · v2.0.0 */
-/* Hallmark · pre-emit critique: P3 H- E3 S3 R2 V3 · weakest: R, covers carry every colour so the chrome stays one amber signal on blue-black */
+/* Yaapu: temple night. Tokens in tokens.css; Floor rules (focus, overflow, reduced motion) in base.css. */
 @import "./tokens.css";
 @import "./base.css" layer(base);
 
