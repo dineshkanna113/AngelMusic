@@ -58,7 +58,7 @@ export function AlbumView({ id }) {
   return (
     <>
       <div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-end">
-        <Cover track={album.cover} token={token} className="aspect-square w-48 sm:w-56" rounded="rounded-card" eager />
+        <Cover track={album.cover} token={token} className="aspect-square w-48 sm:w-56" rounded="rounded-lg" eager />
         <div className="min-w-0">
           <p className="text-xs font-medium text-muted">Album</p>
           <h1 className="font-display mt-1 text-3xl">{album.name}</h1>

@@ -21,7 +21,7 @@ export function AlbumGrid({ albums, emptyText = "No albums." }) {
         <li key={a.id} className="group min-w-0">
           <div className="relative">
             <a href={href("album", a.id)} className="block" tabIndex={-1} aria-hidden="true">
-              <Cover track={a.cover} token={token} className="aspect-square w-full" rounded="rounded-part" />
+              <Cover track={a.cover} token={token} className="aspect-square w-full" rounded="rounded-sm" />
             </a>
             {!offlineMode && (
               <button

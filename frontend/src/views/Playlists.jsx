@@ -37,7 +37,7 @@ export function Playlists() {
           <li key={pl.id} className="min-w-0">
             <a href={href("playlist", pl.id)} className="block">
               <Cover track={pl.cover_track_id ? byId.get(pl.cover_track_id) : null} token={token}
-                className="aspect-square w-full" rounded="rounded-part" />
+                className="aspect-square w-full" rounded="rounded-sm" />
               <p className="mt-2 truncate text-sm font-medium">{pl.name}</p>
               <Meta className="text-xs text-muted" parts={[plural(pl.track_count, "track"), formatTime(pl.duration)]} />
             </a>
@@ -100,7 +100,7 @@ export function PlaylistView({ id }) {
   return (
     <>
       <div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-end">
-        <Cover track={cover} token={token} className="aspect-square w-48" rounded="rounded-card" eager />
+        <Cover track={cover} token={token} className="aspect-square w-48" rounded="rounded-lg" eager />
         <div className="min-w-0">
           <p className="text-xs font-medium text-muted">Playlist</p>
           <h1 className="font-display mt-1 text-3xl">{pl.name}</h1>

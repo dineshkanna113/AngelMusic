@@ -19,10 +19,10 @@ export function MixCover({ tracks, className = "aspect-square w-full" }) {
     }
   }
   if (covers.length < 4) {
-    return <Cover track={covers[0] ?? null} token={token} className={className} rounded="rounded-part" />;
+    return <Cover track={covers[0] ?? null} token={token} className={className} rounded="rounded-sm" />;
   }
   return (
-    <div className={`${className} grid grid-cols-2 overflow-hidden rounded-part`}>
+    <div className={`${className} grid grid-cols-2 overflow-hidden rounded-sm`}>
       {covers.map((t) => <Cover key={t.id} track={t} token={token} className="aspect-square w-full" rounded="" />)}
     </div>
   );
@@ -40,8 +40,8 @@ export default function MixGrid({ mixes }) {
             <div className="relative">
               <a href={href("mix", m.key)} className="block" tabIndex={-1} aria-hidden="true">
                 <MixCover tracks={m.tracks} />
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-part bg-gradient-to-t from-scrim/85 to-transparent px-3 pb-2.5 pt-10">
-                  <p className="truncate font-display text-lg text-fg">{m.title}</p>
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-sm bg-gradient-to-t from-scrim/85 to-transparent px-3 pb-2.5 pt-10">
+                  <p className="title-display truncate text-2xl text-fg">{m.title}</p>
                 </div>
               </a>
               {list.length > 0 && (

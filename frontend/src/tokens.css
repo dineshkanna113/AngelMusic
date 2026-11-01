@@ -45,13 +45,7 @@
   --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px;
   --z-dropdown: 100; --z-modal: 400; --z-toast: 500;
 
-  /* TEMPORARY: Ribbon names still read by component CSS until Task 3 rewrites it. */
-  --color-paper: var(--color-night); --color-paper-2: var(--color-dusk); --color-paper-3: var(--color-dusk-2);
-  --color-ink: var(--color-jasmine); --color-muted: var(--color-mist); --color-accent: var(--color-marigold);
-  --color-focus: var(--color-marigold);
-  --metal-hi: var(--color-dusk-3); --metal-lo: var(--color-dusk-2);
   --edge-light: inset 0 1px 0 rgb(255 255 255 / 0.06);
   --shadow-part: 0 6px 14px -6px rgb(0 0 0 / 0.6);
   --shadow-panel: 0 24px 48px -16px rgb(0 0 0 / 0.7);
-  --gutter: 64px;
 }

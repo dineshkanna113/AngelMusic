@@ -1,4 +1,6 @@
-/* Yaapu: temple night. Tokens in tokens.css; Floor rules (focus, overflow, reduced motion) in base.css. */
+/* Hallmark · shape: app screen · genre: atmospheric · theme: custom (Yaapu temple night, docs/superpowers/specs/2026-11-02-yaapu-design.md) · redesign: full
+ * nav: kept (sidebar with sliding selection) · signature: the cover-colour bloom on the Now Playing stage · states: loading, empty, error, full · v2.0.0 */
+/* Yaapu: tokens in tokens.css; floor rules (focus, overflow, reduced motion) in base.css. */
 @import "./tokens.css";
 @import "./base.css" layer(base);
 
@@ -15,70 +17,89 @@
     @apply bg-surface-0 font-sans text-fg;
   }
 
+  /* Heads: Bricolage at a condensed width and heavy weight; the type is the grandeur. */
   h1,
   h2,
   h3 {
     max-width: none;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-stretch: 88%;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+  }
+  h1 {
+    font-weight: 800;
+    font-stretch: 78%;
   }
 }
 
 @layer components {
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 100%;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  /* Titles that should carry the brand voice: covers, the player, the stage. */
+  .title-display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 80%;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+
   .input {
-    @apply h-10 w-full rounded-part border border-line bg-surface-1 px-3 text-sm text-fg placeholder:text-muted
-      focus:border-accent/60 focus:outline-none;
-    box-shadow: inset 0 1px 2px color-mix(in oklab, var(--color-scrim) 40%, transparent);
+    @apply h-11 w-full rounded-pill border border-line bg-surface-1 px-4 text-sm text-fg placeholder:text-muted
+      focus:border-accent focus:outline-none;
     transition: border-color var(--dur-micro) var(--ease-out);
   }
 
-  /* Machined pills: lit from above, pressed 1px down. The primary is the one lit part. */
   .btn-primary,
-  .btn-secondary {
-    @apply inline-flex h-10 items-center justify-center gap-1.5 rounded-pill px-5 text-sm font-medium
+  .btn-secondary,
+  .btn-social {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-pill px-6 text-sm font-semibold
       disabled:cursor-default disabled:opacity-50;
-    transition: transform var(--dur-micro) var(--ease-out), filter var(--dur-micro) var(--ease-out);
+    transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out),
+      color var(--dur-micro) var(--ease-out);
   }
   .btn-primary {
-    @apply bg-accent text-accent-ink shadow-part;
+    @apply bg-accent text-accent-ink hover:bg-[#ffc04d];
   }
   .btn-secondary {
-    @apply border border-line text-fg shadow-part;
-    background: linear-gradient(var(--color-paper-3), var(--color-paper-2));
+    @apply border border-line bg-surface-1 text-fg hover:bg-surface-2;
   }
-  .btn-primary:hover:not(:disabled),
-  .btn-secondary:hover:not(:disabled) {
-    filter: brightness(1.08);
+  .btn-social {
+    @apply border border-social/60 text-social hover:bg-social/10;
   }
   .btn-primary:active:not(:disabled),
-  .btn-secondary:active:not(:disabled) {
-    transform: translateY(1px);
+  .btn-secondary:active:not(:disabled),
+  .btn-social:active:not(:disabled) {
+    transform: scale(0.97);
   }
 
   .btn-ghost {
-    @apply inline-flex h-8 items-center rounded-pill px-3 text-sm text-muted hover:bg-surface-2 hover:text-fg
+    @apply inline-flex h-9 items-center rounded-pill px-3 text-sm text-muted hover:bg-surface-2 hover:text-fg
       disabled:opacity-50;
     transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
   }
 
-  /* A panel lit from above: the player, menus, dialogs. */
+  /* Raised surfaces: menus, dialogs, popovers. */
   .panel {
-    @apply rounded-card border border-line shadow-panel;
-    background: linear-gradient(var(--color-paper-3), var(--color-paper-2));
+    @apply rounded-lg border border-line bg-surface-1 shadow-panel;
   }
 
-  /* The seek slot: a sunk bed with a tick scale; its glow fills to the playhead. */
+  /* Seek: a pill track whose marigold fill runs to the playhead. */
   .slot {
-    @apply relative h-1.5 overflow-hidden rounded-pill;
-    background:
-      repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), color-mix(in oklab, var(--color-muted) 35%, transparent) calc(10% - 1px) 10%),
-      var(--color-paper);
-    box-shadow: inset 0 1px 2px color-mix(in oklab, var(--color-scrim) 80%, transparent);
+    @apply relative h-1.5 overflow-hidden rounded-pill bg-surface-3;
   }
   .slot-fill {
     @apply absolute inset-y-0 left-0 rounded-pill bg-accent;
-    box-shadow: 0 0 10px color-mix(in oklab, var(--color-accent) 60%, transparent);
   }
 
-  /* The range input sits over the slot: invisible track, a knurled metal cap on hover/focus. */
   .seek {
     @apply cursor-pointer appearance-none bg-transparent opacity-0 disabled:cursor-default;
     transition: opacity var(--dur-micro) var(--ease-out);
@@ -95,40 +116,38 @@
     @apply bg-transparent;
   }
   .seek::-webkit-slider-thumb {
-    @apply mt-0.5 h-4 w-2.5 appearance-none rounded-part;
-    background: linear-gradient(var(--metal-hi), var(--metal-lo));
-    box-shadow: var(--edge-light), var(--shadow-part), inset 0 -2px 0 var(--color-accent);
+    @apply mt-1 h-3.5 w-3.5 appearance-none rounded-full bg-fg;
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-marigold) 35%, transparent);
   }
   .seek::-moz-range-thumb {
-    @apply h-4 w-2.5 rounded-part border-0;
-    background: linear-gradient(var(--metal-hi), var(--metal-lo));
-    box-shadow: var(--edge-light), var(--shadow-part), inset 0 -2px 0 var(--color-accent);
+    @apply h-3.5 w-3.5 rounded-full border-0 bg-fg;
   }
 
-  /* Time bubble while scrubbing (after Watermelon's scrub slider, on a native range input). */
+  /* Time bubble while scrubbing (idea from Watermelon UI's scrub slider, on a native range input). */
   .scrub-bubble {
-    @apply pointer-events-none absolute -top-9 -translate-x-1/2 rounded-part px-2 py-1 text-xs font-medium tabular-nums text-fg shadow-part;
-    background: linear-gradient(var(--metal-hi), var(--metal-lo));
+    @apply pointer-events-none absolute -top-9 -translate-x-1/2 rounded-pill bg-fg px-2.5 py-1 text-xs font-semibold
+      tabular-nums text-surface-0;
   }
 
   .volume {
     @apply h-1.5 cursor-pointer appearance-none rounded-pill;
-    background: linear-gradient(90deg, var(--color-accent) var(--level, 100%), var(--color-paper) var(--level, 100%));
-    box-shadow: inset 0 1px 2px color-mix(in oklab, var(--color-scrim) 80%, transparent);
+    background: linear-gradient(90deg, var(--color-jasmine) var(--level, 100%), var(--color-dusk-3) var(--level, 100%));
   }
   .volume::-webkit-slider-thumb {
-    @apply h-4 w-2.5 appearance-none rounded-part;
-    background: linear-gradient(var(--metal-hi), var(--metal-lo));
-    box-shadow: var(--edge-light), var(--shadow-part);
+    @apply h-3.5 w-3.5 appearance-none rounded-full bg-fg;
   }
   .volume::-moz-range-thumb {
-    @apply h-4 w-2.5 rounded-part border-0;
-    background: linear-gradient(var(--metal-hi), var(--metal-lo));
-    box-shadow: var(--edge-light), var(--shadow-part);
+    @apply h-3.5 w-3.5 rounded-full border-0 bg-fg;
   }
 
   /* Meta lines: parts set apart by space, never joined with dots. */
   .meta {
     @apply flex flex-wrap items-baseline gap-x-3 gap-y-0.5;
+  }
+
+  /* Sliding selection indicator for the sidebar (idea from Watermelon UI's macos-sidebar). */
+  .nav-indicator {
+    @apply pointer-events-none absolute left-0 right-0 rounded-md bg-surface-2;
+    transition: transform var(--dur-short) var(--ease-out);
   }
 }

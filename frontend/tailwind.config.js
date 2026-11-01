@@ -34,9 +34,6 @@ export default {
         md: "var(--radius-md)",
         lg: "var(--radius-lg)",
         pill: "var(--radius-pill)",
-        // Ribbon names kept as aliases until Task 3 moves components to sm/md/lg.
-        part: "var(--radius-sm)",
-        card: "var(--radius-lg)",
       },
       boxShadow: {
         part: "var(--edge-light), var(--shadow-part)",

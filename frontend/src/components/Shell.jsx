@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { api, auth } from "../lib/api";
 import { useSession } from "../lib/hooks";
 import { library, useLibrary } from "../lib/library";
@@ -7,10 +7,11 @@ import { href, navigate, useRoute } from "../lib/router";
 import { useToasts } from "../lib/toast";
 import {
   AlbumIcon, ArtistIcon, CheckIcon, HeartIcon, HomeIcon, OfflineIcon, PlaylistIcon, PlusIcon, SearchIcon, SettingsIcon,
-  SongsIcon, UploadIcon, WaveIcon,
+  SongsIcon, UploadIcon,
 } from "./Icons";
 import { Menu, MenuItem } from "./Menu";
 import { newPlaylistWith } from "./TrackMenu";
+import Wordmark from "./Wordmark";
 
 const NAV = [
   ["", "Home", HomeIcon],
@@ -44,12 +45,12 @@ function NavLink({ to, label, icon: Icon, active, compact = false, badge = 0 }) 
       className={
         compact
           ? `flex flex-1 flex-col items-center gap-0.5 py-1.5 text-[10px] ${active ? "text-accent" : "text-muted"}`
-          : `flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
-              active ? "bg-surface-2 font-medium text-fg" : "text-muted hover:bg-surface-2 hover:text-fg"
+          : `relative z-[1] flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors ${
+              active ? "font-semibold text-fg" : "text-muted hover:text-fg"
             }`
       }
     >
-      <Icon className={compact ? "h-5 w-5" : "h-4 w-4"} />
+      <Icon className={`${compact ? "h-5 w-5" : "h-4 w-4"} ${active && !compact ? "text-accent" : ""}`} />
       {label}
       {badge > 0 && <span className="ml-auto rounded-full bg-gold/20 px-1.5 text-[10px] font-semibold text-gold">{badge}</span>}
     </a>
@@ -61,22 +62,32 @@ export function Sidebar() {
   const { playlists } = useLibrary();
   const user = useSession()?.user;
   const pending = usePendingCount(user?.is_admin, section);
+  const list = useRef(null);
+  const [indicator, setIndicator] = useState(null);
   useEffect(() => {
     library.loadPlaylists();
   }, []);
+  // The selection slides to the current page instead of jumping.
+  useLayoutEffect(() => {
+    const el = list.current?.querySelector('[aria-current="page"]');
+    setIndicator(el ? { top: el.offsetTop, height: el.offsetHeight } : null);
+  }, [section, user?.can_upload, user?.is_admin]);
   return (
-    <nav aria-label="Main" className="hidden w-60 shrink-0 flex-col gap-1 overflow-y-auto border-r border-line bg-surface-1/50 p-3 md:flex">
-      <a href="#/" className="mb-4 flex items-center gap-2 px-3 pt-1">
-        <WaveIcon className="h-5 w-5 text-accent" />
-        <span className="font-semibold tracking-tight">Yaapu</span>
+    <nav aria-label="Main" className="hidden w-64 shrink-0 flex-col gap-1 overflow-y-auto bg-surface-1 px-4 pb-4 pt-6 md:flex">
+      <a href="#/" className="mb-6 px-3" aria-label="Yaapu home">
+        <Wordmark size="text-[1.9rem]" />
       </a>
-      {NAV.map(([to, label, Icon]) => (
-        <NavLink key={to} to={to} label={label} icon={Icon} active={section === to} />
-      ))}
-      {user?.can_upload && <NavLink to="upload" label="Upload" icon={UploadIcon} active={section === "upload"} />}
-      {user?.is_admin && <NavLink to="review" label="Review" icon={CheckIcon} active={section === "review"} badge={pending} />}
-      <div className="mt-5 flex items-center justify-between px-3">
-        <span className="text-xs font-medium text-muted">Your playlists</span>
+      <div ref={list} className="relative flex flex-col gap-0.5">
+        {indicator && <span aria-hidden="true" className="nav-indicator"
+          style={{ transform: `translateY(${indicator.top}px)`, height: indicator.height }} />}
+        {NAV.map(([to, label, Icon]) => (
+          <NavLink key={to} to={to} label={label} icon={Icon} active={section === to} />
+        ))}
+        {user?.can_upload && <NavLink to="upload" label="Upload" icon={UploadIcon} active={section === "upload"} />}
+        {user?.is_admin && <NavLink to="review" label="Review" icon={CheckIcon} active={section === "review"} badge={pending} />}
+      </div>
+      <div className="mt-8 flex items-center justify-between px-3">
+        <h2 className="text-lg">Your playlists</h2>
         <button type="button" aria-label="New playlist" onClick={() => newPlaylistWith([])}
           className="grid h-6 w-6 place-items-center rounded text-muted hover:bg-surface-2 hover:text-fg">
           <PlusIcon className="h-4 w-4" />
@@ -155,7 +166,7 @@ export function TopBar() {
         {scanning && <span className="text-xs text-muted">Scanning…</span>}
         <Menu
           label="Account"
-          trigger={<span className="grid h-8 w-8 place-items-center rounded-full bg-surface-3 text-xs font-semibold">{session?.user?.username?.[0]?.toUpperCase()}</span>}
+          trigger={<span className="grid h-9 w-9 place-items-center rounded-full bg-surface-2 text-sm font-semibold ring-2 ring-social/70">{session?.user?.username?.[0]?.toUpperCase()}</span>}
           className="rounded-full"
         >
           {(close) => (

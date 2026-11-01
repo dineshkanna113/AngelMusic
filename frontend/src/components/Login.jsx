@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, auth } from "../lib/api";
-import { WaveIcon } from "./Icons";
+import Wordmark from "./Wordmark";
 
 export default function Login() {
   const [mode, setMode] = useState("login");
@@ -38,19 +38,24 @@ export default function Login() {
   const awaitingAdmin = status && !status.has_users && !status.registration_open;
 
   return (
-    <main className="grid min-h-dvh place-items-center bg-surface-0 px-4">
-      <form onSubmit={submit} className="panel w-full max-w-sm space-y-5 p-7">
-        <div className="flex items-center gap-2.5">
-          <WaveIcon className="h-6 w-6 text-accent" />
-          <h1 className="font-display text-lg">Yaapu</h1>
-        </div>
+    <main className="relative grid min-h-dvh overflow-hidden bg-surface-0 px-5 py-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-center md:gap-12 md:px-16">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0"
+        style={{ background: "radial-gradient(60% 50% at 15% 85%, color-mix(in oklab, var(--color-marigold) 22%, transparent), transparent 70%), radial-gradient(45% 40% at 85% 10%, color-mix(in oklab, var(--color-kingfisher) 16%, transparent), transparent 70%)" }} />
+      <div className="relative mb-10 md:mb-0">
+        <h1 className="sr-only">Yaapu</h1>
+        <Wordmark size="text-[clamp(4.5rem,15vw,11rem)]" className="-ml-1" />
+        <p className="mt-5 max-w-md font-display text-xl text-fg-2 md:text-2xl" style={{ fontStretch: "88%" }}>
+          Hear what your friends are playing, and play it louder.
+        </p>
+      </div>
+      <form onSubmit={submit} className="panel relative w-full max-w-sm space-y-5 justify-self-start p-7 md:justify-self-end">
         <p className="text-sm text-muted">
           {awaitingAdmin
             ? "This server has no accounts yet. Create the admin on the server with: python -m app.manage create-user <name> --admin"
             : firstRun
             ? "Create the admin account for this server."
             : mode === "login"
-              ? "Sign in to your library."
+              ? "Sign in to Yaapu."
               : "Create an account."}
         </p>
 

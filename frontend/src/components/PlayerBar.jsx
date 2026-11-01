@@ -66,7 +66,7 @@ function SleepTimer({ sleep }) {
         <span className="relative">
           <MoonIcon className="h-4 w-4" />
           {sleep && (
-            <span className="absolute -right-2.5 -top-2 rounded-part bg-accent px-1 text-[9px] font-semibold leading-3 text-accent-ink">
+            <span className="absolute -right-2.5 -top-2 rounded-sm bg-accent px-1 text-[9px] font-semibold leading-3 text-accent-ink">
               {remaining ?? "end"}
             </span>
           )}
@@ -135,15 +135,15 @@ export default function PlayerBar() {
   const repeatLabel = { off: "Repeat off", all: "Repeat all", one: "Repeat one" }[state.repeat];
 
   return (
-    <div className="border-t border-line shadow-panel" style={{ background: "linear-gradient(var(--color-paper-3), var(--color-paper-2))" }}>
+    <div className="border-t border-line bg-surface-1">
       {state.error && <p role="alert" className="bg-danger/15 px-4 py-1.5 text-center text-xs text-danger">{state.error}</p>}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-3 py-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1fr)] md:px-4 md:py-2.5">
         <div className="flex min-w-0 items-center gap-3">
           <a href={href("album", track.album_id)} aria-label="Go to album">
-            <Cover track={track} token={token} className="h-14 w-14" rounded="rounded-part" eager />
+            <Cover track={track} token={token} className="h-14 w-14" rounded="rounded-sm" eager />
           </a>
           <div className="min-w-0">
-            <p className="truncate font-display text-base">{track.title}</p>
+            <p className="title-display truncate text-lg">{track.title}</p>
             <a href={href("artist", track.artist_id)} className="block truncate text-xs text-muted hover:text-fg hover:underline">{track.artist}</a>
           </div>
           <button type="button" onClick={() => library.toggleFavorite(track)} disabled={offlineMode}
@@ -192,7 +192,7 @@ export default function PlayerBar() {
             aria-expanded={showPath}
             title="Signal path"
             aria-label={`Signal path: ${track.codec.toUpperCase()}${track.bit_depth ? ` ${track.bit_depth}-bit` : ""} ${formatRate(track.sample_rate)}`}
-            className="group flex items-baseline gap-2 rounded-part px-2 py-1 hover:bg-surface-3/60"
+            className="group flex items-baseline gap-2 rounded-sm px-2 py-1 hover:bg-surface-3/60"
           >
             <span className={`font-display text-xl leading-none tabular-nums ${isHiRes(track) ? "text-accent" : "text-fg"}`}>
               {track.bit_depth ? `${track.bit_depth}/` : ""}{track.sample_rate ? +(track.sample_rate / 1000).toFixed(1) : "?"}

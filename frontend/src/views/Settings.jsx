@@ -156,7 +156,7 @@ function SubsonicCard({ username }) {
     >
       <dl className="grid max-w-xl grid-cols-[8rem_1fr] gap-x-3 gap-y-2 text-sm">
         <dt className="text-muted">Server</dt>
-        <dd className="flex items-center gap-2 truncate font-mono">{server}<button type="button" className="text-xs text-accent" onClick={() => copy(server)}>Copy</button></dd>
+        <dd className="flex items-center gap-2"><span className="truncate font-mono">{server}</span><button type="button" className="text-xs text-accent" onClick={() => copy(server)}>Copy</button></dd>
         <dt className="text-muted">Username</dt>
         <dd className="font-mono">{username}</dd>
         <dt className="text-muted">App password</dt>

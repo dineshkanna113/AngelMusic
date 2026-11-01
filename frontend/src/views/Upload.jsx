@@ -61,7 +61,7 @@ function DropZone({ onFiles }) {
       onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
       onDragLeave={() => setDragging(false)}
       onDrop={async (e) => { e.preventDefault(); setDragging(false); onFiles(await filesFromDrop(e.dataTransfer)); }}
-      className={`grid place-items-center rounded-card border-2 border-dashed px-6 py-10 text-center text-sm transition-colors ${dragging ? "border-accent bg-accent/5" : "border-line"}`}
+      className={`grid place-items-center rounded-lg border-2 border-dashed px-6 py-10 text-center text-sm transition-colors ${dragging ? "border-accent bg-accent/5" : "border-line"}`}
     >
       <UploadIcon className="mb-2 h-7 w-7 text-muted" />
       <p className="font-medium">Drop audio files or whole album folders here</p>
