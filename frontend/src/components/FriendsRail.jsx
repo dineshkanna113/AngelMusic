@@ -5,6 +5,7 @@ import { player } from "../lib/player";
 import { href } from "../lib/router";
 import { social } from "../lib/social";
 import Avatar from "./Avatar";
+import { StickerLabel } from "./Stickers";
 import Cover from "./Cover";
 import { canPlay } from "./TrackList";
 
@@ -49,13 +50,15 @@ export function FriendsList({ friends }) {
       {friends.map(({ person, track, live, at }) => (
         <li key={person.username} className="flex min-w-0 items-center gap-3 rounded-md px-1 py-2 hover:bg-surface-2/60">
           <a href={href("u", person.username)} className="relative shrink-0" aria-label={`${person.display_name}’s profile`}>
-            <Avatar person={person} className="h-11 w-11 text-sm" ring={false} />
+            <Avatar person={person} className="h-11 w-11 text-sm" ring={false} sticker />
             {live && <span className="live-dot absolute -bottom-0.5 -right-0.5" aria-hidden="true" />}
           </a>
           <div className="min-w-0 flex-1">
             <p className="flex items-baseline justify-between gap-2">
               <a href={href("u", person.username)} className="truncate text-sm font-semibold hover:underline">{person.display_name}</a>
-              <span className={`shrink-0 text-xs ${live ? "text-social" : "text-muted"}`}>{live ? "Listening" : at ? timeAgo(at) : ""}</span>
+              {live
+                ? <StickerLabel tone="gum" tilt={4} className="!border-2 !px-2 !py-0 text-[10px]">live</StickerLabel>
+                : <span className="shrink-0 text-xs text-muted">{at ? timeAgo(at) : ""}</span>}
             </p>
             {track ? (
               <button type="button" disabled={!canPlay(track.mime)} onClick={() => player.playQueue([track], 0)}
@@ -78,7 +81,7 @@ export function FriendsList({ friends }) {
 export default function FriendsRail() {
   const friends = useActivity();
   return (
-    <aside aria-label="Friend activity" className="hidden w-72 shrink-0 flex-col overflow-y-auto border-l border-line bg-surface-1 px-4 pb-4 pt-6 xl:flex">
+    <aside aria-label="Friend activity" className="glass relative hidden w-72 shrink-0 flex-col overflow-y-auto px-4 pb-4 pt-5 xl:flex">
       <h2 className="mb-4 px-1 text-xl">Friends</h2>
       <FriendsList friends={friends} />
     </aside>

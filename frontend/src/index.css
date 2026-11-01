@@ -1,14 +1,14 @@
-/* Hallmark · shape: app screen · genre: atmospheric · theme: custom (Yaapu temple night, docs/superpowers/specs/2026-11-02-yaapu-design.md) · redesign: full
- * nav: kept (sidebar with sliding selection) · signature: the cover-colour bloom on the Now Playing stage · states: loading, empty, error, full · v2.0.0 */
+/* Hallmark · shape: app screen · genre: playful · theme: custom (Yaapu Sticker chrome, docs/superpowers/specs/2026-11-02-yaapu-design.md) · redesign: full
+ * nav: floating glass sidebar, phone tab bar · signature: the floating ink player pill with a spinning record cover · states: loading, empty, error, full · v2.0.0 */
 /* Yaapu: tokens in tokens.css; floor rules (focus, overflow, reduced motion) in base.css. */
 @import "./tokens.css";
 @import "./base.css" layer(base);
 
-/* --ambient is registered as a colour so the bloom interpolates between covers. */
+/* --ambient is registered as a colour so the Now Playing tint interpolates between covers. */
 @property --ambient {
   syntax: "<color>";
   inherits: true;
-  initial-value: #251a30;
+  initial-value: #e9e3ff;
 }
 
 @tailwind base;
@@ -21,28 +21,21 @@
   }
 
   body {
-    @apply bg-surface-0 font-sans text-fg;
+    @apply font-sans text-fg;
   }
 
-  /* The one orchestrated moment: the cover's colour blooms in on a track change. */
   :root {
     transition: --ambient var(--dur-bloom) var(--ease-in-out);
   }
 
-  /* Heads: Bricolage at a condensed width and heavy weight; the type is the grandeur. */
   h1,
   h2,
   h3 {
     max-width: none;
     font-family: var(--font-display);
-    font-weight: 700;
-    font-stretch: 88%;
-    letter-spacing: -0.02em;
-    line-height: 1.02;
-  }
-  h1 {
     font-weight: 800;
-    font-stretch: 78%;
+    letter-spacing: -0.035em;
+    line-height: 1;
   }
 }
 
@@ -50,63 +43,96 @@
   .wordmark {
     font-family: var(--font-display);
     font-weight: 800;
-    font-stretch: 100%;
-    letter-spacing: -0.045em;
+    letter-spacing: -0.05em;
     line-height: 1;
   }
 
-  /* Titles that should carry the brand voice: covers, the player, the stage. */
   .title-display {
     font-family: var(--font-display);
     font-weight: 800;
-    font-stretch: 80%;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+  }
+
+  /* Chrome type for the biggest heads: a brushed-silver gradient on ink. */
+  .chrome {
+    background: linear-gradient(100deg, #2b2733 0%, #8a8798 30%, #2b2733 48%, #b9b6c6 62%, #2b2733 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Translucent white panels floating on the pearl ground. */
+  .glass {
+    @apply rounded-lg bg-surface-1/70;
+    backdrop-filter: blur(10px);
+  }
+
+  .panel {
+    @apply rounded-lg bg-surface-1 shadow-card;
   }
 
   .input {
-    @apply h-11 w-full rounded-pill border border-line bg-surface-1 px-4 text-sm text-fg placeholder:text-muted
-      focus:border-accent focus:outline-none;
+    @apply h-11 w-full rounded-pill border-2 border-transparent bg-surface-1 px-5 text-sm text-fg shadow-card
+      placeholder:text-muted focus:border-ink focus:outline-none;
     transition: border-color var(--dur-micro) var(--ease-out);
   }
 
   .btn-primary,
   .btn-secondary,
   .btn-social {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-pill px-6 text-sm font-semibold
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-pill px-6 font-display text-sm font-bold
       disabled:cursor-default disabled:opacity-50;
-    transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out),
-      color var(--dur-micro) var(--ease-out);
+    transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
   }
   .btn-primary {
-    @apply bg-accent text-accent-ink hover:bg-[#ffc04d];
+    @apply bg-ink text-accent shadow-sticker;
   }
   .btn-secondary {
-    @apply border border-line bg-surface-1 text-fg hover:bg-surface-2;
+    @apply bg-surface-1 text-fg shadow-sticker hover:bg-surface-2;
   }
   .btn-social {
-    @apply border border-social/60 text-social hover:bg-social/10;
+    @apply bg-social text-ink shadow-sticker;
+  }
+  .btn-primary:hover:not(:disabled),
+  .btn-social:hover:not(:disabled) {
+    transform: translateY(-1px) rotate(-1deg);
   }
   .btn-primary:active:not(:disabled),
   .btn-secondary:active:not(:disabled),
   .btn-social:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: scale(0.96);
   }
 
   .btn-ghost {
-    @apply inline-flex h-9 items-center rounded-pill px-3 text-sm text-muted hover:bg-surface-2 hover:text-fg
+    @apply inline-flex h-9 items-center rounded-pill px-3 text-sm font-semibold text-muted hover:bg-surface-1 hover:text-fg
       disabled:opacity-50;
     transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
   }
 
-  /* Raised surfaces: menus, dialogs, popovers. */
-  .panel {
-    @apply rounded-lg border border-line bg-surface-1 shadow-panel;
+  /* Stickers: a white border, a soft shadow and a tilt. */
+  .sticker-label {
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-pill border-[3px] border-white px-3 py-1 font-display text-xs font-bold shadow-sticker;
+    transform: rotate(var(--tilt, -6deg));
+  }
+  .artifact {
+    transform: rotate(var(--tilt, 0deg));
+    filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff)
+      drop-shadow(0 8px 8px rgb(60 20 90 / 0.28));
+  }
+  /* A cover as a sticker: white border, big radius, optional tilt. */
+  .cover-sticker {
+    @apply overflow-hidden rounded-lg border-[5px] border-white shadow-card;
+    transform: rotate(var(--tilt, 0deg));
+    transition: transform var(--dur-short) var(--ease-out);
+  }
+  .group:hover .cover-sticker {
+    transform: rotate(0deg) scale(1.02);
   }
 
-  /* Seek: a pill track whose marigold fill runs to the playhead. */
+  /* The player pill's progress: a lime fill on a dark track. */
   .slot {
-    @apply relative h-1.5 overflow-hidden rounded-pill bg-surface-3;
+    @apply relative h-1.5 overflow-hidden rounded-pill bg-ink-soft;
   }
   .slot-fill {
     @apply absolute inset-y-0 left-0 rounded-pill bg-accent;
@@ -128,55 +154,66 @@
     @apply bg-transparent;
   }
   .seek::-webkit-slider-thumb {
-    @apply mt-1 h-3.5 w-3.5 appearance-none rounded-full bg-fg;
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-lime) 35%, transparent);
+    @apply mt-1 h-3.5 w-3.5 appearance-none rounded-full bg-accent;
+    box-shadow: 0 0 0 3px var(--color-ink);
   }
   .seek::-moz-range-thumb {
-    @apply h-3.5 w-3.5 rounded-full border-0 bg-fg;
+    @apply h-3.5 w-3.5 rounded-full border-0 bg-accent;
   }
 
   /* Time bubble while scrubbing (idea from Watermelon UI's scrub slider, on a native range input). */
   .scrub-bubble {
-    @apply pointer-events-none absolute -top-9 -translate-x-1/2 rounded-pill bg-fg px-2.5 py-1 text-xs font-semibold
-      tabular-nums text-surface-0;
+    @apply pointer-events-none absolute -top-9 -translate-x-1/2 rounded-pill border-[3px] border-white bg-accent px-2.5 py-0.5
+      font-display text-xs font-bold tabular-nums text-ink;
   }
 
   .volume {
     @apply h-1.5 cursor-pointer appearance-none rounded-pill;
-    background: linear-gradient(90deg, var(--color-ink) var(--level, 100%), var(--color-surface-3) var(--level, 100%));
+    background: linear-gradient(90deg, var(--color-lime) var(--level, 100%), var(--color-ink-soft) var(--level, 100%));
   }
   .volume::-webkit-slider-thumb {
-    @apply h-3.5 w-3.5 appearance-none rounded-full bg-fg;
+    @apply h-3.5 w-3.5 appearance-none rounded-full bg-white;
   }
   .volume::-moz-range-thumb {
-    @apply h-3.5 w-3.5 rounded-full border-0 bg-fg;
+    @apply h-3.5 w-3.5 rounded-full border-0 bg-white;
   }
 
-  .stage {
-    background:
-      radial-gradient(90% 70% at 25% 30%, color-mix(in oklab, var(--ambient) 85%, transparent), transparent 70%),
-      linear-gradient(180deg, color-mix(in oklab, var(--ambient) 45%, var(--color-pearl)), var(--color-pearl) 85%);
+  /* The record cover in the player pill turns while music plays. */
+  .spin {
+    animation: spin 14s linear infinite;
+    animation-play-state: paused;
   }
-
-  /* A friend listening right now: a kingfisher dot that breathes (still with reduced motion). */
-  .live-dot {
-    @apply block h-3 w-3 rounded-full border-2 border-surface-1 bg-social;
-    animation: live-breathe 2.4s var(--ease-in-out) infinite;
+  .spin.playing {
+    animation-play-state: running;
   }
-  @keyframes live-breathe {
-    50% {
-      box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-gum) 25%, transparent);
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
     }
   }
 
-  /* Meta lines: parts set apart by space, never joined with dots. */
   .meta {
     @apply flex flex-wrap items-baseline gap-x-3 gap-y-0.5;
   }
 
-  /* Sliding selection indicator for the sidebar (idea from Watermelon UI's macos-sidebar). */
+  /* Sliding selection for the sidebar (idea from Watermelon UI's macos-sidebar). */
   .nav-indicator {
-    @apply pointer-events-none absolute left-0 right-0 rounded-md bg-surface-2;
+    @apply pointer-events-none absolute left-0 right-0 rounded-md bg-ink shadow-sticker;
     transition: transform var(--dur-short) var(--ease-out);
+  }
+
+  .live-dot {
+    @apply block h-3.5 w-3.5 rounded-full border-[3px] border-white bg-social;
+    animation: live-breathe 2.4s var(--ease-in-out) infinite;
+  }
+  @keyframes live-breathe {
+    50% {
+      box-shadow: 0 0 0 5px color-mix(in oklab, var(--color-gum) 30%, transparent);
+    }
+  }
+
+  /* Now Playing: the pearl ground tinted with the cover's colour. */
+  .stage {
+    background: radial-gradient(80% 60% at 30% 25%, color-mix(in oklab, var(--ambient) 55%, transparent), transparent 70%);
   }
 }

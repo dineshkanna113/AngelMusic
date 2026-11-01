@@ -11,6 +11,7 @@ import {
 } from "./Icons";
 import { Menu, MenuItem } from "./Menu";
 import { newPlaylistWith } from "./TrackMenu";
+import { StickerLabel } from "./Stickers";
 import Wordmark from "./Wordmark";
 
 const NAV = [
@@ -45,15 +46,15 @@ function NavLink({ to, label, icon: Icon, active, compact = false, badge = 0 }) 
       aria-current={active ? "page" : undefined}
       className={
         compact
-          ? `flex flex-1 flex-col items-center gap-0.5 py-1.5 text-[10px] ${active ? "text-accent" : "text-muted"}`
-          : `relative z-[1] flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors ${
-              active ? "font-semibold text-fg" : "text-muted hover:text-fg"
+          ? `flex flex-1 flex-col items-center gap-0.5 rounded-pill py-1.5 font-display text-[11px] font-bold ${active ? "bg-accent text-ink" : "text-muted"}`
+          : `relative z-[1] flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors ${
+              active ? "text-accent" : "text-muted hover:text-fg"
             }`
       }
     >
-      <Icon className={`${compact ? "h-5 w-5" : "h-4 w-4"} ${active && !compact ? "text-accent" : ""}`} />
+      <Icon className={compact ? "h-5 w-5" : "h-5 w-5"} />
       {label}
-      {badge > 0 && <span className="ml-auto rounded-full bg-gold/20 px-1.5 text-[10px] font-semibold text-gold">{badge}</span>}
+      {badge > 0 && <span className="ml-auto rounded-pill bg-social px-2 text-[11px] font-bold text-ink">{badge}</span>}
     </a>
   );
 }
@@ -74,9 +75,9 @@ export function Sidebar() {
     setIndicator(el ? { top: el.offsetTop, height: el.offsetHeight } : null);
   }, [section, user?.can_upload, user?.is_admin]);
   return (
-    <nav aria-label="Main" className="hidden w-64 shrink-0 flex-col gap-1 overflow-y-auto bg-surface-1 px-4 pb-4 pt-6 md:flex">
+    <nav aria-label="Main" className="glass relative hidden w-60 shrink-0 flex-col gap-1 overflow-y-auto px-3 pb-4 pt-5 md:flex">
       <a href="#/" className="mb-6 px-3" aria-label="Yaapu home">
-        <Wordmark size="text-[1.9rem]" />
+        <Wordmark size="text-[1.75rem]" />
       </a>
       <div ref={list} className="relative flex flex-col gap-0.5">
         {indicator && <span aria-hidden="true" className="nav-indicator"
@@ -88,7 +89,7 @@ export function Sidebar() {
         {user?.is_admin && <NavLink to="review" label="Review" icon={CheckIcon} active={section === "review"} badge={pending} />}
       </div>
       <div className="mt-8 flex items-center justify-between px-3">
-        <h2 className="text-lg">Your playlists</h2>
+        <h2 className="text-base">Your playlists</h2>
         <button type="button" aria-label="New playlist" onClick={() => newPlaylistWith([])}
           className="grid h-6 w-6 place-items-center rounded text-muted hover:bg-surface-2 hover:text-fg">
           <PlusIcon className="h-4 w-4" />
@@ -104,7 +105,11 @@ export function Sidebar() {
               }`}
             >
               {pl.name}
-              {pl.collaborative && <FriendsIcon aria-label="Shared" className="ml-1.5 inline h-3.5 w-3.5 align-[-2px] text-social" />}
+              {pl.collaborative && (
+                <StickerLabel tone="gum" tilt={-3} className="ml-2 !border-2 !px-2 !py-0 text-[10px]">
+                  {pl.role === "member" ? `with ${pl.owner.display_name}` : "shared"}
+                </StickerLabel>
+              )}
             </a>
           </li>
         ))}
@@ -116,7 +121,7 @@ export function Sidebar() {
 export function MobileNav() {
   const { section } = useRoute();
   return (
-    <nav aria-label="Main" className="flex border-t border-line bg-surface-1 md:hidden">
+    <nav aria-label="Main" className="mx-3 mb-3 flex gap-1 rounded-pill bg-surface-1/90 p-1.5 shadow-card md:hidden">
       {[NAV[0], NAV[1], ["friends", "Friends", FriendsIcon], NAV[5], ["settings", "Settings", SettingsIcon]].map(([to, label, Icon]) => (
         <NavLink key={to} to={to} label={label} icon={Icon} active={section === to} compact />
       ))}
@@ -150,7 +155,7 @@ export function TopBar() {
   };
 
   return (
-    <header className="flex items-center gap-3 border-b border-line px-4 py-2.5">
+    <header className="flex items-center gap-3 px-4 pb-2 pt-3 md:px-6">
       <label className="relative w-full max-w-md">
         <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
         <input
@@ -168,7 +173,7 @@ export function TopBar() {
         {scanning && <span className="text-xs text-muted">Scanning…</span>}
         <Menu
           label="Account"
-          trigger={<span className="grid h-9 w-9 place-items-center rounded-full bg-surface-2 text-sm font-semibold ring-2 ring-social/70">{session?.user?.username?.[0]?.toUpperCase()}</span>}
+          trigger={<span className="grid h-10 w-10 rotate-6 place-items-center rounded-[14px] border-[3px] border-white bg-social font-display text-sm font-bold text-ink shadow-sticker">{session?.user?.username?.[0]?.toUpperCase()}</span>}
           className="rounded-full"
         >
           {(close) => (

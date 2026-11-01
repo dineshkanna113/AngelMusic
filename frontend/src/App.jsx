@@ -103,12 +103,12 @@ function Authenticated() {
   }, []);
 
   return (
-    <div className="flex h-dvh flex-col bg-surface-0">
-      <div className="flex min-h-0 flex-1">
+    <div className="flex h-dvh flex-col">
+      <div className="flex min-h-0 flex-1 gap-3 md:p-3 md:pb-0">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar />
-          <main ref={mainRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-10 pt-5 md:px-6">
+          <main ref={mainRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-10 pt-4 md:px-6">
             <View />
           </main>
         </div>

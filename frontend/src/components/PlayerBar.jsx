@@ -28,7 +28,7 @@ function SeekBar({ state }) {
   };
 
   return (
-    <div className="flex items-center gap-3 text-xs tabular-nums text-muted">
+    <div className="flex items-center gap-3 text-xs tabular-nums text-ink-muted">
       <span className="w-10 text-right">{formatTime(value)}</span>
       <div className="relative h-5 flex-1">
         <div className="slot absolute inset-x-0 top-1/2 -translate-y-1/2">
@@ -73,7 +73,7 @@ function SleepTimer({ sleep }) {
           )}
         </span>
       }
-      className={`grid h-9 w-9 place-items-center rounded-full hover:text-fg ${sleep ? "text-accent" : "text-muted"}`}
+      className={`grid h-9 w-9 place-items-center rounded-full hover:text-white ${sleep ? "text-accent" : "text-ink-muted"}`}
     >
       {(close) => (
         <>
@@ -89,7 +89,7 @@ function SleepTimer({ sleep }) {
   );
 }
 
-const iconBtn = "grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-fg disabled:opacity-40";
+const iconBtn = "grid h-9 w-9 place-items-center rounded-full text-ink-muted transition-colors hover:text-white disabled:opacity-40";
 
 export default function PlayerBar() {
   const state = usePlayer();
@@ -141,92 +141,92 @@ export default function PlayerBar() {
   const repeatLabel = { off: "Repeat off", all: "Repeat all", one: "Repeat one" }[state.repeat];
 
   return (
-    <div className="border-t border-line bg-surface-1">
-      {state.error && <p role="alert" className="bg-danger/15 px-4 py-1.5 text-center text-xs text-danger">{state.error}</p>}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-3 py-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1fr)] md:px-4 md:py-2.5">
-        <div className="flex min-w-0 items-center gap-3">
-          <a href={href("now")} aria-label="Open Now Playing">
-            <Cover track={track} token={token} className="h-14 w-14" rounded="rounded-sm" eager onImage={ambient.fromImage} />
-          </a>
-          <div className="min-w-0">
-            <button type="button" onClick={() => navigate("now")} className="block max-w-full text-left">
-              <span className="title-display block truncate text-lg hover:underline">{track.title}</span>
+    <div className="px-3 pb-3 pt-2 md:px-4">
+      <div className="on-ink relative mx-auto max-w-6xl rounded-[32px] bg-ink px-3 py-2.5 text-white shadow-float md:rounded-pill md:px-4">
+        {state.error && <p role="alert" className="mb-2 rounded-pill bg-danger px-4 py-1 text-center text-xs text-white">{state.error}</p>}
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)]">
+          <div className="flex min-w-0 items-center gap-3">
+            <a href={href("now")} aria-label="Open Now Playing" className="shrink-0">
+              <Cover track={track} token={token} className={`spin h-12 w-12 border-[3px] border-white md:h-14 md:w-14 ${state.playing ? "playing" : ""}`}
+                rounded="rounded-full" eager onImage={ambient.fromImage} />
+            </a>
+            <div className="min-w-0">
+              <button type="button" onClick={() => navigate("now")} className="block max-w-full text-left">
+                <span className="title-display block truncate text-base hover:underline">{track.title}</span>
+              </button>
+              <a href={href("artist", track.artist_id)} className="block truncate text-xs text-ink-muted hover:text-white hover:underline">{track.artist}</a>
+            </div>
+            <button type="button" onClick={() => library.toggleFavorite(track)} disabled={offlineMode}
+              aria-label={live.favorite ? "Remove from favorites" : "Add to favorites"} aria-pressed={!!live.favorite}
+              className={`${iconBtn} hidden sm:grid ${live.favorite ? "!text-social" : ""}`}>
+              {live.favorite ? <HeartIcon className="h-5 w-5" /> : <HeartOutlineIcon className="h-5 w-5" />}
             </button>
-            <a href={href("artist", track.artist_id)} className="block truncate text-xs text-muted hover:text-fg hover:underline">{track.artist}</a>
           </div>
-          <button type="button" onClick={() => library.toggleFavorite(track)} disabled={offlineMode}
-            aria-label={live.favorite ? "Remove from favorites" : "Add to favorites"} aria-pressed={!!live.favorite}
-            className={`${iconBtn} hidden sm:grid ${live.favorite ? "!text-accent" : ""}`}>
-            {live.favorite ? <HeartIcon className="h-4 w-4" /> : <HeartOutlineIcon className="h-4 w-4" />}
-          </button>
-        </div>
 
-        {/* Mobile: compact play/next on the first row */}
-        <div className="flex items-center md:hidden">
-          <button type="button" onClick={() => player.togglePlay()} aria-label={state.playing ? "Pause" : "Play"}
-            className="relative grid h-11 w-11 place-items-center rounded-full bg-accent text-accent-ink shadow-part active:translate-y-px">
-            {state.buffering && <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-accent-ink" />}
-            {state.playing ? <PauseIcon /> : <PlayIcon className="ml-0.5 h-5 w-5" />}
-          </button>
-          <button type="button" className={iconBtn} onClick={() => player.next()} aria-label="Next"><NextIcon /></button>
-        </div>
-
-        <div className="col-span-2 md:col-span-1">
-          <div className="mb-0.5 hidden items-center justify-center gap-1 md:flex">
-            <button type="button" className={`${iconBtn} ${state.shuffle ? "!text-accent" : ""}`} onClick={() => player.toggleShuffle()}
-              aria-label="Shuffle" aria-pressed={state.shuffle}>
-              <ShuffleIcon className="h-4 w-4" />
-            </button>
-            <button type="button" className={iconBtn} onClick={() => player.previous()} aria-label="Previous"><PrevIcon /></button>
+          {/* Phone: play and next on the first row */}
+          <div className="flex items-center gap-1 md:hidden">
             <button type="button" onClick={() => player.togglePlay()} aria-label={state.playing ? "Pause" : "Play"}
-              className="relative grid h-11 w-11 place-items-center rounded-full bg-accent text-accent-ink shadow-part transition-transform duration-micro ease-out hover:brightness-110 active:translate-y-px">
-              {state.buffering && <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-accent-ink" />}
-              {state.playing ? <PauseIcon /> : <PlayIcon className="ml-0.5 h-5 w-5" />}
+              className="relative grid h-12 w-12 place-items-center rounded-full bg-accent text-ink active:scale-95">
+              {state.buffering && <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-ink" />}
+              {state.playing ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="ml-0.5 h-6 w-6" />}
             </button>
-            <button type="button" className={iconBtn} onClick={() => player.next()} aria-label="Next"><NextIcon /></button>
-            <button type="button" className={`${iconBtn} relative ${state.repeat !== "off" ? "!text-accent" : ""}`}
-              onClick={() => player.cycleRepeat()} aria-label={repeatLabel} title={repeatLabel}>
-              <RepeatIcon className="h-4 w-4" />
-              {state.repeat === "one" && <span className="absolute right-1 top-1 text-[9px] font-bold">1</span>}
-            </button>
+            <button type="button" className={iconBtn} onClick={() => player.next()} aria-label="Next"><NextIcon className="h-5 w-5" /></button>
           </div>
-          <SeekBar state={state} />
-        </div>
 
-        <div className="relative col-span-2 flex items-center justify-between gap-1 md:col-span-1 md:justify-end">
-          <button
-            type="button"
-            onClick={() => setShowPath((v) => !v)}
-            aria-expanded={showPath}
-            title="Signal path"
-            aria-label={`Signal path: ${track.codec.toUpperCase()}${track.bit_depth ? ` ${track.bit_depth}-bit` : ""} ${formatRate(track.sample_rate)}`}
-            className="group flex items-baseline gap-2 rounded-sm px-2 py-1 hover:bg-surface-3/60"
-          >
-            <span className={`font-display text-xl leading-none tabular-nums ${isHiRes(track) ? "text-accent" : "text-fg"}`}>
-              {track.bit_depth ? `${track.bit_depth}/` : ""}{track.sample_rate ? +(track.sample_rate / 1000).toFixed(1) : "?"}
-            </span>
-            <span className="text-xs text-muted group-hover:text-fg">{track.codec.toUpperCase()}</span>
-          </button>
-          <div className="flex items-center">
-            <button type="button" className={`${iconBtn} md:hidden ${state.shuffle ? "!text-accent" : ""}`} onClick={() => player.toggleShuffle()}
-              aria-label="Shuffle" aria-pressed={state.shuffle}><ShuffleIcon className="h-4 w-4" /></button>
-            <button type="button" className={`${iconBtn} ${panel === "lyrics" ? "!text-accent" : ""}`} onClick={() => ui.togglePanel("lyrics")}
-              aria-label="Lyrics" aria-pressed={panel === "lyrics"} title={track.has_lyrics ? "Lyrics" : "Lyrics (none for this track)"}>
-              <LyricsIcon className="h-4 w-4" />
-            </button>
-            <button type="button" className={`${iconBtn} ${panel === "queue" ? "!text-accent" : ""}`} onClick={() => ui.togglePanel("queue")}
-              aria-label="Queue" aria-pressed={panel === "queue"}>
-              <QueueIcon className="h-4 w-4" />
-            </button>
-            <SleepTimer sleep={state.sleep} />
-            <button type="button" className={`${iconBtn} hidden lg:grid`} onClick={() => player.toggleMute()} aria-label={state.muted ? "Unmute" : "Mute"}>
-              {state.muted || state.volume === 0 ? <MuteIcon className="h-4 w-4" /> : <VolumeIcon className="h-4 w-4" />}
-            </button>
-            <input type="range" aria-label="Volume" min={0} max={1} step={0.01} value={state.muted ? 0 : state.volume}
-              onChange={(e) => player.setVolume(Number(e.target.value))} className="volume hidden w-24 lg:block"
-              style={{ "--level": `${(state.muted ? 0 : state.volume) * 100}%` }} />
+          <div className="col-span-2 md:col-span-1">
+            <div className="mb-0.5 hidden items-center justify-center gap-1.5 md:flex">
+              <button type="button" className={`${iconBtn} ${state.shuffle ? "!text-accent" : ""}`} onClick={() => player.toggleShuffle()}
+                aria-label="Shuffle" aria-pressed={state.shuffle}>
+                <ShuffleIcon className="h-4 w-4" />
+              </button>
+              <button type="button" className={iconBtn} onClick={() => player.previous()} aria-label="Previous"><PrevIcon className="h-5 w-5" /></button>
+              <button type="button" onClick={() => player.togglePlay()} aria-label={state.playing ? "Pause" : "Play"}
+                className="relative grid h-12 w-12 place-items-center rounded-full bg-accent text-ink transition-transform duration-micro ease-out hover:scale-105 active:scale-95">
+                {state.buffering && <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-ink" />}
+                {state.playing ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="ml-0.5 h-6 w-6" />}
+              </button>
+              <button type="button" className={iconBtn} onClick={() => player.next()} aria-label="Next"><NextIcon className="h-5 w-5" /></button>
+              <button type="button" className={`${iconBtn} relative ${state.repeat !== "off" ? "!text-accent" : ""}`}
+                onClick={() => player.cycleRepeat()} aria-label={repeatLabel} title={repeatLabel}>
+                <RepeatIcon className="h-4 w-4" />
+                {state.repeat === "one" && <span className="absolute right-1 top-1 text-[9px] font-bold">1</span>}
+              </button>
+            </div>
+            <SeekBar state={state} />
           </div>
-          {showPath && <SignalPath track={track} state={state} gainDb={gainDb} onClose={() => setShowPath(false)} />}
+
+          <div className="relative col-span-2 flex items-center justify-between gap-1 md:col-span-1 md:justify-end">
+            <button
+              type="button"
+              onClick={() => setShowPath((v) => !v)}
+              aria-expanded={showPath}
+              title="Signal path"
+              aria-label={`Signal path: ${track.codec.toUpperCase()}${track.bit_depth ? ` ${track.bit_depth}-bit` : ""} ${formatRate(track.sample_rate)}`}
+              className={`whitespace-nowrap rounded-pill px-3 py-1 font-display text-xs font-bold tabular-nums ${isHiRes(track) ? "bg-accent text-ink" : "bg-ink-soft text-white"}`}
+            >
+              {track.bit_depth ? `${track.bit_depth}/` : ""}{track.sample_rate ? +(track.sample_rate / 1000).toFixed(1) : "?"} {track.codec.toUpperCase()}
+            </button>
+            <div className="flex items-center">
+              <button type="button" className={`${iconBtn} md:hidden ${state.shuffle ? "!text-accent" : ""}`} onClick={() => player.toggleShuffle()}
+                aria-label="Shuffle" aria-pressed={state.shuffle}><ShuffleIcon className="h-4 w-4" /></button>
+              <button type="button" className={`${iconBtn} ${panel === "lyrics" ? "!text-accent" : ""}`} onClick={() => ui.togglePanel("lyrics")}
+                aria-label="Lyrics" aria-pressed={panel === "lyrics"} title={track.has_lyrics ? "Lyrics" : "Lyrics (none for this track)"}>
+                <LyricsIcon className="h-4 w-4" />
+              </button>
+              <button type="button" className={`${iconBtn} ${panel === "queue" ? "!text-accent" : ""}`} onClick={() => ui.togglePanel("queue")}
+                aria-label="Queue" aria-pressed={panel === "queue"}>
+                <QueueIcon className="h-4 w-4" />
+              </button>
+              <SleepTimer sleep={state.sleep} />
+              <button type="button" className={`${iconBtn} hidden lg:grid`} onClick={() => player.toggleMute()} aria-label={state.muted ? "Unmute" : "Mute"}>
+                {state.muted || state.volume === 0 ? <MuteIcon className="h-4 w-4" /> : <VolumeIcon className="h-4 w-4" />}
+              </button>
+              <input type="range" aria-label="Volume" min={0} max={1} step={0.01} value={state.muted ? 0 : state.volume}
+                onChange={(e) => player.setVolume(Number(e.target.value))} className="volume hidden w-24 lg:block"
+                style={{ "--level": `${(state.muted ? 0 : state.volume) * 100}%` }} />
+            </div>
+            {showPath && <SignalPath track={track} state={state} gainDb={gainDb} onClose={() => setShowPath(false)} />}
+          </div>
         </div>
       </div>
     </div>
