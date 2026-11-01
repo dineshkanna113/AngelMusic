@@ -9,8 +9,7 @@ It carries both licensed catalogue (labels and distributors) and independent art
 their own music, side by side, like Spotify. It must feel grand and premium, and must not look like
 a Spotify clone.
 
-The name: யாப்பு (yaappu) is the Tamil word for poetic metre, the rhythm that structures verse. The
-brand leans on rhythm shared between people. Voice: confident, warm, a little cheeky, plain words.
+Voice: confident, warm, a little cheeky, plain words. The product speaks to a global audience.
 
 ## Goals
 
@@ -45,25 +44,40 @@ karaoke vocal removal, Chromecast/AirPlay casting.
 
 ## Identity and design system (decided)
 
-Direction "temple night": grand but young.
+**Revised 2026-11-02:** the owner chose "Sticker chrome" from three mockups (Marquee, Kolam,
+Sticker chrome) and asked that it read as global: no Tamil lettering, no culture-specific
+stickers. It replaces the earlier "temple night" direction.
+
+Direction "Sticker chrome": a Gen Z scrapbook. Light, glossy, playful, social-first.
 
 | Token | Hex | Role |
 |---|---|---|
-| night | `#160F1E` | base, a deep aubergine, never neutral black |
-| dusk | `#251A30` | raised surfaces |
-| marigold | `#FFB020` | play, primary actions, premium |
-| kingfisher | `#19C2B8` | everything social and live: friends, rooms, reactions |
-| jasmine | `#F6EFE3` | text |
-| mist | `#A497B0` | muted text |
+| pearl | `#F7F2FF` | ground (top of the pearl-lilac-mint gradient) |
+| lilac | `#E9E3FF` | ground (middle) |
+| mint | `#D6F7EE` | ground (bottom) |
+| ink | `#19161F` | text, the player pill, primary buttons |
+| lime | `#C6FF3D` | play and primary actions (on ink, or as a sticker with ink text) |
+| bubblegum | `#FF6FD8` | friends and anything live (sticker fill with ink text) |
+| gum-ink | `#B0127A` | bubblegum as text on light grounds |
+| muted | `#5A5466` | secondary text |
+| white | `#FFFFFF` | cards and the borders around stickers |
 
-- Type: **Bricolage Grotesque** for display (expressive, uses its width and optical-size axes
-  as part of the design), **Hanken Grotesk** for text, **Noto Sans Tamil** for Tamil titles.
-- The one orchestrated moment: when the track changes, its cover art's colour blooms across the
-  screen. Everything else is quiet. Motion otherwise only answers the user's actions.
-- The song playing is a full "stage" (art, title, lyrics, queue), not only a bottom bar.
-  Desktop: a live friends rail on the right. Phone: one swipe away.
-- No all-caps labels, no dot-joined meta strings, no monospace data labels, no arrows glued to
-  link text, no identical card grids as decoration.
+Contrast: ink on pearl 16.2, muted on pearl 6.6, lime on ink 15.1, ink on bubblegum 7.2,
+gum-ink on pearl 5.9. White on bubblegum (2.5) is not allowed.
+
+- Type: **Syne** 800 for display (chrome gradient on the largest heads), **Hanken Grotesk** for
+  text, Noto Sans Tamil only as a font fallback so non-Latin titles render (never decoration).
+- Icons: **Phosphor** (fill weight in navigation, regular elsewhere).
+- Shapes: cards with large radii and a white border; featured covers and stickers sit at a
+  slight tilt (±2-8°); lists stay straight so they scan.
+- Stickers: pill labels with a 3 px white border ("on repeat", "live", "hi-res"), and drawn
+  music artifacts (vinyl, cassette, headphones, boombox, drum, sparkle) in the palette. They
+  decorate Home, empty states, login and the share card; never over player controls.
+  An abstract dot-and-loop line pattern is the background texture.
+- Signature: the floating ink player pill with a spinning record cover (spins only while
+  playing; still with reduced motion). Friends appear as story rings on phone Home.
+- Now Playing keeps the cover-colour bloom, as a soft tint of the pearl ground.
+- No all-caps labels, no dot-joined meta strings, no arrows glued to link text.
 - Watermelon UI is searched before building a component from scratch; its source is adapted to
   these tokens and to accessible native controls, never installed as-is.
 
