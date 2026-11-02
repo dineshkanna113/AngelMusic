@@ -74,8 +74,32 @@ def _first(tags, *keys) -> str:
             text = getattr(value, "text", None)
             if text:
                 value = text[0]
+            if isinstance(value, (bytes, bytearray)):  # MP4 freeform atoms
+                value = bytes(value).decode("utf-8", "replace")
             return str(value).strip()
     return ""
+
+
+# ISO 639-1/639-2 codes -> display names for the languages music is commonly tagged with.
+_LANGUAGES = {
+    "ta": "Tamil", "tam": "Tamil", "en": "English", "eng": "English", "hi": "Hindi", "hin": "Hindi",
+    "te": "Telugu", "tel": "Telugu", "ml": "Malayalam", "mal": "Malayalam", "kn": "Kannada", "kan": "Kannada",
+    "bn": "Bengali", "ben": "Bengali", "mr": "Marathi", "mar": "Marathi", "pa": "Punjabi", "pan": "Punjabi",
+    "gu": "Gujarati", "guj": "Gujarati", "ur": "Urdu", "urd": "Urdu", "es": "Spanish", "spa": "Spanish",
+    "fr": "French", "fra": "French", "fre": "French", "de": "German", "deu": "German", "ger": "German",
+    "it": "Italian", "ita": "Italian", "pt": "Portuguese", "por": "Portuguese", "ja": "Japanese", "jpn": "Japanese",
+    "ko": "Korean", "kor": "Korean", "zh": "Chinese", "zho": "Chinese", "chi": "Chinese", "ru": "Russian",
+    "rus": "Russian", "ar": "Arabic", "ara": "Arabic", "tr": "Turkish", "tur": "Turkish", "id": "Indonesian",
+    "ind": "Indonesian", "sv": "Swedish", "swe": "Swedish", "nl": "Dutch", "nld": "Dutch", "dut": "Dutch",
+    "zxx": "Instrumental",
+}
+
+
+def normalize_language(text: str) -> str:
+    """A language tag as a display name: 'tam', 'ta' and 'Tamil' all give 'Tamil'. Only the first
+    value of a multi-value tag counts. Unknown text is returned as written."""
+    first = re.split(r"[;,/]", text or "")[0].strip()
+    return _LANGUAGES.get(first.lower(), first)
 
 
 def _int(text: str) -> int | None:
@@ -205,6 +229,7 @@ def read_metadata(path: Path, rel_path: str, display_name: Path | None = None) -
         title, artist = get("\xa9nam"), get("\xa9ART")
         album, album_artist = get("\xa9alb"), get("aART")
         genre, year = get("\xa9gen"), get("\xa9day")
+        mood, language = get("----:com.apple.iTunes:MOOD"), get("----:com.apple.iTunes:LANGUAGE")
         trkn = tags.get("trkn") if tags else None
         disk = tags.get("disk") if tags else None
         track_no = trkn[0][0] if trkn else None
@@ -214,12 +239,14 @@ def read_metadata(path: Path, rel_path: str, display_name: Path | None = None) -
         get = lambda *k: _first(tags, *k)  # noqa: E731
         title, artist, album = get("TIT2"), get("TPE1"), get("TALB")
         album_artist, genre, year = get("TPE2"), get("TCON"), get("TDRC")
+        mood, language = get("TMOO"), get("TLAN")
         track_no, disc_no = _int(get("TRCK")), _int(get("TPOS"))
         rg = lambda k: _gain(get(f"TXXX:{k}", f"TXXX:{k.upper()}"))  # noqa: E731
     else:  # Vorbis comments (FLAC, Ogg)
         get = lambda *k: _first(tags, *k)  # noqa: E731
         title, artist, album = get("title"), get("artist"), get("album")
         album_artist, genre, year = get("albumartist", "album artist"), get("genre"), get("date", "year")
+        mood, language = get("mood"), get("language")
         track_no, disc_no = _int(get("tracknumber")), _int(get("discnumber"))
         rg = lambda k: _gain(get(k))  # noqa: E731
 
@@ -239,6 +266,8 @@ def read_metadata(path: Path, rel_path: str, display_name: Path | None = None) -
         "album": album,
         "album_artist": album_artist,
         "genre": genre,
+        "mood": mood,
+        "language": normalize_language(language),
         "year": year[:4] if year else "",
         "track_no": track_no,
         "disc_no": disc_no,
@@ -329,7 +358,7 @@ def write_tags(path: Path, fields: dict) -> None:
 
 
 COLUMNS = (
-    "id", "rel_path", "size", "mtime_ns", "title", "artist", "album", "album_artist", "genre", "year",
+    "id", "rel_path", "size", "mtime_ns", "title", "artist", "album", "album_artist", "genre", "mood", "language", "year",
     "track_no", "disc_no", "duration", "codec", "mime", "sample_rate", "bit_depth", "channels", "bitrate",
     "rg_track_gain", "rg_track_peak", "rg_album_gain", "rg_album_peak", "has_cover", "has_lyrics",
     "album_id", "artist_id",

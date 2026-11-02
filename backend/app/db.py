@@ -7,7 +7,7 @@ from pathlib import Path
 
 # Bump when the tracks table changes; tracks are a cache of the files on disk, so they're
 # simply dropped and rescanned. User data tables are migrated in place.
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS tracks (
     album_id        TEXT NOT NULL,
     artist_id       TEXT NOT NULL,
     genre           TEXT NOT NULL DEFAULT '',
+    mood            TEXT NOT NULL DEFAULT '',
+    language        TEXT NOT NULL DEFAULT '',
     year            TEXT NOT NULL DEFAULT '',
     track_no        INTEGER,
     disc_no         INTEGER,
