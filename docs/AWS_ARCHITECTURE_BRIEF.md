@@ -1,8 +1,8 @@
 # Yaapu: AWS architecture brief
 
-**For:** an AWS DevOps / cloud architect
-**From:** the Yaapu team (contact: _name, email_)
-**Status:** draft for discussion. Items marked **[confirm]** are our assumptions or open decisions, not facts.
+- **For:** an AWS DevOps / cloud architect
+- **From:** the Yaapu team (contact: _name, email_)
+- **Status:** draft for discussion. Items marked **[confirm]** are our assumptions or open decisions, not facts.
 
 ## 1. What we are asking for
 
