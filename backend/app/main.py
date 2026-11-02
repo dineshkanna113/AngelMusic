@@ -14,7 +14,7 @@ from .config import Settings, load_settings
 from .db import Database
 from .ingest import IngestWorker
 from .library import Library
-from .routes import auth, discover, library, me, social, subsonic, uploads, users
+from .routes import auth, discover, growth, library, me, social, subsonic, uploads, users
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("lossless")
@@ -113,6 +113,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(uploads.router)
     app.include_router(social.router)
     app.include_router(discover.router)
+    app.include_router(growth.router)
     app.include_router(subsonic.router)
 
     _mount_frontend(app, settings)

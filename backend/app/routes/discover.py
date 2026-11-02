@@ -8,8 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 
 from .. import queries
-from ..library import artist_key
-from ..security import admin_user, current_user
+from ..artists import artist_name, artist_row, manages, require_manage, top_fans
+from ..security import current_user
 from .me import playlist_summary
 
 router = APIRouter(prefix="/api", tags=["discover"])
@@ -39,15 +39,9 @@ def charts(
     return {"days": days, "tracks": ranked}
 
 
-def _artist_row(conn, artist_id: str):
-    row = conn.execute("SELECT album_artist, artist FROM tracks WHERE artist_id = ? LIMIT 1", (artist_id,)).fetchone()
-    if row is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Artist not found")
-    return row
-
-
-def _artist_page(conn, user_id: int, artist_id: str) -> dict:
-    row = _artist_row(conn, artist_id)
+def _artist_page(conn, user: dict, artist_id: str) -> dict:
+    user_id = user["id"]
+    artist_row(conn, artist_id)
     info = conn.execute("SELECT bio FROM artist_info WHERE artist_id = ?", (artist_id,)).fetchone()
     top = conn.execute(
         """SELECT p.track_id, COUNT(*) AS plays, MAX(p.id) AS last FROM plays p JOIN tracks t ON t.id = p.track_id
@@ -59,28 +53,30 @@ def _artist_page(conn, user_id: int, artist_id: str) -> dict:
     albums = queries.albums(queries.tracks(conn, user_id, "t.artist_id = :a", {"a": artist_id}))
     return {
         "id": artist_id,
-        "name": artist_key(row["album_artist"], row["artist"]),
+        "name": artist_name(conn, artist_id),
         "bio": info["bio"] if info else "",
         "followers": conn.execute("SELECT COUNT(*) FROM artist_follows WHERE artist_id = ?", (artist_id,)).fetchone()[0],
         "following": conn.execute("SELECT 1 FROM artist_follows WHERE artist_id = ? AND user_id = ?",
                                   (artist_id, user_id)).fetchone() is not None,
         "top_tracks": top_tracks,
         "albums": albums,
+        "can_manage": manages(conn, user, artist_id),
+        "top_fans": top_fans(conn, artist_id, user_id, 5, anonymous_ok=False),
     }
 
 
 @router.get("/artists/{artist_id}")
 def artist_page(artist_id: str, request: Request, user: dict = Depends(current_user)):
     with request.app.state.db.connect() as conn:
-        return _artist_page(conn, user["id"], artist_id)
+        return _artist_page(conn, user, artist_id)
 
 
 @router.put("/artists/{artist_id}/bio")
-def set_bio(artist_id: str, body: BioBody, request: Request, admin: dict = Depends(admin_user)):
-    """Editorial bio for an artist page; an empty bio clears it."""
+def set_bio(artist_id: str, body: BioBody, request: Request, user: dict = Depends(current_user)):
+    """Bio for an artist page, set by an admin or the artist's owner; an empty bio clears it."""
     bio = body.bio.strip()
     with request.app.state.db.connect() as conn:
-        _artist_row(conn, artist_id)
+        require_manage(conn, user, artist_id)
         if bio:
             conn.execute(
                 """INSERT INTO artist_info (artist_id, bio, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
@@ -89,7 +85,7 @@ def set_bio(artist_id: str, body: BioBody, request: Request, admin: dict = Depen
             )
         else:
             conn.execute("DELETE FROM artist_info WHERE artist_id = ?", (artist_id,))
-        return _artist_page(conn, admin["id"], artist_id)
+        return _artist_page(conn, user, artist_id)
 
 
 @router.get("/editorial")

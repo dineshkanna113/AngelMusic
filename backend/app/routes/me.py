@@ -211,15 +211,25 @@ class PlayBody(BaseModel):
     track_id: str = TRACK_ID
 
 
-def record_play(conn, user_id: int, track_id: str) -> None:
+def viewer_location(request: Request) -> tuple[str | None, str | None]:
+    """Country and city of the listener from the CDN's headers, only when those headers are trusted."""
+    if not request.app.state.settings.trust_geo_headers:
+        return None, None
+    country = request.headers.get("cloudfront-viewer-country", "").strip().upper()
+    city = request.headers.get("cloudfront-viewer-city", "").strip()[:80]
+    return (country if len(country) == 2 and country.isalpha() else None), (city or None)
+
+
+def record_play(conn, user_id: int, track_id: str, country: str | None = None, city: str | None = None) -> None:
     _track_exists(conn, track_id)
-    conn.execute("INSERT INTO plays (user_id, track_id) VALUES (?, ?)", (user_id, track_id))
+    conn.execute("INSERT INTO plays (user_id, track_id, country, city) VALUES (?, ?, ?, ?)",
+                 (user_id, track_id, country, city))
 
 
 @router.post("/history", status_code=status.HTTP_204_NO_CONTENT)
 def add_play(body: PlayBody, request: Request, user: dict = Depends(current_user)):
     with request.app.state.db.connect() as conn:
-        record_play(conn, user["id"], body.track_id)
+        record_play(conn, user["id"], body.track_id, *viewer_location(request))
 
 
 @router.get("/history")

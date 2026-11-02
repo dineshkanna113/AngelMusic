@@ -162,6 +162,13 @@ CREATE TABLE IF NOT EXISTS artist_info (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Who may manage an artist (edit its bio, see stats, create drops). Granted by admins.
+CREATE TABLE IF NOT EXISTS artist_owners (
+    artist_id TEXT NOT NULL,
+    user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    PRIMARY KEY (artist_id, user_id)
+);
+
 CREATE TABLE IF NOT EXISTS artist_follows (
     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     artist_id  TEXT NOT NULL,
@@ -185,6 +192,8 @@ ADDED_COLUMNS = [
     ("playlists", "visibility", "TEXT NOT NULL DEFAULT 'private'"),
     ("playlists", "collaborative", "INTEGER NOT NULL DEFAULT 0"),
     ("playlists", "featured", "INTEGER NOT NULL DEFAULT 0"),
+    ("plays", "country", "TEXT"),
+    ("plays", "city", "TEXT"),
 ]
 
 

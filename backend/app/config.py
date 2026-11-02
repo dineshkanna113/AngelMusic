@@ -60,6 +60,9 @@ class Settings:
     # Mobile apps compare their version with this (GET /api/config) to ask users to update.
     min_app_version: str = field(default_factory=lambda: os.getenv("MIN_APP_VERSION", "1.0.0"))
     public_url: str = field(default_factory=lambda: os.getenv("PUBLIC_URL", "").rstrip("/"))
+    # Take a play's country and city from the CDN's viewer headers. Only enable behind a CDN that sets
+    # them (CloudFront-Viewer-Country / -City); otherwise a client could claim any location.
+    trust_geo_headers: bool = field(default_factory=lambda: _bool("TRUST_GEO_HEADERS", False))
     scan_on_startup: bool = field(default_factory=lambda: _bool("SCAN_ON_STARTUP", True))
 
     @property
