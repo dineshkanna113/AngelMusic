@@ -139,6 +139,33 @@ Artists come from file tags, not accounts. An admin grants a user access to an a
 | `GET /api/drop-art/{name}` | Public image. |
 | `GET /s/{slug}` | Public HTML smart link with Open Graph tags; it opens the app at `/#/drop/{slug}`. 404 for an unknown slug. |
 
+## Live: Rewind, Blend and Rooms
+
+| Call | Notes |
+|---|---|
+| `GET /api/rewind?period=month` | Your own listening recap. `period` is `month` (default, current UTC month), `year`, `YYYY-MM` or `YYYY`; anything else is 422. `{period, label, start, end, plays, seconds, minutes, active_days, top_tracks (≤5, with plays), top_artists (≤5: {id, name, plays}), top_genre, busiest_day: {date, plays} \| null}`. Empty periods return zeros and empty lists. |
+| `POST /api/blends {username}` | A private playlist from your taste and a friend's. Needs a mutual follow and the other person's shared activity (403 otherwise), not yourself (400), and listening history from both (400). Returns the playlist detail plus `blend: {match, shared_artists}`; `match` is the whole-percent share of artists you both listen to. |
+| `POST /api/rooms {name?}` | Open a room (201): `{code, name, host, track_id, position, playing}`. `code` is 6 characters. A host has one open room; opening another ends the first. |
+| `GET /api/rooms/{code}` | Snapshot; 404 if unknown or ended. `position` is already advanced when playing. |
+| `DELETE /api/rooms/{code}` | Host only (403 otherwise). Connected sockets receive `ended`. |
+
+**Room WebSocket:** `wss://<host>/api/rooms/{code}/ws`. Rooms last up to 24 hours. Frames are JSON.
+The first frame must be `{"type": "auth", "token": "<access token>"}`; the token is never put in the URL.
+Close codes: `4401` not authenticated, `4404` room not found or ended, `4429` room full (50).
+
+| Direction | Frame |
+|---|---|
+| client to server | `{"type": "play", "track_id", "position", "playing"}` (host only; others get an `error`) |
+| client to server | `{"type": "chat", "text"}` (1 to 280 characters, one per second) |
+| client to server | `{"type": "react", "emoji"}` (one of 🔥 💖 😮 🎶 👏 🙌 😂 🥹) |
+| server to client | `state {room, members, you: {username, is_host}, server_time}` right after auth |
+| server to client | `sync {track_id, position, playing, server_time}` (to everyone but the host) |
+| server to client | `chat {from, text, at}`, `react {from, emoji}`, `members {members}`, `ended`, `error {message}` |
+
+To stay in sync, a listener plays `position + (now_server - server_time)` while `playing`, and seeks
+only when its own position is more than about 1.5 seconds off. Chat and reactions are not stored.
+Rooms keep their connections in one server process; running several servers needs a shared channel (see the AWS brief).
+
 ## Uploading (users with `can_upload`)
 
 Resumable, chunked (tus-style). Files go to review; nothing is public until an admin approves.

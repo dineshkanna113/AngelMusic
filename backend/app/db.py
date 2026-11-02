@@ -188,6 +188,20 @@ CREATE TABLE IF NOT EXISTS drops (
 CREATE INDEX IF NOT EXISTS idx_drops_artist ON drops(artist_id);
 CREATE INDEX IF NOT EXISTS idx_drops_upload ON drops(upload_id);
 
+-- Listening rooms. Playback state is kept so someone joining late syncs at once. Chat is never stored.
+CREATE TABLE IF NOT EXISTS rooms (
+    code     TEXT PRIMARY KEY,
+    host_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name     TEXT NOT NULL,
+    track_id TEXT,
+    position REAL NOT NULL DEFAULT 0,
+    playing  INTEGER NOT NULL DEFAULT 0,
+    state_at REAL NOT NULL,
+    created  REAL NOT NULL,
+    ended_at REAL
+);
+CREATE INDEX IF NOT EXISTS idx_rooms_host ON rooms(host_id);
+
 CREATE TABLE IF NOT EXISTS presaves (
     drop_id    INTEGER NOT NULL REFERENCES drops(id) ON DELETE CASCADE,
     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
