@@ -193,3 +193,81 @@ export async function renderShareCard(track, ambient) {
 
   return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
 }
+
+/** A 1080×1920 story card for a Rewind: the big numbers and the top artists. Counts only; nothing invented. */
+export async function renderRewindCard(rewind, listening) {
+  await document.fonts.load('800 80px "Syne"');
+  await document.fonts.load('500 44px "Hanken Grotesk"');
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, PEARL);
+  bg.addColorStop(1, MINT);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  drawSticker(ctx, "my rewind", 90, 150, LIME, -5);
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = INK;
+  ctx.font = '800 120px "Syne", sans-serif';
+  ctx.fillText(rewind.label, 90, 440);
+
+  const tiles = [
+    [String(rewind.plays), "plays", LIME, -2],
+    [listening, "listened", GUM, 2],
+    [String(rewind.active_days), rewind.active_days === 1 ? "day" : "days", "#9BE7FF", -1.5],
+  ];
+  tiles.forEach(([value, label, fill, tilt], i) => {
+    ctx.save();
+    ctx.translate(90 + (i % 2) * 450, 540 + Math.floor(i / 2) * 270);
+    ctx.rotate((tilt * Math.PI) / 180);
+    ctx.shadowColor = "rgba(60,20,90,0.3)";
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetY = 14;
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.roundRect(0, 0, 420, 240, 56);
+    ctx.fill();
+    ctx.shadowColor = "transparent";
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.roundRect(12, 12, 396, 216, 46);
+    ctx.fill();
+    ctx.fillStyle = INK;
+    ctx.font = '800 84px "Syne", sans-serif';
+    ctx.fillText(value, 40, 135);
+    ctx.font = '600 38px "Hanken Grotesk", sans-serif';
+    ctx.fillText(label, 42, 195);
+    ctx.restore();
+  });
+
+  let y = 1190;
+  const list = (title, rows) => {
+    if (!rows.length) return;
+    ctx.fillStyle = MUTED;
+    ctx.font = '700 40px "Hanken Grotesk", sans-serif';
+    ctx.fillText(title, 90, y);
+    y += 80;
+    rows.forEach((text, i) => {
+      ctx.fillStyle = INK;
+      ctx.font = '800 58px "Syne", "Noto Sans Tamil", sans-serif';
+      const [line] = wrapLines((t) => ctx.measureText(t).width, `${i + 1}  ${text}`, 900, 1);
+      ctx.fillText(line, 90, y);
+      y += 84;
+    });
+    y += 40;
+  };
+  list("Top artists", rewind.top_artists.slice(0, 3).map((a) => a.name));
+  list("Top songs", rewind.top_tracks.slice(0, 3).map((t) => t.title));
+
+  drawMark(ctx, 90, H - 200, 76);
+  ctx.fillStyle = INK;
+  ctx.font = '800 72px "Syne", sans-serif';
+  ctx.fillText("yaapu", 190, H - 138);
+  ctx.fillStyle = MUTED;
+  ctx.font = '600 34px "Hanken Grotesk", sans-serif';
+  ctx.fillText("Get your Rewind on Yaapu", 90, H - 80);
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+}

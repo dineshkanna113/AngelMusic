@@ -6,7 +6,9 @@ import Meta from "../components/Meta";
 import { formatTime, headingSize, plural } from "../lib/format";
 import { useStreamTokenValue } from "../lib/hooks";
 import { useLibrary } from "../lib/library";
-import { href } from "../lib/router";
+import { live } from "../lib/live";
+import { href, navigate } from "../lib/router";
+import { toast, toastError } from "../lib/toast";
 import { social } from "../lib/social";
 
 /** A row of people with follow buttons (followers, following, search results). */
@@ -61,6 +63,20 @@ export default function Profile({ username }) {
   const [error, setError] = useState("");
   const [tab, setTab] = useState("playlists");
   const [people, setPeople] = useState(null);
+  const [blending, setBlending] = useState(false);
+
+  const makeBlend = async () => {
+    setBlending(true);
+    try {
+      const made = await live.blend(username);
+      toast(`${made.blend.match}% match. Your blend is ready.`);
+      navigate("playlist", made.id);
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setBlending(false);
+    }
+  };
 
   const load = useCallback(() => {
     setError("");
@@ -102,7 +118,16 @@ export default function Profile({ username }) {
         <div className="shrink-0">
           {prof.is_self
             ? <a className="btn-secondary" href={href("settings")}>Edit profile</a>
-            : <FollowButton following={prof.is_following} onToggle={(on) => social.follow(prof.username, on)} onChange={load} />}
+            : (
+              <div className="flex flex-wrap items-center gap-2">
+                {prof.is_following && prof.follows_you && (
+                  <button type="button" className="btn-secondary" disabled={blending} onClick={makeBlend}>
+                    {blending ? "Blending…" : "Blend"}
+                  </button>
+                )}
+                <FollowButton following={prof.is_following} onToggle={(on) => social.follow(prof.username, on)} onChange={load} />
+              </div>
+            )}
         </div>
       </header>
 

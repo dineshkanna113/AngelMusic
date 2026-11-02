@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlbumGrid, Section } from "../components/Grid";
-import { Artifact, DotLoops } from "../components/Stickers";
+import { Artifact, DotLoops, StickerLabel } from "../components/Stickers";
 import StoryRings from "../components/StoryRings";
 import { useActivity } from "../lib/activity";
 import MixGrid from "../components/MixGrid";
@@ -51,6 +51,15 @@ export default function Home() {
         <p className="relative z-10 mb-6 rounded-md bg-surface-1 px-4 py-3 text-sm font-semibold text-gold shadow-card">
           You’re offline. Only tracks saved for offline are playable. <a className="underline" href={href("downloads")}>See downloads</a>
         </p>
+      )}
+      {!offlineMode && (
+        <a href={href("rewind")} className="relative z-10 mb-8 flex items-center justify-between gap-4 overflow-hidden rounded-lg border-[5px] border-white bg-social p-5 shadow-card md:p-6">
+          <span>
+            <StickerLabel tone="ink" tilt={-4}>rewind</StickerLabel>
+            <span className="mt-2 block font-display text-2xl font-bold text-ink md:text-3xl">See what you played this month</span>
+          </span>
+          <Artifact kind="vinyl" size={84} tilt={12} className="shrink-0" />
+        </a>
       )}
       {mixes.length > 0 && (
         <Section title="Made for you" art={<Artifact kind="sparkle" size={34} tilt={-12} />}>
