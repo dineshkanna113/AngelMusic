@@ -24,7 +24,7 @@ const Row = memo(function Row({
   return (
     <li
       className={`group grid items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-surface-2 ${
-        current ? "bg-surface-2/70" : ""
+        current ? "bg-accent-soft" : ""
       } ${showAlbum ? "grid-cols-[2rem_auto_1fr_auto] md:grid-cols-[2rem_auto_minmax(0,2fr)_minmax(0,1.3fr)_auto_auto_3rem_auto]" : "grid-cols-[2rem_auto_1fr_auto] md:grid-cols-[2rem_auto_minmax(0,1fr)_auto_auto_3rem_auto]"} ${
         playable ? "" : "opacity-40"
       }`}
@@ -39,7 +39,7 @@ const Row = memo(function Row({
         className="grid h-8 w-8 place-items-center rounded-full text-xs tabular-nums text-muted hover:text-fg disabled:cursor-not-allowed"
       >
         {current ? (
-          playing ? <PauseIcon className="h-4 w-4 text-accent" /> : <PlayIcon className="h-4 w-4 text-accent" />
+          playing ? <PauseIcon className="h-4 w-4 text-social-ink" /> : <PlayIcon className="h-4 w-4 text-social-ink" />
         ) : (
           <>
             <span className="group-hover:hidden">{number}</span>
@@ -47,9 +47,9 @@ const Row = memo(function Row({
           </>
         )}
       </button>
-      {showCover ? <Cover track={track} token={token} className="h-10 w-10" /> : <span />}
+      {showCover ? <Cover track={track} token={token} className="h-10 w-10" rounded="rounded-[12px]" /> : <span />}
       <div className="min-w-0">
-        <p className={`truncate text-sm font-medium ${current ? "text-accent" : ""}`}>{track.title}</p>
+        <p className={`truncate text-sm font-medium ${current ? "font-bold text-social-ink" : ""}`}>{track.title}</p>
         <p className="truncate text-xs text-muted">
           <a href={href("artist", track.artist_id)} className="hover:text-fg hover:underline" onClick={(e) => e.stopPropagation()}>
             {track.artist || "Unknown artist"}
@@ -62,7 +62,7 @@ const Row = memo(function Row({
         </a>
       )}
       <span className="hidden items-center gap-2 md:flex">
-        {saved && <OfflineIcon className="h-3.5 w-3.5 text-accent" title="Available offline" />}
+        {saved && <OfflineIcon className="h-3.5 w-3.5 text-ink" title="Available offline" />}
         {saving && <span className="text-[11px] tabular-nums text-muted">{Math.round(saving * 100)}%</span>}
         <QualityBadge track={track} />
       </span>
@@ -72,7 +72,7 @@ const Row = memo(function Row({
         disabled={offlineMode}
         aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
         aria-pressed={favorite}
-        className={`hidden h-8 w-8 place-items-center rounded-full md:grid ${favorite ? "text-accent" : "text-muted opacity-0 hover:text-fg group-hover:opacity-100 focus-visible:opacity-100"}`}
+        className={`hidden h-8 w-8 place-items-center rounded-full md:grid ${favorite ? "text-social-ink" : "text-muted opacity-0 hover:text-fg group-hover:opacity-100 focus-visible:opacity-100"}`}
       >
         {favorite ? <HeartIcon className="h-4 w-4" /> : <HeartOutlineIcon className="h-4 w-4" />}
       </button>
@@ -120,7 +120,7 @@ export default function TrackList({
   if (!rows.length) return <p className="px-2 py-6 text-sm text-muted">{emptyText}</p>;
 
   return (
-    <ul className="space-y-0.5">
+    <ul className="space-y-0.5 rounded-lg bg-surface-1/80 p-2 shadow-card">
       {rows.map((t, i) => (
         <Row
           key={`${t.id}-${i}`}

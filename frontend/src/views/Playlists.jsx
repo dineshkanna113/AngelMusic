@@ -37,10 +37,12 @@ export function Playlists() {
       <ul className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {(playlists ?? []).map((pl) => (
           <li key={pl.id} className="min-w-0">
-            <a href={href("playlist", pl.id)} className="block">
-              <Cover track={pl.cover_track_id ? byId.get(pl.cover_track_id) : null} token={token}
-                className="aspect-square w-full" rounded="rounded-sm" />
-              <p className="mt-2 truncate text-sm font-medium">{pl.name}</p>
+            <a href={href("playlist", pl.id)} className="group block">
+              <div className="cover-sticker" style={{ "--tilt": "-1.5deg" }}>
+                <Cover track={pl.cover_track_id ? byId.get(pl.cover_track_id) : null} token={token}
+                  className="aspect-square w-full" rounded="" />
+              </div>
+              <p className="mt-3 truncate font-display text-sm font-bold">{pl.name}</p>
               <Meta className="text-xs text-muted" parts={[plural(pl.track_count, "track"), formatTime(pl.duration)]} />
             </a>
           </li>
@@ -167,9 +169,9 @@ export function PlaylistView({ id }) {
   return (
     <>
       <div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-end">
-        <Cover track={cover} token={token} className="aspect-square w-48" rounded="rounded-lg" eager />
+        <div className="cover-sticker w-48" style={{ "--tilt": "-2deg" }}><Cover track={cover} token={token} className="aspect-square w-full" rounded="" eager /></div>
         <div className="min-w-0">
-          <p className={`text-xs font-medium ${pl.collaborative ? "text-social" : "text-muted"}`}>{kind}</p>
+          <p className={`text-xs font-medium ${pl.collaborative ? "font-bold text-social-ink" : "text-muted"}`}>{kind}</p>
           <h1 className="font-display mt-1 text-3xl">{pl.name}</h1>
           <Meta className="mt-1 text-sm text-muted" parts={[
             !isOwner && <a key="o" className="font-semibold text-fg hover:underline" href={href("u", pl.owner.username)}>{pl.owner.display_name}</a>,

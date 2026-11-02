@@ -69,7 +69,7 @@ export function AlbumView({ id }) {
             <a key="a" className="font-medium text-fg hover:underline" href={href("artist", album.artist_id)}>{album.artist}</a>,
             album.year, plural(album.tracks.length, "track"), formatTime(album.duration),
           ]} />
-          <Meta className={`mt-1 text-xs tabular-nums ${album.hires ? "text-accent" : "text-fg-2"}`} parts={qualitySummary(album.tracks)} />
+          <Meta className={`mt-1 text-xs tabular-nums ${album.hires ? "font-bold text-social-ink" : "text-fg-2"}`} parts={qualitySummary(album.tracks)} />
           <div className="mt-4"><CollectionActions tracks={album.tracks} /></div>
         </div>
       </div>

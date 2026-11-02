@@ -11,7 +11,7 @@ function ShareDialog({ track, onDone }) {
 
   useEffect(() => {
     let url;
-    const ambient = getComputedStyle(document.documentElement).getPropertyValue("--ambient").trim() || undefined;
+    const ambient = document.documentElement.style.getPropertyValue("--ambient").trim() || undefined; // set only when the cover has colour
     renderShareCard(track, ambient).then((b) => {
       setBlob(b);
       url = URL.createObjectURL(b);

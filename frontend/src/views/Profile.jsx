@@ -21,7 +21,7 @@ export function PeopleList({ people, empty = "No one here yet." }) {
             <span className="min-w-0">
               <span className="block truncate font-semibold">{p.display_name}</span>
               <span className="block truncate text-sm text-muted">
-                @{p.username}{p.follows_you ? <span className="ml-2 text-social">Follows you</span> : null}
+                @{p.username}{p.follows_you ? <span className="ml-2 font-semibold text-social-ink">Follows you</span> : null}
               </span>
             </span>
           </a>
@@ -40,10 +40,12 @@ function PlaylistGrid({ playlists }) {
     <ul className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {playlists.map((pl) => (
         <li key={pl.id} className="min-w-0">
-          <a href={href("playlist", pl.id)} className="block">
-            <Cover track={pl.cover_track_id ? byId.get(pl.cover_track_id) : null} token={token}
-              className="aspect-square w-full" rounded="rounded-md" />
-            <p className="mt-2 truncate text-sm font-semibold">{pl.name}</p>
+          <a href={href("playlist", pl.id)} className="group block">
+            <div className="cover-sticker" style={{ "--tilt": "-1.5deg" }}>
+              <Cover track={pl.cover_track_id ? byId.get(pl.cover_track_id) : null} token={token}
+                className="aspect-square w-full" rounded="" />
+            </div>
+            <p className="mt-3 truncate font-display text-sm font-bold">{pl.name}</p>
             <Meta className="text-xs text-muted" parts={[plural(pl.track_count, "track"), formatTime(pl.duration)]} />
           </a>
         </li>
@@ -85,7 +87,7 @@ export default function Profile({ username }) {
         <div className="min-w-0 flex-1">
           <h1 className="title-display text-[clamp(2.5rem,7vw,4.5rem)] leading-none">{prof.display_name}</h1>
           <p className="mt-2 text-muted">
-            @{prof.username}{prof.follows_you && <span className="ml-3 text-social">Follows you</span>}
+            @{prof.username}{prof.follows_you && <span className="ml-3 font-semibold text-social-ink">Follows you</span>}
           </p>
           {prof.bio && <p className="mt-3 max-w-xl text-fg-2">{prof.bio}</p>}
           <div className="mt-4 flex flex-wrap items-center gap-5 text-sm">
@@ -127,7 +129,7 @@ export default function Profile({ username }) {
         {TABS.map(([key, label]) => (
           <button key={key} type="button" role="tab" aria-selected={tab === key} onClick={() => setTab(key)}
             className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-semibold ${
-              tab === key ? "border-accent text-fg" : "border-transparent text-muted hover:text-fg"}`}>
+              tab === key ? "border-ink text-fg" : "border-transparent text-muted hover:text-fg"}`}>
             {label}
           </button>
         ))}

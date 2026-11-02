@@ -28,7 +28,7 @@ function QueueRow({ track, index, current, token, isFirst, isLast }) {
       <button type="button" className="flex min-w-0 flex-1 items-center gap-3 text-left" onClick={() => player.jumpTo(index)}>
         <Cover track={track} token={token} className="h-9 w-9" />
         <span className="min-w-0">
-          <span className={`block truncate text-sm ${current ? "font-medium text-accent" : ""}`}>{track.title}</span>
+          <span className={`block truncate text-sm ${current ? "font-bold text-social-ink" : ""}`}>{track.title}</span>
           <span className="block truncate text-xs text-muted">{track.artist}</span>
         </span>
       </button>

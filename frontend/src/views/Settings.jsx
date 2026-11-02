@@ -214,7 +214,7 @@ function Devices() {
       {sessions.map((s) => (
         <li key={s.id} className="flex items-center gap-3 py-2 text-sm">
           <div className="min-w-0 flex-1">
-            <p className="truncate">{s.device || "Unknown device"}{s.current && <span className="ml-2 text-xs text-accent">This device</span>}</p>
+            <p className="truncate">{s.device || "Unknown device"}{s.current && <span className="ml-2 text-xs font-semibold text-social-ink">This device</span>}</p>
             <p className="text-xs text-muted">Last active {when(s.last_used_at)}</p>
           </div>
           {!s.current && <button type="button" className="btn-ghost text-xs" onClick={() => revoke(s)}>Sign out</button>}
@@ -254,7 +254,7 @@ function SubsonicCard({ username }) {
     >
       <dl className="grid max-w-xl grid-cols-[8rem_1fr] gap-x-3 gap-y-2 text-sm">
         <dt className="text-muted">Server</dt>
-        <dd className="flex items-center gap-2"><span className="truncate font-mono">{server}</span><button type="button" className="text-xs text-accent" onClick={() => copy(server)}>Copy</button></dd>
+        <dd className="flex items-center gap-2"><span className="truncate font-mono">{server}</span><button type="button" className="text-xs font-semibold text-social-ink" onClick={() => copy(server)}>Copy</button></dd>
         <dt className="text-muted">Username</dt>
         <dd className="font-mono">{username}</dd>
         <dt className="text-muted">App password</dt>
@@ -262,8 +262,8 @@ function SubsonicCard({ username }) {
           {password === undefined ? "…" : password ? (
             <>
               <span className="font-mono">{shown ? password : "••••••••••••"}</span>
-              <button type="button" className="text-xs text-accent" onClick={() => setShown((v) => !v)}>{shown ? "Hide" : "Show"}</button>
-              <button type="button" className="text-xs text-accent" onClick={() => copy(password)}>Copy</button>
+              <button type="button" className="text-xs font-semibold text-social-ink" onClick={() => setShown((v) => !v)}>{shown ? "Hide" : "Show"}</button>
+              <button type="button" className="text-xs font-semibold text-social-ink" onClick={() => copy(password)}>Copy</button>
             </>
           ) : <span className="text-muted">None</span>}
         </dd>

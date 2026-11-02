@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, auth } from "../lib/api";
+import { Artifact, DotLoops } from "./Stickers";
 import Wordmark from "./Wordmark";
 
 export default function Login() {
@@ -38,17 +39,22 @@ export default function Login() {
   const awaitingAdmin = status && !status.has_users && !status.registration_open;
 
   return (
-    <main className="relative grid min-h-dvh overflow-hidden bg-surface-0 px-5 py-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-center md:gap-12 md:px-16">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(60% 50% at 15% 85%, color-mix(in oklab, var(--color-marigold) 22%, transparent), transparent 70%), radial-gradient(45% 40% at 85% 10%, color-mix(in oklab, var(--color-kingfisher) 16%, transparent), transparent 70%)" }} />
+    <main className="relative grid min-h-dvh overflow-hidden px-5 py-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-center md:gap-12 md:px-16">
+      <DotLoops size={340} className="absolute -bottom-16 -left-20 opacity-15" />
       <div className="relative mb-10 md:mb-0">
         <h1 className="sr-only">Yaapu</h1>
-        <Wordmark size="text-[clamp(4.5rem,15vw,11rem)]" className="-ml-1" />
-        <p className="mt-5 max-w-md font-display text-xl text-fg-2 md:text-2xl" style={{ fontStretch: "88%" }}>
+        <Wordmark size="text-[clamp(3.6rem,12vw,8.5rem)]" className="-ml-1" />
+        <p className="mt-5 max-w-md font-display text-xl font-bold text-fg-2 md:text-2xl">
           Hear what your friends are playing, and play it louder.
         </p>
+        <div className="mt-8 flex items-end gap-3" aria-hidden="true">
+          <Artifact kind="vinyl" size={72} tilt={-10} />
+          <Artifact kind="headphones" size={64} tilt={8} />
+          <Artifact kind="boombox" size={78} tilt={-5} />
+          <Artifact kind="cassette" size={64} tilt={12} />
+        </div>
       </div>
-      <form onSubmit={submit} className="panel relative w-full max-w-sm space-y-5 justify-self-start p-7 md:justify-self-end">
+      <form onSubmit={submit} className="panel relative w-full max-w-sm -rotate-1 space-y-5 justify-self-start border-[5px] border-white p-7 md:justify-self-end">
         <p className="text-sm text-muted">
           {awaitingAdmin
             ? "This server has no accounts yet. Create the admin on the server with: python -m app.manage create-user <name> --admin"

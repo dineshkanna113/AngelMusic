@@ -6,9 +6,9 @@ export default function QualityBadge({ track }) {
     : `${Math.round((track.bitrate || 0) / 1000)}k`;
   // Hi-Res is the one lit badge; plain lossless reads in ink, lossy recedes.
   const tone = isHiRes(track)
-    ? "border-accent/50 text-accent"
+    ? "border-transparent bg-accent text-ink"
     : track.lossless
-      ? "border-line text-fg-2"
+      ? "border-line bg-surface-1 text-fg-2"
       : "border-line text-muted";
   return (
     <span

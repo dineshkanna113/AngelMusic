@@ -43,7 +43,7 @@ export default function SignalPath({ track, state, gainDb, onClose }) {
           label="Source"
           value={`${track.codec.toUpperCase()}, ${formatResolution(track)}`}
           note={<Meta className="justify-end" parts={[`${track.channels ?? "?"} ch`, formatBitrate(track.bitrate), formatSize(track.size)]} />}
-          tone={track.lossless ? "text-accent" : "text-fg"}
+          tone="text-fg"
         />
         <Row label="Delivery" value="Original file, untouched" note="No transcoding. Byte-range streamed, so seeking is instant." />
         <Row

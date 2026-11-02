@@ -58,7 +58,8 @@ function SeekBar({ state }) {
   );
 }
 
-function SleepTimer({ sleep }) {
+/** `light`: for use on the pearl ground (the Now Playing stage) instead of the dark pill. */
+export function SleepTimer({ sleep, light = false }) {
   const remaining = sleep?.mode === "time" ? Math.max(0, Math.ceil((sleep.at - Date.now()) / 60_000)) : null;
   return (
     <Menu
@@ -73,7 +74,9 @@ function SleepTimer({ sleep }) {
           )}
         </span>
       }
-      className={`grid h-9 w-9 place-items-center rounded-full hover:text-white ${sleep ? "text-accent" : "text-ink-muted"}`}
+      className={light
+        ? `grid h-11 w-11 place-items-center rounded-full bg-surface-1 shadow-sticker ${sleep ? "!bg-ink text-accent" : "text-ink"}`
+        : `grid h-9 w-9 place-items-center rounded-full hover:text-white ${sleep ? "text-accent" : "text-ink-muted"}`}
     >
       {(close) => (
         <>
@@ -195,7 +198,7 @@ export default function PlayerBar() {
             <SeekBar state={state} />
           </div>
 
-          <div className="relative col-span-2 flex items-center justify-between gap-1 md:col-span-1 md:justify-end">
+          <div className="relative col-span-2 hidden items-center justify-between gap-1 md:col-span-1 md:flex md:justify-end">
             <button
               type="button"
               onClick={() => setShowPath((v) => !v)}

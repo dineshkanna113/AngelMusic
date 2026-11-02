@@ -1,35 +1,12 @@
-import { useEffect, useState } from "react";
+import { useActivity } from "../lib/activity";
 import { timeAgo } from "../lib/format";
 import { useStreamTokenValue } from "../lib/hooks";
 import { player } from "../lib/player";
 import { href } from "../lib/router";
-import { social } from "../lib/social";
 import Avatar from "./Avatar";
 import { StickerLabel } from "./Stickers";
 import Cover from "./Cover";
 import { canPlay } from "./TrackList";
-
-const POLL_MS = 20_000;
-
-/** Friends' listening, refreshed while the page is visible. Null until the first load. */
-export function useActivity() {
-  const [friends, setFriends] = useState(null);
-  useEffect(() => {
-    let timer;
-    const load = () => {
-      if (document.visibilityState === "visible") social.activity().then(setFriends).catch(() => {});
-      timer = setTimeout(load, POLL_MS);
-    };
-    load();
-    const onVisible = () => document.visibilityState === "visible" && social.activity().then(setFriends).catch(() => {});
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, []);
-  return friends;
-}
 
 /** Focus the search box; people show up in search results. */
 export const findPeople = () => document.getElementById("global-search")?.focus();

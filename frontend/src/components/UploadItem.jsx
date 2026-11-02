@@ -86,7 +86,7 @@ const pickReleaseTime = () => mount((done) => <ScheduleDialog onDone={done} />);
 
 const STATUS_TONE = {
   invalid: "bg-danger/15 text-danger", declined: "bg-danger/15 text-danger", removed: "bg-danger/15 text-danger",
-  pending: "bg-gold/15 text-gold", scheduled: "bg-accent-soft text-fg", published: "bg-accent/15 text-accent",
+  pending: "bg-gold/15 text-gold", scheduled: "bg-accent-soft text-fg", published: "bg-accent text-ink",
 };
 
 export const hasErrors = (u) => u.issues.some((i) => i.level === "error");
@@ -176,7 +176,7 @@ export default function UploadRow({ upload: u, admin = false, onChange, selected
               ))}
             </ul>
           )}
-          {u.status === "scheduled" && <p className="mt-1 text-xs text-accent">Goes live {when(u.release_at)}</p>}
+          {u.status === "scheduled" && <p className="mt-1 text-xs font-semibold text-social-ink">Goes live {when(u.release_at)}</p>}
           {u.review_note && <p className="mt-1 text-xs text-muted">Reviewer note: {u.review_note}</p>}
           {u.status === "published" && (
             <Meta className="mt-1 text-xs text-muted" parts={[`Live since ${when(u.published_at)}`, u.reviewer && `approved by ${u.reviewer}`]} />
@@ -188,7 +188,7 @@ export default function UploadRow({ upload: u, admin = false, onChange, selected
         <div className="flex shrink-0 items-center gap-1">
           {canPreview && u.technical && (
             <button type="button" aria-label={previewing ? "Hide preview" : "Preview"} title="Preview"
-              className={`grid h-8 w-8 place-items-center rounded-full hover:bg-surface-3 ${previewing ? "text-accent" : "text-muted"}`}
+              className={`grid h-8 w-8 place-items-center rounded-full hover:bg-surface-3 ${previewing ? "text-social-ink" : "text-muted"}`}
               onClick={() => setPreviewing((v) => !v)}>
               <PlayIcon className="h-4 w-4" />
             </button>

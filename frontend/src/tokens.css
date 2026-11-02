@@ -12,7 +12,7 @@
   --color-gum: #ff6fd8;
   --color-gum-ink: #b0127a;
   --color-muted: #5a5466;
-  --color-white: #ffffff;
+  --color-white: #fdfaff; /* tinted toward the lilac ground, never pure white */
   /* sticker fills */
   --color-sky: #9be7ff;
   --color-peach: #ffd6a5;
@@ -28,6 +28,11 @@
   --color-warn: #9a5b00;
   --color-error: #c2273b;
   --color-scrim: #19161f;
+  /* brushed-silver ramp for the biggest heads (single neutral hue, ink to grey) */
+  --chrome-dark: #2b2733;
+  --chrome-mid: #8a8798;
+  --chrome-light: #b9b6c6;
+  --glow: rgb(60 20 90 / 0.28);
 
   --ground: radial-gradient(120% 80% at 10% 0%, #fdf1ff 0%, var(--color-lilac) 45%, var(--color-mint) 100%) fixed;
 

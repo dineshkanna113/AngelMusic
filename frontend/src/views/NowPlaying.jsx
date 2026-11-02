@@ -1,9 +1,12 @@
 import { useEffect, useRef } from "react";
 import Cover from "../components/Cover";
-import { DownIcon, HeartIcon, HeartOutlineIcon, LyricsIcon, NextIcon, PauseIcon, PlayIcon, PrevIcon, QueueIcon, ShareIcon } from "../components/Icons";
-import { shareTrack } from "../components/ShareDialog";
+import { DownIcon, HeartIcon, HeartOutlineIcon, LyricsIcon, NextIcon, PauseIcon, PlayIcon, PrevIcon, QueueIcon, ShareIcon, ShuffleIcon } from "../components/Icons";
 import Meta from "../components/Meta";
-import { formatResolution } from "../lib/format";
+import { SleepTimer } from "../components/PlayerBar";
+import { shareTrack } from "../components/ShareDialog";
+import { Artifact, StickerLabel } from "../components/Stickers";
+import { useActivity } from "../lib/activity";
+import { formatResolution, isHiRes } from "../lib/format";
 import { usePlayer, useStreamTokenValue } from "../lib/hooks";
 import { library, useLibrary } from "../lib/library";
 import { player } from "../lib/player";
@@ -15,14 +18,21 @@ function close() {
   else window.location.hash = "#/";
 }
 
+// Syne is wide: shorter titles get the big size, long ones step down so words never break mid-way.
+const titleSize = (t) =>
+  t.length <= 8 ? "text-[clamp(2.4rem,5vw,4rem)]" : t.length <= 14 ? "text-[clamp(1.9rem,3.4vw,2.9rem)]" : "text-[clamp(1.5rem,2.6vw,2.2rem)]";
+
+const roundBtn = "grid h-12 w-12 place-items-center rounded-full bg-surface-1 text-ink shadow-sticker transition-transform duration-micro ease-out active:scale-95 disabled:opacity-50";
+
 /**
- * The stage: the playing song at full size, its cover colour blooming behind it
- * (--ambient, set by lib/ambient.js from the player bar's cover).
+ * The stage: the playing song at full size on a tilted sticker cover, tinted with the cover's
+ * colour (--ambient, set by lib/ambient.js from the player pill's cover).
  */
 export default function NowPlaying() {
   const state = usePlayer();
   const token = useStreamTokenValue();
   const { byId, offlineMode } = useLibrary();
+  const friends = useActivity();
   const panel = usePanel();
   const playButton = useRef(null);
   const track = state.queue[state.index];
@@ -37,9 +47,10 @@ export default function NowPlaying() {
 
   if (!track) {
     return (
-      <div className="grid min-h-[60vh] place-items-center text-center">
+      <div className="relative grid min-h-[60vh] place-items-center text-center">
         <div>
-          <h1 className="text-4xl">Nothing playing yet</h1>
+          <Artifact kind="vinyl" size={96} tilt={-8} className="mx-auto" />
+          <h1 className="chrome mt-4 pb-1 text-4xl">Nothing playing yet</h1>
           <p className="mt-2 text-muted">Pick a song and it takes the stage here.</p>
           <a className="btn-primary mt-6" href={href("")}>Find something to play</a>
         </div>
@@ -48,60 +59,77 @@ export default function NowPlaying() {
   }
 
   const next = state.queue[state.index + 1];
+  // Real, data-backed stickers only: your plays, the file's quality, friends on the same song.
+  const here = (friends ?? []).filter((f) => f.live && f.track?.id === track.id).map((f) => f.person.display_name);
   return (
-    <div className="stage -mx-4 -mb-10 -mt-5 min-h-full px-5 pb-12 pt-5 md:-mx-6 md:px-10">
+    <div className="stage relative -mx-4 -mb-10 -mt-4 min-h-full px-5 pb-12 pt-4 md:-mx-6 md:px-10">
       <div className="mx-auto flex max-w-6xl items-center justify-between">
-        <button type="button" onClick={close} aria-label="Close Now Playing" className="btn-ghost h-10 w-10 justify-center px-0">
+        <button type="button" onClick={close} aria-label="Close Now Playing" className={roundBtn}>
           <DownIcon className="h-6 w-6" />
         </button>
-        <p className="text-sm text-fg-2">Now playing</p>
-        <span className="w-10" />
+        <p className="font-display text-sm font-bold">Now playing</p>
+        <span className="w-12" />
       </div>
 
-      <div className="mx-auto mt-6 grid max-w-6xl items-center gap-8 md:mt-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:gap-14">
-        <Cover track={track} token={token} eager rounded="rounded-lg"
-          className="aspect-square w-full max-w-[min(30rem,80vw)] justify-self-center shadow-panel md:justify-self-end" />
+      <div className="mx-auto mt-6 grid max-w-6xl items-center gap-10 md:mt-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:gap-14">
+        <div className="relative mx-auto w-full max-w-[min(30rem,64vw)] md:max-w-[min(30rem,82vw)] md:mr-0">
+          <div className="cover-sticker" style={{ "--tilt": "-2.5deg" }}>
+            <Cover track={track} token={token} eager rounded="" className="aspect-square w-full" />
+          </div>
+          {live.play_count >= 3 && <StickerLabel tone="lime" tilt={8} className="absolute -right-2 top-5 text-sm">on repeat</StickerLabel>}
+          {isHiRes(track) && <StickerLabel tone="sky" tilt={-5} className="absolute -left-3 top-24 text-sm">hi-res</StickerLabel>}
+          {here.length > 0 && (
+            <StickerLabel tone="gum" tilt={-9} className="absolute -left-3 bottom-7 text-sm">
+              {here.length === 1 ? `${here[0]} is here` : `${here[0]} and ${here.length - 1} more are here`}
+            </StickerLabel>
+          )}
+          <Artifact kind="sparkle" size={48} tilt={14} className="absolute -bottom-4 -right-3" />
+        </div>
 
         <div className="min-w-0">
-          <h1 className="title-display text-[clamp(2.4rem,6vw,4.75rem)] leading-[0.95]">{track.title}</h1>
-          <Meta className="mt-4 text-lg text-fg-2" parts={[
-            <a key="ar" className="font-semibold text-fg hover:underline" href={href("artist", track.artist_id)}>{track.artist}</a>,
+          <h1 className={`chrome break-words pb-2 leading-[1.1] ${titleSize(track.title)}`}>{track.title}</h1>
+          <Meta className="mt-2 text-lg text-fg-2" parts={[
+            <a key="ar" className="font-bold text-fg hover:underline" href={href("artist", track.artist_id)}>{track.artist}</a>,
             track.album && <a key="al" className="hover:underline" href={href("album", track.album_id)}>{track.album}</a>,
           ]} />
-          <p className="mt-2 text-sm tabular-nums text-muted">{track.codec.toUpperCase()} {formatResolution(track)}</p>
+          <p className="mt-2 text-sm font-semibold tabular-nums text-muted">{track.codec.toUpperCase()} {formatResolution(track)}</p>
 
-          <div className="mt-8 flex items-center gap-3">
-            <button type="button" aria-label="Previous" onClick={() => player.previous()}
-              className="grid h-12 w-12 place-items-center rounded-full text-fg hover:bg-fg/10"><PrevIcon className="h-6 w-6" /></button>
+          <div className="on-ink mt-8 flex flex-wrap items-center gap-3">
+            <button type="button" aria-label="Previous" onClick={() => player.previous()} className={roundBtn}><PrevIcon className="h-6 w-6" /></button>
             <button ref={playButton} type="button" aria-label={state.playing ? "Pause" : "Play"} onClick={() => player.togglePlay()}
-              className="grid h-20 w-20 place-items-center rounded-full bg-accent text-accent-ink shadow-panel transition-transform duration-micro ease-out active:scale-95">
-              {state.playing ? <PauseIcon className="h-9 w-9" /> : <PlayIcon className="ml-1 h-9 w-9" />}
+              className="flex h-16 min-w-40 items-center justify-center gap-3 rounded-pill bg-ink px-8 font-display text-lg font-bold text-accent shadow-float transition-transform duration-micro ease-out active:scale-95">
+              {state.playing ? <PauseIcon className="h-7 w-7" /> : <PlayIcon className="h-7 w-7" />}
+              {state.playing ? "Pause" : "Play"}
             </button>
-            <button type="button" aria-label="Next" onClick={() => player.next()}
-              className="grid h-12 w-12 place-items-center rounded-full text-fg hover:bg-fg/10"><NextIcon className="h-6 w-6" /></button>
+            <button type="button" aria-label="Next" onClick={() => player.next()} className={roundBtn}><NextIcon className="h-6 w-6" /></button>
             <button type="button" onClick={() => library.toggleFavorite(track)} disabled={offlineMode}
               aria-label={live.favorite ? "Remove from favorites" : "Add to favorites"} aria-pressed={!!live.favorite}
-              className={`ml-2 grid h-12 w-12 place-items-center rounded-full hover:bg-fg/10 ${live.favorite ? "text-accent" : "text-fg"}`}>
+              className={`${roundBtn} ${live.favorite ? "!text-social-ink" : ""}`}>
               {live.favorite ? <HeartIcon className="h-6 w-6" /> : <HeartOutlineIcon className="h-6 w-6" />}
             </button>
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap items-center gap-2">
             <button type="button" className="btn-social" onClick={() => shareTrack(live)}>
               <ShareIcon className="h-4 w-4" /> Share
             </button>
-            <button type="button" className={`btn-secondary ${panel === "lyrics" ? "!border-accent" : ""}`}
+            <button type="button" className={`btn-secondary ${panel === "lyrics" ? "!bg-ink !text-accent" : ""}`}
               aria-pressed={panel === "lyrics"} onClick={() => ui.togglePanel("lyrics")}>
               <LyricsIcon className="h-4 w-4" /> Lyrics
             </button>
-            <button type="button" className={`btn-secondary ${panel === "queue" ? "!border-accent" : ""}`}
+            <button type="button" className={`btn-secondary ${panel === "queue" ? "!bg-ink !text-accent" : ""}`}
               aria-pressed={panel === "queue"} onClick={() => ui.togglePanel("queue")}>
               <QueueIcon className="h-4 w-4" /> Up next
             </button>
+            <button type="button" className={`${roundBtn} !h-11 !w-11 ${state.shuffle ? "!bg-ink !text-accent" : ""}`}
+              aria-label="Shuffle" aria-pressed={state.shuffle} onClick={() => player.toggleShuffle()}>
+              <ShuffleIcon className="h-5 w-5" />
+            </button>
+            <SleepTimer sleep={state.sleep} light />
           </div>
           {next && (
             <p className="mt-6 truncate text-sm text-muted">
-              Next: <span className="text-fg-2">{next.title}</span>, {next.artist}
+              Next: <span className="font-semibold text-fg-2">{next.title}</span>, {next.artist}
             </p>
           )}
         </div>

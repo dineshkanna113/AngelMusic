@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlbumGrid, Section } from "../components/Grid";
+import { Artifact, DotLoops } from "../components/Stickers";
+import StoryRings from "../components/StoryRings";
+import { useActivity } from "../lib/activity";
 import MixGrid from "../components/MixGrid";
 import TrackList from "../components/TrackList";
 import { api } from "../lib/api";
@@ -11,6 +14,8 @@ export default function Home() {
   const { albums, tracks, offlineMode } = useLibrary();
   const [recent, setRecent] = useState(null);
   const mixes = useMixes();
+  const friends = useActivity();
+  const liveCount = friends?.filter((f) => f.live).length ?? 0;
 
   useEffect(() => {
     if (offlineMode) return;
@@ -30,36 +35,48 @@ export default function Home() {
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <>
-      <h1 className="font-display mb-6 text-2xl">{greeting}</h1>
+    <div className="relative">
+      <DotLoops size={300} className="absolute -right-24 -top-4 hidden opacity-15 md:block" />
+      <header className="relative z-10 mb-8">
+        <h1 className="chrome pb-2 text-[clamp(2.4rem,6vw,3.6rem)] leading-[1.1]">{greeting}</h1>
+        <p className="mt-1 text-muted">
+          {friends === null ? " " : friends.length === 0
+            ? "Follow friends to see what they’re playing."
+            : liveCount === 0 ? "No friends are listening right now."
+              : `${liveCount} ${liveCount === 1 ? "friend is" : "friends are"} listening right now`}
+        </p>
+        <StoryRings friends={friends} className="mt-5 md:hidden" />
+      </header>
       {offlineMode && (
-        <p className="mb-6 rounded-md bg-gold/10 px-3 py-2 text-sm text-gold">
+        <p className="relative z-10 mb-6 rounded-md bg-surface-1 px-4 py-3 text-sm font-semibold text-gold shadow-card">
           You’re offline. Only tracks saved for offline are playable. <a className="underline" href={href("downloads")}>See downloads</a>
         </p>
       )}
       {mixes.length > 0 && (
-        <Section title="Made for you">
+        <Section title="Made for you" art={<Artifact kind="sparkle" size={34} tilt={-12} />}>
           <MixGrid mixes={mixes} />
         </Section>
       )}
       {recent?.length > 0 && (
-        <Section title="Recently played" action={<a className="text-xs text-muted hover:text-fg" href={href("recent")}>Show all</a>}>
+        <Section title="Recently played" art={<Artifact kind="headphones" size={40} tilt={8} />}
+          action={<a className="text-sm font-semibold text-muted hover:text-fg" href={href("recent")}>Show all</a>}>
           <TrackList tracks={recent.slice(0, 6)} />
         </Section>
       )}
-      <Section title="Recently added" action={<a className="text-xs text-muted hover:text-fg" href={href("albums")}>All albums</a>}>
+      <Section title="Recently added" art={<Artifact kind="cassette" size={42} tilt={-8} />}
+        action={<a className="text-sm font-semibold text-muted hover:text-fg" href={href("albums")}>All albums</a>}>
         <AlbumGrid albums={recentlyAdded} emptyText="Your library is empty. Add music to the library folder or upload it in Settings." />
       </Section>
       {mostPlayed.length > 0 && (
-        <Section title="Most played">
+        <Section title="Most played" art={<Artifact kind="drum" size={40} tilt={10} />}>
           <TrackList tracks={mostPlayed} />
         </Section>
       )}
       {hires.length > 0 && (
-        <Section title="Hi-Res albums">
+        <Section title="Hi-Res albums" art={<Artifact kind="vinyl" size={40} tilt={-10} />}>
           <AlbumGrid albums={hires} />
         </Section>
       )}
-    </>
+    </div>
   );
 }

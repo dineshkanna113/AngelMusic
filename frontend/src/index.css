@@ -1,5 +1,6 @@
 /* Hallmark · shape: app screen · genre: playful · theme: custom (Yaapu Sticker chrome, docs/superpowers/specs/2026-11-02-yaapu-design.md) · redesign: full
  * nav: floating glass sidebar, phone tab bar · signature: the floating ink player pill with a spinning record cover · states: loading, empty, error, full · v2.0.0 */
+/* Hallmark · waive 2b · single neutral ramp (ink to grey) from tokens, used only on the largest heads and never on small text · the owner picked "chrome titles" in the Sticker chrome mockup */
 /* Yaapu: tokens in tokens.css; floor rules (focus, overflow, reduced motion) in base.css. */
 @import "./tokens.css";
 @import "./base.css" layer(base);
@@ -56,7 +57,7 @@
 
   /* Chrome type for the biggest heads: a brushed-silver gradient on ink. */
   .chrome {
-    background: linear-gradient(100deg, #2b2733 0%, #8a8798 30%, #2b2733 48%, #b9b6c6 62%, #2b2733 80%);
+    background: linear-gradient(100deg, var(--chrome-dark) 0%, var(--chrome-mid) 30%, var(--chrome-dark) 48%, var(--chrome-light) 62%, var(--chrome-dark) 80%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -76,6 +77,12 @@
     @apply h-11 w-full rounded-pill border-2 border-transparent bg-surface-1 px-5 text-sm text-fg shadow-card
       placeholder:text-muted focus:border-ink focus:outline-none;
     transition: border-color var(--dur-micro) var(--ease-out);
+  }
+
+  /* Fields inside a white panel (login, dialogs, settings) sit on a soft lilac so they read. */
+  .panel .input,
+  .glass .input {
+    @apply bg-surface-2 shadow-none;
   }
 
   .btn-primary,
@@ -117,8 +124,8 @@
   }
   .artifact {
     transform: rotate(var(--tilt, 0deg));
-    filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff)
-      drop-shadow(0 8px 8px rgb(60 20 90 / 0.28));
+    filter: drop-shadow(2px 0 0 var(--color-white)) drop-shadow(-2px 0 0 var(--color-white)) drop-shadow(0 2px 0 var(--color-white))
+      drop-shadow(0 -2px 0 var(--color-white)) drop-shadow(0 8px 8px var(--glow));
   }
   /* A cover as a sticker: white border, big radius, optional tilt. */
   .cover-sticker {
@@ -214,6 +221,7 @@
 
   /* Now Playing: the pearl ground tinted with the cover's colour. */
   .stage {
-    background: radial-gradient(80% 60% at 30% 25%, color-mix(in oklab, var(--ambient) 55%, transparent), transparent 70%);
+    /* closest-side: the tint fades to nothing at the edges, so the box never shows a seam. */
+    background: radial-gradient(closest-side at 40% 42%, color-mix(in oklab, var(--ambient) 60%, transparent), transparent);
   }
 }

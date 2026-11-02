@@ -103,7 +103,7 @@ function Transfers() {
                 <span className="min-w-0 flex-1 truncate">{i.name}</span>
                 <span className={`shrink-0 ${i.state === "failed" ? "text-danger" : "text-muted"}`}>{label}</span>
                 <span className="shrink-0 text-muted">{formatSize(i.size)}</span>
-                {i.state === "failed" && <button type="button" className="text-accent" onClick={() => uploads.retry(i.key)}>Retry</button>}
+                {i.state === "failed" && <button type="button" className="font-semibold text-social-ink" onClick={() => uploads.retry(i.key)}>Retry</button>}
                 {["queued", "uploading", "retrying", "failed"].includes(i.state) && (
                   <button type="button" aria-label={`Cancel ${i.name}`} className="text-muted hover:text-fg" onClick={() => uploads.cancel(i.key)}>
                     <CloseIcon className="h-3.5 w-3.5" />

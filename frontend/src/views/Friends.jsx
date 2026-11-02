@@ -1,4 +1,5 @@
-import { findPeople, FriendsList, useActivity } from "../components/FriendsRail";
+import { findPeople, FriendsList } from "../components/FriendsRail";
+import { useActivity } from "../lib/activity";
 import { PageHeader } from "../components/Grid";
 
 export default function Friends() {
