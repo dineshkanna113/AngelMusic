@@ -50,8 +50,8 @@ function Lobby() {
           <p className="text-sm text-ink/80">Ask the host for their 6-character code.</p>
           <label className="grid gap-1.5">
             <span className="text-sm font-semibold text-ink">Code</span>
-            <input className="input uppercase tracking-[0.3em]" maxLength={6} autoComplete="off" value={code}
-              onChange={(e) => setCode(e.target.value.replace(/[^a-z0-9]/gi, ""))} />
+            <input className="input font-display text-lg font-bold" maxLength={6} autoComplete="off" value={code}
+              onChange={(e) => setCode(e.target.value.replace(/[^a-z0-9]/gi, "").toUpperCase())} />
           </label>
           <div><button className="btn-secondary" disabled={code.trim().length !== 6}>Join</button></div>
         </form>
