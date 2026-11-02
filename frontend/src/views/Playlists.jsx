@@ -108,6 +108,7 @@ export function PlaylistView({ id }) {
   const [error, setError] = useState("");
   const token = useStreamTokenValue();
   const me = useSession()?.user?.username;
+  const isAdmin = useSession()?.user?.is_admin;
 
   const load = useCallback(() => {
     api(`/api/playlists/${id}`).then(setPl).catch((err) => setError(err.message));
@@ -164,7 +165,7 @@ export function PlaylistView({ id }) {
       toastError(err);
     }
   };
-  const kind = pl.collaborative ? "Collaborative playlist" : pl.visibility === "public" ? "Public playlist" : "Playlist";
+  const kind = pl.featured ? "Featured on Browse" : pl.collaborative ? "Collaborative playlist" : pl.visibility === "public" ? "Public playlist" : "Playlist";
   const cover = pl.tracks.find((t) => t.has_cover);
   return (
     <>
@@ -191,6 +192,11 @@ export function PlaylistView({ id }) {
                   </MenuItem>
                   {pl.collaborative && (
                     <MenuItem close={close} onSelect={() => manageCollaborators(pl, me)}>Collaborators…</MenuItem>
+                  )}
+                  {isAdmin && (
+                    <MenuItem close={close} onSelect={() => save({ featured: !pl.featured })}>
+                      {pl.featured ? "Remove from Browse" : "Feature on Browse"}
+                    </MenuItem>
                   )}
                   <MenuItem icon={TrashIcon} close={close} danger onSelect={destroy}>Delete playlist</MenuItem>
                 </>

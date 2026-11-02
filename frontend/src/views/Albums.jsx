@@ -3,14 +3,17 @@ import CollectionActions from "../components/CollectionActions";
 import FollowButton from "../components/FollowButton";
 import Meta from "../components/Meta";
 import Cover from "../components/Cover";
-import { AlbumGrid, ArtistGrid, PageHeader, Select } from "../components/Grid";
+import { editBio } from "../components/BioDialog";
+import { AlbumGrid, ArtistGrid, PageHeader, Section, Select } from "../components/Grid";
+import { Artifact } from "../components/Stickers";
 import TrackList from "../components/TrackList";
-import { formatResolution, formatTime, plural } from "../lib/format";
-import { useStreamTokenValue } from "../lib/hooks";
+import { formatResolution, formatTime, headingSize, plural } from "../lib/format";
+import { useSession, useStreamTokenValue } from "../lib/hooks";
 import { useLibrary } from "../lib/library";
 import { href } from "../lib/router";
 import { api } from "../lib/api";
 import { social } from "../lib/social";
+import { toast, toastError } from "../lib/toast";
 
 const ALBUM_SORTS = {
   artist: null,
@@ -84,44 +87,72 @@ export function AlbumView({ id }) {
 }
 
 export function ArtistView({ id }) {
-  const [following, setFollowing] = useState(null);
-  useEffect(() => {
-    setFollowing(null);
-    api("/api/me/artists").then((d) => setFollowing(d.artists.some((a) => a.id === id))).catch(() => {});
-  }, [id]);
   const { artists, tracks } = useLibrary();
   const token = useStreamTokenValue();
+  const isAdmin = useSession()?.user?.is_admin;
   const artist = artists.find((a) => a.id === id);
+  // Bio, follower count and all-listener top tracks come from the server; the albums and
+  // everything playable come from the library the app already holds, so offline still works.
+  const [info, setInfo] = useState(null);
+  useEffect(() => {
+    setInfo(null);
+    api(`/api/artists/${id}`).then(setInfo).catch(() => setInfo(null));
+  }, [id]);
   const all = useMemo(() => artist?.albums.flatMap((a) => a.tracks) ?? [], [artist]);
-  const top = useMemo(() => [...all].sort((a, b) => b.play_count - a.play_count).slice(0, 5), [all]);
+  const discography = useMemo(
+    () => [...(artist?.albums ?? [])].sort((a, b) => (b.year || "").localeCompare(a.year || "") || a.name.localeCompare(b.name)),
+    [artist],
+  );
   if (!artist) return <p className="text-sm text-muted">{tracks === null ? "Loading…" : "Artist not found."}</p>;
 
+  const popular = info?.top_tracks ?? [];
+  const editBioClick = async () => {
+    const bio = await editBio(artist.name, info?.bio ?? "");
+    if (bio === null) return;
+    try {
+      setInfo(await api(`/api/artists/${id}/bio`, { method: "PUT", body: { bio } }));
+      toast(bio ? "Bio saved" : "Bio removed");
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
   return (
-    <>
-      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end">
-        <Cover track={artist.cover} token={token} className="aspect-square w-40" rounded="rounded-full" eager />
-        <div className="min-w-0">
-          <p className="text-xs font-medium text-muted">Artist</p>
-          <h1 className="font-display mt-1 text-3xl">{artist.name}</h1>
-          <Meta className="mt-1 text-sm text-muted" parts={[plural(artist.albums.length, "album"), plural(artist.track_count, "track")]} />
+    <div className="relative z-10">
+      <header className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end">
+        <div className="cover-sticker w-44 shrink-0 sm:w-56" style={{ "--tilt": "-3deg" }}>
+          <Cover track={artist.cover} token={token} className="aspect-square w-full" rounded="" eager />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h1 className={`chrome break-words pb-2 leading-[1.1] ${headingSize(artist.name)}`}>{artist.name}</h1>
+          <Meta className="mt-1 text-sm text-muted" parts={[
+            info && plural(info.followers, "follower"),
+            plural(artist.albums.length, "album"),
+            plural(artist.track_count, "track"),
+          ]} />
+          {info?.bio && <p className="mt-3 max-w-2xl whitespace-pre-line text-fg-2">{info.bio}</p>}
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <CollectionActions tracks={all} />
-            {following !== null && (
-              <FollowButton key={`${artist.id}-${following}`} following={following}
-                onToggle={(on) => social.followArtist(artist.id, on)} className="h-9 px-4" />
+            {info && (
+              <FollowButton key={`${artist.id}-${info.following}`} following={info.following}
+                onToggle={(on) => social.followArtist(artist.id, on)} className="h-9 px-4"
+                onChange={(on) => setInfo((cur) => cur && { ...cur, following: on, followers: Math.max(0, cur.followers + (on ? 1 : -1)) })} />
+            )}
+            {isAdmin && info && (
+              <button type="button" className="btn-ghost" onClick={editBioClick}>{info.bio ? "Edit bio" : "Add a bio"}</button>
             )}
           </div>
         </div>
-      </div>
-      {top.some((t) => t.play_count > 0) && (
-        <section className="mb-8">
-          <h2 className="font-display mb-2 text-lg">Most played</h2>
-          <TrackList tracks={top} />
-        </section>
+      </header>
+      {popular.length > 0 && (
+        <Section title="Popular" art={<Artifact kind="drum" size={38} tilt={10} />}>
+          <TrackList tracks={popular} />
+        </Section>
       )}
-      <h2 className="font-display mb-3 text-lg">Albums</h2>
-      <AlbumGrid albums={artist.albums} />
-    </>
+      <Section title="Discography" art={<Artifact kind="vinyl" size={40} tilt={-10} />}>
+        <AlbumGrid albums={discography} />
+      </Section>
+    </div>
   );
 }
 

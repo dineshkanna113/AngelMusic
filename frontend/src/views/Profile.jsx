@@ -3,7 +3,7 @@ import Avatar from "../components/Avatar";
 import Cover from "../components/Cover";
 import FollowButton from "../components/FollowButton";
 import Meta from "../components/Meta";
-import { formatTime, plural } from "../lib/format";
+import { formatTime, headingSize, plural } from "../lib/format";
 import { useStreamTokenValue } from "../lib/hooks";
 import { useLibrary } from "../lib/library";
 import { href } from "../lib/router";
@@ -85,7 +85,7 @@ export default function Profile({ username }) {
       <header className="flex flex-col gap-6 border-b border-line pb-8 sm:flex-row sm:items-end">
         <Avatar person={prof} className="h-32 w-32 text-5xl sm:h-40 sm:w-40" />
         <div className="min-w-0 flex-1">
-          <h1 className="title-display text-[clamp(2.5rem,7vw,4.5rem)] leading-none">{prof.display_name}</h1>
+          <h1 className={`title-display break-words leading-none ${headingSize(prof.display_name)}`}>{prof.display_name}</h1>
           <p className="mt-2 text-muted">
             @{prof.username}{prof.follows_you && <span className="ml-3 font-semibold text-social-ink">Follows you</span>}
           </p>

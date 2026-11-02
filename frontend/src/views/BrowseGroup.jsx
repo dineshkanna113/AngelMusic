@@ -3,7 +3,7 @@ import CollectionActions from "../components/CollectionActions";
 import Meta from "../components/Meta";
 import TrackList from "../components/TrackList";
 import { groupBy } from "../lib/browse";
-import { formatTime, plural } from "../lib/format";
+import { formatTime, headingSize, plural } from "../lib/format";
 import { useLibrary } from "../lib/library";
 import { href } from "../lib/router";
 
@@ -29,7 +29,7 @@ export default function BrowseGroup({ kind, groupKey }) {
     <>
       <div className="mb-6">
         <p className="text-sm font-bold text-social-ink">{TITLES[kind]}</p>
-        <h1 className="chrome mt-1 pb-2 text-[clamp(2.2rem,6vw,4rem)] leading-[1.1]">{group.label}</h1>
+        <h1 className={`chrome mt-1 break-words pb-2 leading-[1.1] ${headingSize(group.label)}`}>{group.label}</h1>
         <Meta className="text-sm text-muted" parts={[plural(group.count, "song"), formatTime(duration)]} />
         <div className="mt-4"><CollectionActions tracks={group.tracks} /></div>
       </div>

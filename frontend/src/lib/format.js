@@ -32,4 +32,11 @@ export function timeAgo(value, now = Date.now()) {
   return `${Math.floor(s / 86400)} d ago`;
 }
 
+/**
+ * Syne is wide, so a long name set at the biggest size breaks mid-word. Pick a size class by
+ * length: short names stay big, long ones step down.
+ */
+export const headingSize = (text) =>
+  text.length <= 10 ? "text-[clamp(2.4rem,5.5vw,4.2rem)]" : text.length <= 18 ? "text-[clamp(1.9rem,3.8vw,3rem)]" : "text-[clamp(1.5rem,2.8vw,2.3rem)]";
+
 export const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
