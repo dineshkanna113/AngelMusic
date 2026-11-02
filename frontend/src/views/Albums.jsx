@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import { manageAccess } from "../components/AccessDialog";
+import Avatar from "../components/Avatar";
 import CollectionActions from "../components/CollectionActions";
+import DropCard from "../components/DropCard";
+import { growth } from "../lib/growth";
 import FollowButton from "../components/FollowButton";
 import Meta from "../components/Meta";
 import Cover from "../components/Cover";
@@ -98,6 +102,11 @@ export function ArtistView({ id }) {
     setInfo(null);
     api(`/api/artists/${id}`).then(setInfo).catch(() => setInfo(null));
   }, [id]);
+  const [nextDrop, setNextDrop] = useState(null);
+  useEffect(() => {
+    setNextDrop(null);
+    growth.drops(id).then((list) => setNextDrop(list.find((d) => d.status !== "out") ?? null)).catch(() => setNextDrop(null));
+  }, [id]);
   const all = useMemo(() => artist?.albums.flatMap((a) => a.tracks) ?? [], [artist]);
   const discography = useMemo(
     () => [...(artist?.albums ?? [])].sort((a, b) => (b.year || "").localeCompare(a.year || "") || a.name.localeCompare(b.name)),
@@ -138,15 +147,39 @@ export function ArtistView({ id }) {
                 onToggle={(on) => social.followArtist(artist.id, on)} className="h-9 px-4"
                 onChange={(on) => setInfo((cur) => cur && { ...cur, following: on, followers: Math.max(0, cur.followers + (on ? 1 : -1)) })} />
             )}
-            {isAdmin && info && (
+            {info?.can_manage && (
               <button type="button" className="btn-ghost" onClick={editBioClick}>{info.bio ? "Edit bio" : "Add a bio"}</button>
+            )}
+            {info?.can_manage && <a className="btn-ghost" href={href("studio")}>Studio</a>}
+            {isAdmin && info && (
+              <button type="button" className="btn-ghost" onClick={() => manageAccess({ id: artist.id, name: artist.name })}>Manage access</button>
             )}
           </div>
         </div>
       </header>
+      {nextDrop && (
+        <Section title="Dropping soon" art={<Artifact kind="cassette" size={38} tilt={-8} />}>
+          <div className="px-2"><DropCard drop={nextDrop} /></div>
+        </Section>
+      )}
       {popular.length > 0 && (
         <Section title="Popular" art={<Artifact kind="drum" size={38} tilt={10} />}>
           <TrackList tracks={popular} />
+        </Section>
+      )}
+      {info?.top_fans?.length > 0 && (
+        <Section title="Top fans" art={<Artifact kind="sparkle" size={34} tilt={-8} />}>
+          <ul className="flex flex-wrap gap-4">
+            {info.top_fans.map((f) => (
+              <li key={f.person.id}>
+                <a href={href("u", f.person.username)} className="flex items-center gap-3 rounded-pill bg-surface-1/80 py-1.5 pl-1.5 pr-4 shadow-sticker">
+                  <Avatar person={f.person} className="h-9 w-9 text-sm" ring={false} />
+                  <span className="text-sm"><span className="block font-semibold">{f.person.display_name}</span>
+                    <span className="block text-xs text-muted">{plural(f.plays, "play")}</span></span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </Section>
       )}
       <Section title="Discography" art={<Artifact kind="vinyl" size={40} tilt={-10} />}>

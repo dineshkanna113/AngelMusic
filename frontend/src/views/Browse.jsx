@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Cover from "../components/Cover";
+import DropCard from "../components/DropCard";
+import { growth } from "../lib/growth";
 import { AlbumGrid, PageHeader, Section } from "../components/Grid";
 import { Artifact, StickerLabel } from "../components/Stickers";
 import { api } from "../lib/api";
@@ -57,9 +59,11 @@ function ChartBanner() {
 export default function Browse() {
   const { tracks, albums, offlineMode } = useLibrary();
   const [editorial, setEditorial] = useState([]);
+  const [drops, setDrops] = useState([]);
   useEffect(() => {
     if (offlineMode) return;
     api("/api/editorial").then((d) => setEditorial(d.playlists)).catch(() => setEditorial([]));
+    growth.drops().then((list) => setDrops(list.filter((d) => d.status !== "out"))).catch(() => setDrops([]));
   }, [offlineMode]);
 
   const genres = useMemo(() => groupBy(tracks ?? [], "genre"), [tracks]);
@@ -71,6 +75,13 @@ export default function Browse() {
     <div className="relative z-10">
       <PageHeader title="Browse" subtitle="Find your next favourite." />
       {!offlineMode && <ChartBanner />}
+      {drops.length > 0 && (
+        <Section title="Upcoming drops" art={<Artifact kind="cassette" size={40} tilt={-8} />}>
+          <ul className="flex gap-6 overflow-x-auto px-2 pb-4 pt-2">
+            {drops.map((d, i) => <li key={d.id}><DropCard drop={d} tilt={[-2, 1.5, -1][i % 3]} /></li>)}
+          </ul>
+        </Section>
+      )}
       {fresh.length > 0 && (
         <Section title="New releases" art={<Artifact kind="sparkle" size={34} tilt={-12} />}
           action={<a className="text-sm font-semibold text-muted hover:text-fg" href={href("albums")}>All albums</a>}>

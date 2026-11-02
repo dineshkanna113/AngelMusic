@@ -12,6 +12,8 @@ import { player } from "./lib/player";
 import { useRoute } from "./lib/router";
 import { AlbumView, Albums, ArtistView, Artists, Favorites } from "./views/Albums";
 import Downloads from "./views/Downloads";
+import Drop from "./views/Drop";
+import Studio from "./views/Studio";
 import Friends from "./views/Friends";
 import Browse from "./views/Browse";
 import BrowseGroup from "./views/BrowseGroup";
@@ -48,6 +50,8 @@ function View() {
     case "friends": return <Friends />;
     case "browse": return params[0] ? <BrowseGroup kind={params[0]} groupKey={params[1]} /> : <Browse />;
     case "chart": return <Chart />;
+    case "studio": return <Studio />;
+    case "drop": return <Drop slug={params[0]} />;
     case "upload": return <Upload />;
     case "review": return <Review />;
     default: return <Home />;

@@ -7,8 +7,9 @@ import { href, navigate, useRoute } from "../lib/router";
 import { useToasts } from "../lib/toast";
 import {
   AlbumIcon, ArtistIcon, BrowseIcon, CheckIcon, FriendsIcon, HeartIcon, HomeIcon, OfflineIcon, PlaylistIcon, PlusIcon, SearchIcon, SettingsIcon,
-  SongsIcon, UploadIcon,
+  SongsIcon, UploadIcon, WaveIcon,
 } from "./Icons";
+import { useStudioArtists } from "../lib/useStudio";
 import { Menu, MenuItem } from "./Menu";
 import { newPlaylistWith } from "./TrackMenu";
 import { StickerLabel } from "./Stickers";
@@ -68,6 +69,8 @@ export function Sidebar() {
   const { playlists } = useLibrary();
   const user = useSession()?.user;
   const pending = usePendingCount(user?.is_admin, section);
+  const owned = useStudioArtists();
+  const manager = user?.is_admin || owned?.length > 0;
   const list = useRef(null);
   const [indicator, setIndicator] = useState(null);
   useEffect(() => {
@@ -77,7 +80,7 @@ export function Sidebar() {
   useLayoutEffect(() => {
     const el = list.current?.querySelector('[aria-current="page"]');
     setIndicator(el ? { top: el.offsetTop, height: el.offsetHeight } : null);
-  }, [section, user?.can_upload, user?.is_admin]);
+  }, [section, user?.can_upload, user?.is_admin, manager]);
   return (
     <nav aria-label="Main" className="glass relative hidden w-60 shrink-0 flex-col gap-1 overflow-y-auto px-3 pb-4 pt-5 md:flex">
       <a href="#/" className="mb-6 px-3" aria-label="Yaapu home">
@@ -90,6 +93,7 @@ export function Sidebar() {
           <NavLink key={to} to={to} label={label} icon={Icon} active={section === to} />
         ))}
         {user?.can_upload && <NavLink to="upload" label="Upload" icon={UploadIcon} active={section === "upload"} />}
+        {manager && <NavLink to="studio" label="Studio" icon={WaveIcon} active={section === "studio"} />}
         {user?.is_admin && <NavLink to="review" label="Review" icon={CheckIcon} active={section === "review"} badge={pending} />}
       </div>
       <div className="mt-8 flex items-center justify-between px-3">
@@ -137,6 +141,7 @@ export function TopBar() {
   const { section, params } = useRoute();
   const session = useSession();
   const { offlineMode, scanning } = useLibrary();
+  const owned = useStudioArtists();
   const routeQuery = section === "search" ? params[0] ?? "" : "";
   const [query, setQuery] = useState(routeQuery);
 
@@ -188,6 +193,7 @@ export function TopBar() {
               <MenuItem icon={SongsIcon} close={close} onSelect={() => navigate("recent")}>Recently played</MenuItem>
               {session?.user?.can_upload && <MenuItem icon={UploadIcon} close={close} onSelect={() => navigate("upload")}>Upload music</MenuItem>}
               {session?.user?.is_admin && <MenuItem icon={CheckIcon} close={close} onSelect={() => navigate("review")}>Review uploads</MenuItem>}
+              {(session?.user?.is_admin || owned?.length > 0) && <MenuItem icon={WaveIcon} close={close} onSelect={() => navigate("studio")}>Studio</MenuItem>}
               <MenuItem close={close} onSelect={() => { player.reset(); library.reset(); auth.logout(); }}>Sign out</MenuItem>
             </>
           )}

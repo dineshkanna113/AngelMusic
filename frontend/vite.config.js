@@ -7,7 +7,11 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       // Same-origin in dev, matching production where the backend serves the built app.
-      proxy: { "/api": { target: env.VITE_PROXY_TARGET || "http://localhost:8000", changeOrigin: true } },
+      proxy: {
+        "/api": { target: env.VITE_PROXY_TARGET || "http://localhost:8000", changeOrigin: true },
+        // Public smart-link pages for drops.
+        "^/s/": { target: env.VITE_PROXY_TARGET || "http://localhost:8000", changeOrigin: true },
+      },
     },
   };
 });
