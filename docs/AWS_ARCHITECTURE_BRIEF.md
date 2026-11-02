@@ -93,7 +93,8 @@ make possible. Some are application changes we will make with you; please tell u
 | The app sends the **whole library** to the client and filters it there (genres, new releases, search) | Fine for thousands of tracks; unusable for a public catalogue. | Paged catalogue API and a search service (for example OpenSearch). This is a significant application change. |
 | Play counts are written by the client when playback passes a threshold | Not trustworthy enough for royalty reporting. | Server-side stream sessions and an append-only play-event stream with deduplication. |
 | Charts query raw play rows | Slow at volume. | Pre-aggregated counters or a small analytics store; refresh on a schedule. |
-| Presence heartbeat every 60 s, activity polled every 20 s | Wasteful at scale; no live push. | Redis for presence; WebSocket service for rooms and live updates (Phase 5). |
+| Presence heartbeat every 60 s, activity polled every 20 s | Wasteful at scale; no live push. | Redis for presence and live updates. |
+| Rooms keep their WebSocket connections in one process (`app/hub.py`); playback state is in the database | Listeners on a different server never hear the host. WebSocket connections are long-lived, so they also affect load balancer and deploy design. | Shared pub/sub (Redis) behind the hub, sticky or stateless WebSocket handling, graceful connection draining on deploy. |
 | Single secret key signs all tokens and derives the encryption of app passwords | Hard to rotate across instances. | Secrets Manager with versioned keys and a rotation plan. |
 
 ## 7. Requirements
@@ -187,7 +188,7 @@ make possible. Some are application changes we will make with you; please tell u
 | 1 to 3 (done) | New design, social layer, discovery | Current single server is enough for a private beta. |
 | Before public launch | None; engineering only | PostgreSQL, S3 and CDN delivery, queue and workers, observability, WAF, CI/CD, environments. |
 | 4 | Artist growth tools: drops, pre-saves, share links, statistics | Scheduled jobs, analytics aggregation, public share pages at the edge. |
-| 5 | Listening rooms, shared "blend" playlists, yearly recap | WebSocket service, Redis, pub/sub. |
+| 5 (built) | Listening rooms, blends, Rewind recap | Already in the code: a WebSocket endpoint with an in-process hub. Needs Redis pub/sub and WebSocket-aware load balancing before more than one server. |
 | 6 | Subscriptions, payments, label deliveries, royalty reports | Payment-provider webhooks, DDEX intake pipeline, immutable play-event store, reporting jobs. |
 | Mobile | iOS and Android apps | Push notifications, deep-link hosting, stable versioned API. |
 

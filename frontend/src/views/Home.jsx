@@ -61,6 +61,15 @@ export default function Home() {
           <Artifact kind="vinyl" size={84} tilt={12} className="shrink-0" />
         </a>
       )}
+      {!offlineMode && (
+        <a href={href("room")} className="relative z-10 -mt-3 mb-8 flex items-center justify-between gap-4 overflow-hidden rounded-lg border-[5px] border-white bg-sky p-5 shadow-card md:p-6">
+          <span>
+            <StickerLabel tone="ink" tilt={3}>rooms</StickerLabel>
+            <span className="mt-2 block font-display text-2xl font-bold text-ink md:text-3xl">Listen together, in sync</span>
+          </span>
+          <Artifact kind="boombox" size={84} tilt={-8} className="shrink-0" />
+        </a>
+      )}
       {mixes.length > 0 && (
         <Section title="Made for you" art={<Artifact kind="sparkle" size={34} tilt={-12} />}>
           <MixGrid mixes={mixes} />

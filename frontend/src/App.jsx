@@ -14,6 +14,9 @@ import { AlbumView, Albums, ArtistView, Artists, Favorites } from "./views/Album
 import Downloads from "./views/Downloads";
 import Drop from "./views/Drop";
 import Rewind from "./views/Rewind";
+import Room from "./views/Room";
+import RoomBar from "./components/RoomBar";
+import { roomSession } from "./lib/rooms";
 import Studio from "./views/Studio";
 import Friends from "./views/Friends";
 import Browse from "./views/Browse";
@@ -53,6 +56,7 @@ function View() {
     case "chart": return <Chart />;
     case "studio": return <Studio />;
     case "rewind": return <Rewind />;
+    case "room": return <Room code={params[0]} />;
     case "drop": return <Drop slug={params[0]} />;
     case "upload": return <Upload />;
     case "review": return <Review />;
@@ -76,6 +80,7 @@ function Authenticated() {
     return () => {
       window.removeEventListener("online", reload);
       player.onPlayed = null;
+      roomSession.leave();
     };
   }, []);
 
@@ -127,6 +132,7 @@ function Authenticated() {
         <FriendsRail />
       </div>
       <footer ref={footerRef}>
+        <RoomBar />
         <PlayerBar />
         <MobileNav />
       </footer>

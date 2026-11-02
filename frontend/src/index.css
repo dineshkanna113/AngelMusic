@@ -225,3 +225,13 @@
     background: radial-gradient(closest-side at 40% 42%, color-mix(in oklab, var(--ambient) 60%, transparent), transparent);
   }
 }
+
+/* Reactions in a room float up and fade. Nothing moves for people who prefer reduced motion. */
+@keyframes yp-float {
+  from { transform: translateY(0) rotate(-6deg); opacity: 1; }
+  to { transform: translateY(-16rem) rotate(8deg); opacity: 0; }
+}
+.yp-float { animation: yp-float 3.4s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .yp-float { animation: none; opacity: 0.9; }
+}
