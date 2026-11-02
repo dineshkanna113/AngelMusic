@@ -32,7 +32,7 @@ export function PeopleList({ people, empty = "No one here yet." }) {
   );
 }
 
-function PlaylistGrid({ playlists }) {
+export function PlaylistGrid({ playlists }) {
   const { byId } = useLibrary();
   const token = useStreamTokenValue();
   if (!playlists.length) return <p className="py-6 text-sm text-muted">No public playlists yet.</p>;

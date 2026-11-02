@@ -6,7 +6,7 @@ import { player } from "../lib/player";
 import { href, navigate, useRoute } from "../lib/router";
 import { useToasts } from "../lib/toast";
 import {
-  AlbumIcon, ArtistIcon, CheckIcon, FriendsIcon, HeartIcon, HomeIcon, OfflineIcon, PlaylistIcon, PlusIcon, SearchIcon, SettingsIcon,
+  AlbumIcon, ArtistIcon, BrowseIcon, CheckIcon, FriendsIcon, HeartIcon, HomeIcon, OfflineIcon, PlaylistIcon, PlusIcon, SearchIcon, SettingsIcon,
   SongsIcon, UploadIcon,
 } from "./Icons";
 import { Menu, MenuItem } from "./Menu";
@@ -16,6 +16,7 @@ import Wordmark from "./Wordmark";
 
 const NAV = [
   ["", "Home", HomeIcon],
+  ["browse", "Browse", BrowseIcon],
   ["songs", "Songs", SongsIcon],
   ["albums", "Albums", AlbumIcon],
   ["artists", "Artists", ArtistIcon],
@@ -38,6 +39,9 @@ function usePendingCount(enabled, section) {
   }, [enabled, section]);
   return count;
 }
+
+// Phone tab bar picks its five by key, so reordering the sidebar can't change it.
+const navItem = (key) => NAV.find(([to]) => to === key);
 
 function NavLink({ to, label, icon: Icon, active, compact = false, badge = 0 }) {
   return (
@@ -122,7 +126,7 @@ export function MobileNav() {
   const { section } = useRoute();
   return (
     <nav aria-label="Main" className="mx-3 mb-3 flex gap-1 rounded-pill bg-surface-1/90 p-1.5 shadow-card md:hidden">
-      {[NAV[0], NAV[1], ["friends", "Friends", FriendsIcon], NAV[5], ["settings", "Settings", SettingsIcon]].map(([to, label, Icon]) => (
+      {[navItem(""), navItem("browse"), navItem("friends"), navItem("playlists"), ["settings", "Settings", SettingsIcon]].map(([to, label, Icon]) => (
         <NavLink key={to} to={to} label={label} icon={Icon} active={section === to} compact />
       ))}
     </nav>

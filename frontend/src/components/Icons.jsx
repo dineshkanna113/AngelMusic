@@ -1,6 +1,6 @@
 // App icons: Phosphor (MIT), wrapped so call sites keep their names and Tailwind sizing.
 import {
-  ArrowCircleDownIcon, CaretDownIcon, CaretUpIcon, CheckIcon as PhCheck, DiscIcon as PhDisc, DotsSixVerticalIcon,
+  ArrowCircleDownIcon, CaretDownIcon, CompassIcon, CaretUpIcon, CheckIcon as PhCheck, DiscIcon as PhDisc, DotsSixVerticalIcon,
   DotsThreeIcon, DownloadSimpleIcon, GearSixIcon, HeartIcon as PhHeart, HouseIcon, MagnifyingGlassIcon,
   MicrophoneStageIcon, MoonIcon as PhMoon, MusicNoteIcon, PauseIcon as PhPause, PlayIcon as PhPlay, PlaylistIcon as PhPlaylist,
   PlusIcon as PhPlus, QueueIcon as PhQueue, RadioIcon as PhRadio, RepeatIcon as PhRepeat, ShareFatIcon, ShuffleIcon as PhShuffle,
@@ -45,6 +45,7 @@ export const ArtistIcon = make(UserIcon, "fill");
 export const PlaylistIcon = make(PhPlaylist, "fill");
 export const OfflineIcon = make(ArrowCircleDownIcon, "fill");
 export const SettingsIcon = make(GearSixIcon, "fill");
+export const BrowseIcon = make(CompassIcon, "fill");
 export const FriendsIcon = make(UsersThreeIcon, "fill");
 export const UploadIcon = make(UploadSimpleIcon, "bold");
 export const MoonIcon = make(PhMoon, "fill");

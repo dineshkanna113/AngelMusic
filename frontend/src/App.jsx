@@ -13,6 +13,9 @@ import { useRoute } from "./lib/router";
 import { AlbumView, Albums, ArtistView, Artists, Favorites } from "./views/Albums";
 import Downloads from "./views/Downloads";
 import Friends from "./views/Friends";
+import Browse from "./views/Browse";
+import BrowseGroup from "./views/BrowseGroup";
+import Chart from "./views/Chart";
 import Home from "./views/Home";
 import NowPlaying from "./views/NowPlaying";
 import Profile from "./views/Profile";
@@ -43,6 +46,8 @@ function View() {
     case "now": return <NowPlaying />;
     case "u": return <Profile username={params[0]} />;
     case "friends": return <Friends />;
+    case "browse": return params[0] ? <BrowseGroup kind={params[0]} groupKey={params[1]} /> : <Browse />;
+    case "chart": return <Chart />;
     case "upload": return <Upload />;
     case "review": return <Review />;
     default: return <Home />;

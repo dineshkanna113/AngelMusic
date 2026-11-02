@@ -42,7 +42,7 @@ export function AlbumGrid({ albums, emptyText = "No albums." }) {
           <a href={href("album", a.id)} className="block">
             <p className="mt-3 truncate font-display text-sm font-bold">{a.name}</p>
             <Meta className="text-xs text-muted" parts={[
-              <span key="a" className="truncate">{a.artist}</span>,
+              <span key="a" className="block max-w-full truncate">{a.artist}</span>,
               a.year,
               a.hires && <span key="h" className="font-bold text-social-ink">Hi-Res</span>,
             ]} />
@@ -92,8 +92,8 @@ export function Section({ title, action, art, children }) {
   return (
     <section className="relative z-10 mb-10">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-3 text-2xl">{title}{art}</h2>
-        {action}
+        <h2 className="flex min-w-0 items-center gap-3 text-xl md:text-2xl">{title}{art}</h2>
+        <span className="shrink-0 whitespace-nowrap">{action}</span>
       </div>
       {children}
     </section>
