@@ -217,6 +217,20 @@ def _destination(audio_dir: Path, md: dict, suffix: str) -> Path:
     return target
 
 
+def release_drops(conn, upload_id: str, track_id: str) -> None:
+    """A published upload releases the drops linked to it and lands the track in every pre-saver's favorites."""
+    track = conn.execute("SELECT album_id FROM tracks WHERE id = ?", (track_id,)).fetchone()
+    drops = conn.execute("SELECT id FROM drops WHERE upload_id = ? AND released_at IS NULL", (upload_id,)).fetchall()
+    for d in drops:
+        conn.execute("UPDATE drops SET track_id = ?, album_id = ?, released_at = CURRENT_TIMESTAMP WHERE id = ?",
+                     (track_id, track["album_id"] if track else None, d["id"]))
+        conn.execute(
+            """INSERT OR IGNORE INTO favorites (user_id, track_id)
+               SELECT user_id, ? FROM presaves WHERE drop_id = ? AND user_id IN (SELECT id FROM users)""",
+            (track_id, d["id"]),
+        )
+
+
 def publish(state, upload_id: str, reviewer_id: int | None) -> dict:
     """Write edited tags into the file, move it into the library and index it."""
     settings, db = state.settings, state.db
@@ -244,6 +258,7 @@ def publish(state, upload_id: str, reviewer_id: int | None) -> dict:
                 (PUBLISHED, track_id, rel_path, reviewer_id, upload_id),
             )
             row = conn.execute("SELECT * FROM uploads WHERE id = ?", (upload_id,)).fetchone()
+        release_drops(conn, upload_id, track_id)
     log.info("Published upload %s as %s", upload_id, rel_path)
     return row
 

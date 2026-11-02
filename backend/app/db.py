@@ -169,6 +169,32 @@ CREATE TABLE IF NOT EXISTS artist_owners (
     PRIMARY KEY (artist_id, user_id)
 );
 
+-- A announced release. Linked to an upload; when that upload is published the drop goes "out".
+CREATE TABLE IF NOT EXISTS drops (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug        TEXT NOT NULL UNIQUE,
+    artist_id   TEXT NOT NULL,
+    user_id     INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    title       TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    release_at  TEXT NOT NULL,
+    artwork     TEXT,
+    upload_id   TEXT,
+    track_id    TEXT,
+    album_id    TEXT,
+    released_at TEXT,
+    created_at  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_drops_artist ON drops(artist_id);
+CREATE INDEX IF NOT EXISTS idx_drops_upload ON drops(upload_id);
+
+CREATE TABLE IF NOT EXISTS presaves (
+    drop_id    INTEGER NOT NULL REFERENCES drops(id) ON DELETE CASCADE,
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (drop_id, user_id)
+);
+
 CREATE TABLE IF NOT EXISTS artist_follows (
     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     artist_id  TEXT NOT NULL,

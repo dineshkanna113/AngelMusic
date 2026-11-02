@@ -113,13 +113,31 @@ public playlists. A playlist you can't see is a 404.
 | Call | Notes |
 |---|---|
 | `GET /api/charts?days=7&limit=50` | Most played tracks across all listeners in the window: tracks with `rank` and `plays`. Aggregate only; empty when nothing was played. |
-| `GET /api/artists/{id}` | `{id, name, bio, followers, following, top_tracks (≤5, with plays), albums}`. `bio` is `""` when none. |
-| `PUT /api/artists/{id}/bio {"bio"}` | Admin only; max 1000 characters; empty clears. |
+| `GET /api/artists/{id}` | `{id, name, bio, followers, following, top_tracks (≤5, with plays), albums, can_manage, top_fans (≤5)}`. `bio` is `""` when none. `top_fans` lists only fans who share activity and have a visible profile. |
+| `PUT /api/artists/{id}/bio {"bio"}` | Admin or the artist's owner; max 1000 characters; empty clears. |
 | `GET /api/editorial` | Playlists admins featured on Browse (always public). Admins feature one with `PATCH /api/playlists/{id} {"featured": true}`. |
 
 Tracks also carry `mood` and `language` (display name, e.g. "Tamil"; empty when untagged), read from the
 files' tags. Genre, mood and language browsing and "new releases" are computed in the app from the
 track list (`added_at`), so they need no extra calls.
+
+## Artist growth
+
+Artists come from file tags, not accounts. An admin grants a user access to an artist; that user (the *owner*) and admins can manage it.
+
+| Call | Notes |
+|---|---|
+| `PUT/DELETE /api/artists/{id}/owners/{username}` | Admin only; idempotent; 404 for an unknown artist or user. |
+| `GET /api/studio` | `{artists: [{id, name}]}` the caller manages. Empty for most users. |
+| `GET /api/artists/{id}/stats?days=30` | Owner or admin (403 otherwise). `{days, artist, plays, listeners, followers, series: [{date, plays}] (one per day, zero-filled), top_tracks, top_fans: [{person \| null, plays}], countries, cities}`. Fans who do not share activity appear as `person: null`. `countries` and `cities` are empty unless the server runs behind a CDN that supplies viewer location (`TRUST_GEO_HEADERS=true`). |
+| `POST /api/drops {artist_id, title, description?, release_at, upload_id?}` | Owner or admin. `release_at` is ISO and must be in the future. `upload_id` must be the caller's own unpublished upload; publishing it releases the drop. |
+| `GET /api/drops?artist_id=` | Upcoming and due drops first (soonest first), then drops released in the last 30 days. |
+| `GET /api/drops/{slug}` | A drop: `{id, slug, artist, title, description, release_at, artwork_url, status, presaves, presaved, track_id, album_id, can_manage, share_url}`. `status` is `upcoming`, `dropping_soon` (time passed, track not published yet) or `out`. |
+| `PATCH /api/drops/{id}`, `DELETE /api/drops/{id}` | Owner or admin. |
+| `PUT/DELETE /api/drops/{id}/presave` | Idempotent. 409 once the drop is out. When the drop is released, the track is added to every pre-saver's favorites. |
+| `POST /api/drops/{id}/artwork` (multipart `file`) | Owner or admin; PNG, JPEG or WebP, under 2 MB. Returns `{artwork_url}`. |
+| `GET /api/drop-art/{name}` | Public image. |
+| `GET /s/{slug}` | Public HTML smart link with Open Graph tags; it opens the app at `/#/drop/{slug}`. 404 for an unknown slug. |
 
 ## Uploading (users with `can_upload`)
 
