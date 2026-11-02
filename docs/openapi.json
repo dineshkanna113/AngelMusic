@@ -2724,6 +2724,193 @@
           }
         ]
       }
+    },
+    "/api/charts": {
+      "get": {
+        "tags": [
+          "discover"
+        ],
+        "summary": "Charts",
+        "description": "The most played tracks across all listeners in the last `days` days.",
+        "operationId": "charts_api_charts_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 1,
+              "default": 7,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/artists/{artist_id}": {
+      "get": {
+        "tags": [
+          "discover"
+        ],
+        "summary": "Artist Page",
+        "operationId": "artist_page_api_artists__artist_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "artist_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Artist Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/artists/{artist_id}/bio": {
+      "put": {
+        "tags": [
+          "discover"
+        ],
+        "summary": "Set Bio",
+        "description": "Editorial bio for an artist page; an empty bio clears it.",
+        "operationId": "set_bio_api_artists__artist_id__bio_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "artist_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Artist Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BioBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/editorial": {
+      "get": {
+        "tags": [
+          "discover"
+        ],
+        "summary": "Editorial",
+        "description": "Playlists an admin has featured on Browse, newest first.",
+        "operationId": "editorial_api_editorial_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -2763,6 +2950,20 @@
         },
         "type": "object",
         "title": "Approve"
+      },
+      "BioBody": {
+        "properties": {
+          "bio": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Bio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bio"
+        ],
+        "title": "BioBody"
       },
       "Body_upload_avatar_api_me_avatar_post": {
         "properties": {
@@ -3203,6 +3404,17 @@
               }
             ],
             "title": "Collaborative"
+          },
+          "featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured"
           }
         },
         "type": "object",

@@ -108,6 +108,19 @@ Playlists carry `visibility` (`private`/`public`), `collaborative`, `owner` and 
 (only people you follow or who follow you). Members can reorder and add tracks; viewers read
 public playlists. A playlist you can't see is a 404.
 
+## Discovery
+
+| Call | Notes |
+|---|---|
+| `GET /api/charts?days=7&limit=50` | Most played tracks across all listeners in the window: tracks with `rank` and `plays`. Aggregate only; empty when nothing was played. |
+| `GET /api/artists/{id}` | `{id, name, bio, followers, following, top_tracks (≤5, with plays), albums}`. `bio` is `""` when none. |
+| `PUT /api/artists/{id}/bio {"bio"}` | Admin only; max 1000 characters; empty clears. |
+| `GET /api/editorial` | Playlists admins featured on Browse (always public). Admins feature one with `PATCH /api/playlists/{id} {"featured": true}`. |
+
+Tracks also carry `mood` and `language` (display name, e.g. "Tamil"; empty when untagged), read from the
+files' tags. Genre, mood and language browsing and "new releases" are computed in the app from the
+track list (`added_at`), so they need no extra calls.
+
 ## Uploading (users with `can_upload`)
 
 Resumable, chunked (tus-style). Files go to review; nothing is public until an admin approves.

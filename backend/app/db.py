@@ -155,6 +155,13 @@ CREATE TABLE IF NOT EXISTS presence (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Editorial bio per artist (set by admins); artists themselves come from the scanned tracks.
+CREATE TABLE IF NOT EXISTS artist_info (
+    artist_id  TEXT PRIMARY KEY,
+    bio        TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS artist_follows (
     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     artist_id  TEXT NOT NULL,
@@ -177,6 +184,7 @@ ADDED_COLUMNS = [
     ("users", "share_activity", "INTEGER NOT NULL DEFAULT 1"),
     ("playlists", "visibility", "TEXT NOT NULL DEFAULT 'private'"),
     ("playlists", "collaborative", "INTEGER NOT NULL DEFAULT 0"),
+    ("playlists", "featured", "INTEGER NOT NULL DEFAULT 0"),
 ]
 
 

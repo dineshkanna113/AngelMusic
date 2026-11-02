@@ -54,6 +54,7 @@ class PlaylistPatch(BaseModel):
     track_ids: list[str] | None = Field(default=None, max_length=20000)
     visibility: Literal["private", "public"] | None = None
     collaborative: bool | None = None
+    featured: bool | None = None  # admins only: show on Browse
 
 
 class AddTracks(BaseModel):
@@ -115,7 +116,7 @@ def playlist_summary(conn, row, role: str | None = None) -> dict:
     summary = {
         "id": row["id"], "name": row["name"], "comment": row["comment"], "created_at": row["created_at"],
         "updated_at": row["updated_at"], "track_count": stats["n"], "duration": stats["dur"],
-        "cover_track_id": stats["cover"], "visibility": row["visibility"], "collaborative": bool(row["collaborative"]),
+        "cover_track_id": stats["cover"], "visibility": row["visibility"], "collaborative": bool(row["collaborative"]), "featured": bool(row["featured"]),
         "owner": {"username": owner["username"], "display_name": owner["display_name"] or owner["username"]},
     }
     if role:
@@ -165,8 +166,14 @@ def update_playlist(playlist_id: int, body: PlaylistPatch, request: Request, use
         _row, role = playlist_access(conn, user["id"], playlist_id)
         if body.track_ids is not None:
             _require(role, "owner", "member")
-        if {"name", "comment", "visibility", "collaborative"} & body.model_fields_set:
+        if {"name", "comment", "visibility", "collaborative", "featured"} & body.model_fields_set:
             _require(role, "owner")
+        if body.featured is not None:
+            if not user["is_admin"]:
+                raise HTTPException(status.HTTP_403_FORBIDDEN, "Only admins can feature playlists")
+            # Featuring a playlist makes it public: everyone can open what Browse shows.
+            conn.execute("UPDATE playlists SET featured = ?, visibility = CASE WHEN ? THEN 'public' ELSE visibility END WHERE id = ?",
+                         (int(body.featured), int(body.featured), playlist_id))
         if body.visibility is not None:
             conn.execute("UPDATE playlists SET visibility = ? WHERE id = ?", (body.visibility, playlist_id))
         if body.collaborative is not None:
