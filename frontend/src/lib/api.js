@@ -6,9 +6,10 @@ const SESSION_KEY = "yp.session";
 const listeners = new Set();
 
 export class ApiError extends Error {
-  constructor(status, message) {
+  constructor(status, message, code) {
     super(message);
     this.status = status;
+    this.code = code; // a machine-readable reason from the server, e.g. "premium_required"
   }
 }
 
@@ -131,7 +132,7 @@ export async function api(path, { method = "GET", body, signal, retried = false 
     }
     const detail = data?.detail;
     const message = Array.isArray(detail) ? detail.map((d) => d.msg).join("; ") : detail;
-    throw new ApiError(res.status, message || `Request failed (${res.status})`);
+    throw new ApiError(res.status, message || `Request failed (${res.status})`, data?.code);
   }
   return data;
 }

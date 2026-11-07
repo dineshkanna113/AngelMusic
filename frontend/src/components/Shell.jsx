@@ -10,6 +10,7 @@ import {
   SongsIcon, UploadIcon, WaveIcon,
 } from "./Icons";
 import { useStudioArtists } from "../lib/useStudio";
+import { useBilling } from "../lib/billing";
 import { Menu, MenuItem } from "./Menu";
 import { newPlaylistWith } from "./TrackMenu";
 import { StickerLabel } from "./Stickers";
@@ -142,6 +143,7 @@ export function TopBar() {
   const session = useSession();
   const { offlineMode, scanning } = useLibrary();
   const owned = useStudioArtists();
+  const billing = useBilling();
   const routeQuery = section === "search" ? params[0] ?? "" : "";
   const [query, setQuery] = useState(routeQuery);
 
@@ -193,6 +195,7 @@ export function TopBar() {
               <MenuItem icon={SongsIcon} close={close} onSelect={() => navigate("recent")}>Recently played</MenuItem>
               {session?.user?.can_upload && <MenuItem icon={UploadIcon} close={close} onSelect={() => navigate("upload")}>Upload music</MenuItem>}
               {session?.user?.is_admin && <MenuItem icon={CheckIcon} close={close} onSelect={() => navigate("review")}>Review uploads</MenuItem>}
+              {billing.data?.enabled && !billing.data.plan.premium && <MenuItem icon={PlusIcon} close={close} onSelect={() => navigate("premium")}>Go Premium</MenuItem>}
               {(session?.user?.is_admin || owned?.length > 0) && <MenuItem icon={WaveIcon} close={close} onSelect={() => navigate("studio")}>Studio</MenuItem>}
               <MenuItem close={close} onSelect={() => { player.reset(); library.reset(); auth.logout(); }}>Sign out</MenuItem>
             </>

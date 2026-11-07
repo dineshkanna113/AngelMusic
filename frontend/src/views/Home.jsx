@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import DiscoverList from "../components/DiscoverList";
+import PromoCards from "../components/PromoCard";
 import { AlbumGrid, Section } from "../components/Grid";
 import { Artifact, DotLoops, StickerLabel } from "../components/Stickers";
 import StoryRings from "../components/StoryRings";
@@ -55,6 +56,7 @@ export default function Home() {
           You’re offline. Only tracks saved for offline are playable. <a className="underline" href={href("downloads")}>See downloads</a>
         </p>
       )}
+      <PromoCards className="mb-8" />
       {!offlineMode && (
         <a href={href("rewind")} className="relative z-10 mb-8 flex items-center justify-between gap-4 overflow-hidden rounded-lg border-[5px] border-white bg-social p-5 shadow-card md:p-6">
           <span>

@@ -1,6 +1,6 @@
 // Offline downloads: the original files are stored in Cache Storage and played from
 // there, so saved tracks keep working on a plane, in a tunnel or on a flaky connection.
-import { API_BASE, coverUrl, streamToken } from "./api";
+import { API_BASE, ApiError, coverUrl, streamToken } from "./api";
 
 const CACHE = "yp-offline-v1";
 const META_KEY = "yp.offline.meta";
@@ -63,6 +63,7 @@ class OfflineStore {
       const res = await fetch(`${API_BASE}/api/download/${track.id}?t=${encodeURIComponent(token)}`, {
         signal: controller.signal,
       });
+      if (res.status === 402) throw new ApiError(402, "Offline listening is a Premium feature", "premium_required");
       if (!res.ok || !res.body) throw new Error(`Download failed (${res.status})`);
       const total = Number(res.headers.get("Content-Length")) || track.size;
       const reader = res.body.getReader();

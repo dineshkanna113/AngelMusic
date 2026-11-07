@@ -1,4 +1,5 @@
-import { api, API_BASE, streamToken } from "../lib/api";
+import { api, API_BASE, auth, streamToken } from "../lib/api";
+import { isPremiumUser } from "../lib/billingMath";
 import { useSession } from "../lib/hooks";
 import { library, useLibrary, useOffline } from "../lib/library";
 import { buildRadio } from "../lib/mixes";
@@ -7,6 +8,7 @@ import { player } from "../lib/player";
 import { navigate } from "../lib/router";
 import { toast, toastError } from "../lib/toast";
 import { confirmDialog, promptDialog } from "./Dialog";
+import { showUpgrade } from "./UpgradeDialog";
 import {
   AlbumIcon, ArtistIcon, DownloadIcon, HeartIcon, HeartOutlineIcon, MoreIcon, OfflineIcon, PlaylistIcon, PlusIcon,
   QueueIcon, RadioIcon, ShareIcon, TrashIcon,
@@ -26,15 +28,19 @@ export async function newPlaylistWith(tracks) {
   }
 }
 
+const freePlan = () => !isPremiumUser(auth.session?.user);
+
 export async function saveOffline(tracks) {
   const pending = tracks.filter((t) => !offline.has(t.id));
   if (!pending.length) return;
+  if (freePlan()) { showUpgrade(); return; }
   toast(pending.length === 1 ? `Saving ${pending[0].title} for offline…` : `Saving ${pending.length} tracks for offline…`);
   for (const t of pending) {
     try {
       await offline.save(t);
     } catch (err) {
-      if (err.name !== "AbortError") toastError(err);
+      if (err.code === "premium_required") showUpgrade();
+      else if (err.name !== "AbortError") toastError(err);
       return;
     }
   }
@@ -42,6 +48,7 @@ export async function saveOffline(tracks) {
 }
 
 async function downloadFile(track) {
+  if (freePlan()) { showUpgrade("Downloading files is part of Premium."); return; }
   const token = await streamToken.get();
   const a = document.createElement("a");
   a.href = `${API_BASE}/api/download/${track.id}?t=${encodeURIComponent(token)}`;

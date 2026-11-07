@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Cover from "../components/Cover";
 import DropCard from "../components/DropCard";
+import PromoCards from "../components/PromoCard";
 import { growth } from "../lib/growth";
 import { AlbumGrid, PageHeader, Section } from "../components/Grid";
 import { Artifact, StickerLabel } from "../components/Stickers";
@@ -74,6 +75,7 @@ export default function Browse() {
   return (
     <div className="relative z-10">
       <PageHeader title="Browse" subtitle="Find your next favourite." />
+      <PromoCards className="mb-8" />
       {!offlineMode && <ChartBanner />}
       {drops.length > 0 && (
         <Section title="Upcoming drops" art={<Artifact kind="cassette" size={40} tilt={-8} />}>

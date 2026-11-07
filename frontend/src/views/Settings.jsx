@@ -4,6 +4,8 @@ import Avatar from "../components/Avatar";
 import { PageHeader } from "../components/Grid";
 import { TrashIcon, UploadIcon } from "../components/Icons";
 import { api, API_BASE, auth } from "../lib/api";
+import { billingApi, useBilling } from "../lib/billing";
+import { planSummary } from "../lib/billingMath";
 import { href } from "../lib/router";
 import { usePlayer, useSession } from "../lib/hooks";
 import { library } from "../lib/library";
@@ -299,6 +301,35 @@ const ROLES = [["listener", "Listener"], ["uploader", "Uploader"], ["admin", "Ad
 const roleOf = (u) => (u.is_admin ? "admin" : u.can_upload ? "uploader" : "listener");
 const roleBody = (role) => ({ is_admin: role === "admin", can_upload: role !== "listener" });
 
+function BillingCard() {
+  const { loading, data, error } = useBilling();
+  const [busy, setBusy] = useState(false);
+  if (loading || error || !data) return null;
+  if (!data.enabled) return null; // nothing to sell on this server
+  const summary = planSummary(data.plan, navigator.language);
+  const manage = async () => {
+    setBusy(true);
+    try {
+      window.location.assign((await billingApi.portal()).url);
+    } catch (err) {
+      toastError(err);
+      setBusy(false);
+    }
+  };
+  return (
+    <Card title="Plan" description="Premium adds offline listening and removes promos. Lossless is free for everyone.">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-lg font-bold">{summary.title}</p>
+          {summary.detail && <p className="text-sm text-muted">{summary.detail}</p>}
+        </div>
+        {data.plan.source === "subscription" && <button type="button" className="btn-secondary" disabled={busy} onClick={manage}>Manage billing</button>}
+        {!data.plan.premium && <a className="btn-primary" href={href("premium")}>Go Premium</a>}
+      </div>
+    </Card>
+  );
+}
+
 function UsersAdmin({ me }) {
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({ username: "", password: "", role: "listener" });
@@ -327,6 +358,18 @@ function UsersAdmin({ me }) {
       toastError(err);
     }
   };
+  const grant = async (u) => {
+    const value = await promptDialog({ title: `Premium for ${u.username}`, label: "Free Premium until (YYYY-MM-DD). Leave a past date to remove.", initial: u.comp_until ? u.comp_until.slice(0, 10) : "", confirmLabel: "Save" });
+    if (!value) return;
+    try {
+      const past = new Date(value) < new Date();
+      await billingApi.comp(u.id, past ? null : value);
+      toast(past ? `Premium gift removed for ${u.username}` : `${u.username} has Premium until ${value}`);
+      load();
+    } catch (err) {
+      toastError(err);
+    }
+  };
   const resetPassword = async (u) => {
     const pw = await promptDialog({ title: `New password for ${u.username}`, label: "At least 8 characters", confirmLabel: "Set password" });
     if (pw) patch(u, { password: pw }, `Password reset; ${u.username} was signed out everywhere`);
@@ -348,6 +391,9 @@ function UsersAdmin({ me }) {
               className="rounded-md border border-line bg-surface-2 px-2 py-1 text-xs">
               {ROLES.map(([r, label]) => <option key={r} value={r}>{label}</option>)}
             </select>
+            <button type="button" className="btn-ghost text-xs" onClick={() => grant(u)}>
+              {u.comp_until && new Date(`${u.comp_until.replace(" ", "T")}Z`) > new Date() ? `Premium to ${u.comp_until.slice(0, 10)}` : "Gift Premium"}
+            </button>
             <button type="button" className="btn-ghost text-xs" onClick={() => resetPassword(u)}>Reset password</button>
             {u.id !== me.id && (
               <button type="button" className="grid h-8 w-8 place-items-center text-muted hover:text-danger" aria-label={`Delete ${u.username}`} onClick={() => remove(u)}>
@@ -393,6 +439,7 @@ export default function Settings() {
     <div className="max-w-3xl">
       <PageHeader title="Settings" subtitle={`Signed in as ${user.username}${user.is_admin ? " (admin)" : ""}`} />
       <ProfileCard username={user.username} />
+      <BillingCard />
       <Card title="Playback">
         <div className="grid gap-5">
           <div>
@@ -429,6 +476,11 @@ export default function Settings() {
       </Card>
       {user.is_admin && <LibraryAdmin />}
       {user.is_admin && <UsersAdmin me={user} />}
+      {user.is_admin && (
+        <Card title="Promos" description="Cards Free listeners see on Home and Browse. Premium listeners never see them.">
+          <a className="btn-secondary" href={href("promos")}>Manage promos</a>
+        </Card>
+      )}
     </div>
   );
 }
