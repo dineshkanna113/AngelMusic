@@ -3634,6 +3634,55 @@
         ]
       }
     },
+    "/api/recommendations/discover": {
+      "get": {
+        "tags": [
+          "recommendations"
+        ],
+        "summary": "Discover",
+        "description": "Tracks you have not played, from what listeners like you play and what matches your taste.\nEach track carries `reason: {kind: listeners | taste | popular, because}`.",
+        "operationId": "discover_api_recommendations_discover_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 30,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rooms": {
       "post": {
         "tags": [

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import DiscoverList from "../components/DiscoverList";
 import { AlbumGrid, Section } from "../components/Grid";
 import { Artifact, DotLoops, StickerLabel } from "../components/Stickers";
 import StoryRings from "../components/StoryRings";
@@ -13,6 +14,7 @@ import { href } from "../lib/router";
 export default function Home() {
   const { albums, tracks, offlineMode } = useLibrary();
   const [recent, setRecent] = useState(null);
+  const [discover, setDiscover] = useState([]);
   const mixes = useMixes();
   const friends = useActivity();
   const liveCount = friends?.filter((f) => f.live).length ?? 0;
@@ -20,6 +22,7 @@ export default function Home() {
   useEffect(() => {
     if (offlineMode) return;
     api("/api/history?limit=12").then((d) => setRecent(d.tracks)).catch(() => setRecent([]));
+    api("/api/recommendations/discover?limit=12").then((d) => setDiscover(d.tracks)).catch(() => setDiscover([]));
   }, [offlineMode]);
 
   const recentlyAdded = useMemo(
@@ -69,6 +72,11 @@ export default function Home() {
           </span>
           <Artifact kind="boombox" size={84} tilt={-8} className="shrink-0" />
         </a>
+      )}
+      {discover.length > 0 && (
+        <Section title="New to you" art={<Artifact kind="sparkle" size={36} tilt={10} />}>
+          <DiscoverList tracks={discover} />
+        </Section>
       )}
       {mixes.length > 0 && (
         <Section title="Made for you" art={<Artifact kind="sparkle" size={34} tilt={-12} />}>

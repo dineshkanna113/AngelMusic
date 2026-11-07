@@ -166,6 +166,12 @@ To stay in sync, a listener plays `position + (now_server - server_time)` while 
 only when its own position is more than about 1.5 seconds off. Chat and reactions are not stored.
 Rooms keep their connections in one server process; running several servers needs a shared channel (see the AWS brief).
 
+## Recommendations
+
+| Call | Notes |
+|---|---|
+| `GET /api/recommendations/discover?limit=30` | Tracks you have not played or favorited. Each has `reason: {kind, because}`: `listeners` (people who play your songs also play it; `because` is one of your tracks; needs at least 2 co-listeners, so no one's taste is exposed), `taste` (shares an artist, genre, mood or language with what you play) or `popular` (only when you have no history yet). Best first; empty when there is nothing to suggest. |
+
 ## Uploading (users with `can_upload`)
 
 Resumable, chunked (tus-style). Files go to review; nothing is public until an admin approves.

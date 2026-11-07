@@ -29,3 +29,11 @@ export const live = {
   rewind: (period) => api(`/api/rewind?period=${encodeURIComponent(period)}`),
   blend: (username) => api("/api/blends", { method: "POST", body: { username } }),
 };
+
+/** Why a track is suggested, in the person's terms. */
+export function reasonText(reason) {
+  if (reason?.kind === "listeners") return `Listeners who play ${reason.because} also play this`;
+  if (reason?.kind === "taste") return `More like ${reason.because}`;
+  if (reason?.kind === "popular") return "Popular on Yaapu right now";
+  return "";
+}

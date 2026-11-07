@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatListening, rewindPeriods } from "./live";
+import { formatListening, reasonText, rewindPeriods } from "./live";
 
 describe("formatListening", () => {
   it("writes minutes under an hour and hours with minutes above it", () => {
@@ -19,5 +19,14 @@ describe("rewindPeriods", () => {
   });
   it("handles a mid-year month", () => {
     expect(rewindPeriods(new Date(Date.UTC(2026, 6, 1)))[1]).toEqual(["2026-06", "June 2026"]);
+  });
+});
+
+describe("reasonText", () => {
+  it("explains each kind of pick", () => {
+    expect(reasonText({ kind: "listeners", because: "Manasilaayo" })).toBe("Listeners who play Manasilaayo also play this");
+    expect(reasonText({ kind: "taste", because: "Lana Del Rey" })).toBe("More like Lana Del Rey");
+    expect(reasonText({ kind: "popular", because: "" })).toBe("Popular on Yaapu right now");
+    expect(reasonText(undefined)).toBe("");
   });
 });
