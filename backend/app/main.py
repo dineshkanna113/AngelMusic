@@ -14,7 +14,7 @@ from .config import Settings, load_settings
 from .db import Database
 from .ingest import IngestWorker
 from .library import Library
-from .routes import auth, billing as billing_routes, discover, drops, growth, library, live, me, recs, rooms, social, subsonic, uploads, users
+from .routes import auth, billing as billing_routes, discover, drops, growth, library, live, me, promos, recs, rooms, social, subsonic, uploads, users
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("lossless")
@@ -119,6 +119,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(drops.public)
     app.include_router(live.router)
     app.include_router(billing_routes.router)
+    app.include_router(promos.router)
     app.include_router(recs.router)
     app.include_router(rooms.router)
     app.include_router(subsonic.router)

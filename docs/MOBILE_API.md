@@ -185,6 +185,9 @@ every sign-in response carry `premium: bool`. Only Stripe's verified webhook gra
 | `POST /api/billing/portal` | `{url}` of Stripe's customer portal (cancel, change card, invoices). 404 if the user has never paid. |
 | `POST /api/billing/webhook` | Stripe only. Verified by signature, applied once per event id, 256 KB limit. Not for apps. |
 | `PUT /api/users/{id}/premium {until}` | Admin only. Gives Premium without Stripe until a date; `null` clears it. |
+| `GET /api/download/{id}?t=` | Saving for offline needs Premium: Free users get `402 {detail, code: "premium_required"}`. `GET /api/stream/{id}` is never blocked. Subsonic `download` returns error 50 for Free users. |
+| `GET /api/promos` | Up to 3 live house promos `{id, title, body, link, image_url}` for Free users; `[]` for Premium and when billing is off. `link` is an `https://` URL or an in-app `#/` route. |
+| `GET/POST/PATCH/DELETE /api/promos...`, `POST /api/promos/{id}/image` | Admin only: `GET /api/promos/all` lists everything including paused and scheduled promos. |
 
 ## Uploading (users with `can_upload`)
 

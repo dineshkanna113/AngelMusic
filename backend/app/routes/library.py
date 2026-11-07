@@ -2,9 +2,9 @@ from functools import lru_cache
 from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
-from .. import queries
+from .. import entitlements, queries
 from ..http import etag_json
 from ..library import read_cover, read_lyrics
 from ..security import admin_user, current_user, stream_user
@@ -82,7 +82,12 @@ def stream(track_id: str, request: Request, _user: dict = Depends(stream_user)):
 
 
 @router.get("/download/{track_id}")
-def download(track_id: str, request: Request, _user: dict = Depends(stream_user)):
+def download(track_id: str, request: Request, user: dict = Depends(stream_user)):
+    """Saving a track for offline is a Premium feature. Listening (stream) is never blocked."""
+    state = request.app.state
+    with state.db.connect() as conn:
+        if not entitlements.is_premium(conn, state.settings, user["id"]):
+            return JSONResponse(entitlements.PREMIUM_REQUIRED, status_code=status.HTTP_402_PAYMENT_REQUIRED)
     row = _row(request, track_id)
     path = _file(request, row)
     return FileResponse(path, media_type=row["mime"], filename=path.name)

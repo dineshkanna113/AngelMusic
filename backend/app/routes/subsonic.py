@@ -16,7 +16,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
 
-from .. import queries
+from .. import entitlements, queries
 from ..library import read_lyrics
 from ..security import decrypt_app_password, throttle
 from .library import _file, _row, cover_response
@@ -554,6 +554,10 @@ HANDLERS = {
 
 
 def _media(req, p, user, method):
+    if method == "download":
+        with req.app.state.db.connect() as conn:
+            if not entitlements.is_premium(conn, req.app.state.settings, user["id"]):
+                raise SubsonicError(50, "Offline downloads are a Premium feature")
     if method in ("stream", "download"):
         row = _row(req, p.require("id"))
         path = _file(req, row)

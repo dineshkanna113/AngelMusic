@@ -202,6 +202,19 @@ CREATE TABLE IF NOT EXISTS rooms (
 );
 CREATE INDEX IF NOT EXISTS idx_rooms_host ON rooms(host_id);
 
+-- House promos shown to Free users (admin-written cards; there is no ad network).
+CREATE TABLE IF NOT EXISTS promos (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    title      TEXT NOT NULL,
+    body       TEXT NOT NULL DEFAULT '',
+    link       TEXT,
+    image      TEXT,
+    active     INTEGER NOT NULL DEFAULT 1,
+    starts_at  TEXT,
+    ends_at    TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS presaves (
     drop_id    INTEGER NOT NULL REFERENCES drops(id) ON DELETE CASCADE,
     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

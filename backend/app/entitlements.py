@@ -49,3 +49,6 @@ def plan(conn, settings, user_id: int, now: datetime | None = None) -> dict:
 
 def is_premium(conn, settings, user_id: int, now: datetime | None = None) -> bool:
     return plan(conn, settings, user_id, now)["premium"]
+
+
+PREMIUM_REQUIRED = {"detail": "Offline listening is a Premium feature", "code": "premium_required"}
