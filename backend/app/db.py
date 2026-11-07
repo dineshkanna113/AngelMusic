@@ -209,6 +209,28 @@ CREATE TABLE IF NOT EXISTS presaves (
     PRIMARY KEY (drop_id, user_id)
 );
 
+-- What each user has paid for. Changed only by verified Stripe webhooks (and read by entitlements.py).
+CREATE TABLE IF NOT EXISTS subscriptions (
+    user_id                INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    stripe_customer_id     TEXT,
+    stripe_subscription_id TEXT,
+    status                 TEXT NOT NULL,
+    price_id               TEXT,
+    interval               TEXT,
+    current_period_end     TEXT,
+    cancel_at_period_end   INTEGER NOT NULL DEFAULT 0,
+    last_event_created     INTEGER NOT NULL DEFAULT 0,
+    updated_at             TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_customer ON subscriptions(stripe_customer_id);
+
+-- Webhook event ids already applied, so a redelivery changes nothing.
+CREATE TABLE IF NOT EXISTS webhook_events (
+    id          TEXT PRIMARY KEY,
+    type        TEXT NOT NULL,
+    received_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS artist_follows (
     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     artist_id  TEXT NOT NULL,
@@ -232,6 +254,7 @@ ADDED_COLUMNS = [
     ("playlists", "visibility", "TEXT NOT NULL DEFAULT 'private'"),
     ("playlists", "collaborative", "INTEGER NOT NULL DEFAULT 0"),
     ("playlists", "featured", "INTEGER NOT NULL DEFAULT 0"),
+    ("users", "comp_until", "TEXT"),
     ("plays", "country", "TEXT"),
     ("plays", "city", "TEXT"),
 ]

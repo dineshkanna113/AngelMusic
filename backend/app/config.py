@@ -64,6 +64,17 @@ class Settings:
     # them (CloudFront-Viewer-Country / -City); otherwise a client could claim any location.
     trust_geo_headers: bool = field(default_factory=lambda: _bool("TRUST_GEO_HEADERS", False))
     scan_on_startup: bool = field(default_factory=lambda: _bool("SCAN_ON_STARTUP", True))
+    # Billing (Stripe). Unset means billing is off and every feature is unlocked.
+    stripe_secret_key: str = field(default_factory=lambda: os.getenv("STRIPE_SECRET_KEY", ""))
+    stripe_webhook_secret: str = field(default_factory=lambda: os.getenv("STRIPE_WEBHOOK_SECRET", ""))
+    stripe_price_monthly: str = field(default_factory=lambda: os.getenv("STRIPE_PRICE_MONTHLY", ""))
+    stripe_price_yearly: str = field(default_factory=lambda: os.getenv("STRIPE_PRICE_YEARLY", ""))
+    # How long Premium survives a failed or late payment after the paid period ends.
+    billing_grace_days: int = field(default_factory=lambda: int(os.getenv("BILLING_GRACE_DAYS", "3")))
+
+    @property
+    def billing_enabled(self) -> bool:
+        return bool(self.stripe_secret_key and self.stripe_webhook_secret and (self.stripe_price_monthly or self.stripe_price_yearly))
 
     @property
     def is_production(self) -> bool:
