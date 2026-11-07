@@ -123,12 +123,14 @@ playback in progress resumes because the player retries from the same position.
 | Users | `docker compose exec app python -m app.manage list-users` |
 | Reset a password | `docker compose exec app python -m app.manage set-password <name>` |
 | Rescan music | `docker compose exec app python -m app.manage scan` |
+| Gift Premium | `docker compose exec app python -m app.manage grant-premium <name> --days 90` (see [BILLING.md](BILLING.md)) |
 | Restore the database | stop the app, `gunzip` a backup to `/srv/angelmusic/data/app.db`, `chown 10001`, start |
 | Taken-down files | `/srv/angelmusic/data/removed/<track-id>/` (move back into music and rescan to restore) |
 
 ## Security notes
 
 - Only Caddy is exposed; the app port is internal. SSH is limited to your IP.
+- `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` move money and verify payments: keep them out of git; on AWS prefer Secrets Manager.
 - `SECRET_KEY` signs every token: keep it out of git, and rotating it signs everyone out.
 - Rotate the **Supabase keys** that were committed to the old `lossless-stream-backend` repo's
   history (this repo never contained them); they are unused, but anyone with the old repo can read them.

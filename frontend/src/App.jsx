@@ -13,6 +13,7 @@ import { useRoute } from "./lib/router";
 import { AlbumView, Albums, ArtistView, Artists, Favorites } from "./views/Albums";
 import Downloads from "./views/Downloads";
 import Drop from "./views/Drop";
+import Legal from "./views/Legal";
 import Premium from "./views/Premium";
 import Promos from "./views/Promos";
 import Rewind from "./views/Rewind";
@@ -59,6 +60,7 @@ function View() {
     case "studio": return <Studio />;
     case "rewind": return <Rewind />;
     case "premium": return <Premium />;
+    case "legal": return <Legal page={params[0]} />;
     case "promos": return <Promos />;
     case "room": return <Room code={params[0]} />;
     case "drop": return <Drop slug={params[0]} />;

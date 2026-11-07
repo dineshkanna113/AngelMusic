@@ -3,7 +3,7 @@ import { PageHeader } from "../components/Grid";
 import { Artifact, StickerLabel } from "../components/Stickers";
 import { billingApi, refreshUser, useBilling } from "../lib/billing";
 import { annualSaving, formatPrice, monthlyEquivalent, planSummary } from "../lib/billingMath";
-import { useRoute } from "../lib/router";
+import { href, useRoute } from "../lib/router";
 import { toast, toastError } from "../lib/toast";
 
 const ROWS = [
@@ -161,6 +161,11 @@ export default function Premium() {
           )}
         </>
       )}
+      <p className="mt-8 text-xs text-muted">
+        <a className="underline" href={href("legal", "terms")}>Terms</a>{" · "}
+        <a className="underline" href={href("legal", "privacy")}>Privacy</a>{" · "}
+        <a className="underline" href={href("legal", "refunds")}>Refunds</a>
+      </p>
     </div>
   );
 }
