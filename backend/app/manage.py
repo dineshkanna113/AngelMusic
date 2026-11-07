@@ -47,6 +47,9 @@ def main(argv=None) -> None:
     reset = sub.add_parser("set-password", help="reset a password and sign the user out everywhere")
     reset.add_argument("username")
     reset.add_argument("--password-stdin", action="store_true")
+    grant = sub.add_parser("grant-premium", help="give a user Premium without Stripe for N days (0 removes it)")
+    grant.add_argument("username")
+    grant.add_argument("--days", type=int, required=True)
     sub.add_parser("list-users")
     sub.add_parser("scan", help="rescan the music folder")
     backup = sub.add_parser("backup", help="online backup of the database")
@@ -69,6 +72,16 @@ def main(argv=None) -> None:
 
     settings = load_settings()
     db = Database(settings.database_path)
+
+    if args.command == "grant-premium":
+        from datetime import datetime, timedelta, timezone
+
+        until = (datetime.now(timezone.utc) + timedelta(days=args.days)).strftime("%Y-%m-%d %H:%M:%S") if args.days > 0 else None
+        with db.connect() as conn:
+            if conn.execute("UPDATE users SET comp_until = ? WHERE username = ?", (until, args.username)).rowcount == 0:
+                raise SystemExit(f"No user named {args.username}")
+        print(f"{args.username}: Premium until {until}" if until else f"{args.username}: Premium grant removed")
+        return
 
     if args.command == "create-user":
         password = _password(args)

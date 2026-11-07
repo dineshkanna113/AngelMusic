@@ -1,6 +1,7 @@
 """Admin-only user management."""
 
 import sqlite3
+from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
@@ -26,7 +27,28 @@ class UserPatch(BaseModel):
 
 def _public(row) -> dict:
     return {"id": row["id"], "username": row["username"], "is_admin": bool(row["is_admin"]),
-            "can_upload": bool(row["is_admin"] or row["can_upload"]), "created_at": row["created_at"]}
+            "can_upload": bool(row["is_admin"] or row["can_upload"]), "created_at": row["created_at"],
+            "comp_until": row["comp_until"]}
+
+
+class PremiumGrant(BaseModel):
+    until: str | None = None  # a date or ISO time; null removes the grant
+
+
+@router.put("/{user_id}/premium")
+def grant_premium(user_id: int, body: PremiumGrant, request: Request, _admin: dict = Depends(admin_user)):
+    """Give a user Premium without Stripe (beta testers, artists, press) until a date, or clear it."""
+    until = None
+    if body.until is not None:
+        try:
+            parsed = datetime.fromisoformat(body.until.replace("Z", "+00:00")) if "T" in body.until else datetime.combine(date.fromisoformat(body.until), datetime.min.time())
+        except ValueError:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Use a date like 2027-01-31")
+        until = (parsed.astimezone(timezone.utc) if parsed.tzinfo else parsed).strftime("%Y-%m-%d %H:%M:%S")
+    with request.app.state.db.connect() as conn:
+        if conn.execute("UPDATE users SET comp_until = ? WHERE id = ?", (until, user_id)).rowcount == 0:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+        return _public(conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone())
 
 
 def _admin_count(conn) -> int:

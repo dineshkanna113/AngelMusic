@@ -172,6 +172,20 @@ Rooms keep their connections in one server process; running several servers need
 |---|---|
 | `GET /api/recommendations/discover?limit=30` | Tracks you have not played or favorited. Each has `reason: {kind, because}`: `listeners` (people who play your songs also play it; `because` is one of your tracks; needs at least 2 co-listeners, so no one's taste is exposed), `taste` (shares an artist, genre, mood or language with what you play) or `popular` (only when you have no history yet). Best first; empty when there is nothing to suggest. |
 
+## Billing and Premium
+
+Plans are Free and Premium. Premium unlocks offline downloads and removes promos; lossless streaming is free for everyone.
+When billing is not set up on a server (`enabled: false`), every user counts as Premium. `/api/auth/me` and the user object in
+every sign-in response carry `premium: bool`. Only Stripe's verified webhook grants or removes Premium; apps never do.
+
+| Call | Notes |
+|---|---|
+| `GET /api/billing` | `{enabled, plan: {premium, source: billing_off \| comp \| subscription \| free, status, current_period_end, cancel_at_period_end}, prices: [{id, interval, amount, currency}]}`. `amount` is in the currency's smallest unit (cents). Prices come from Stripe; an outage gives an empty list. |
+| `POST /api/billing/checkout {interval: "month" \| "year"}` | `{url}` of Stripe's hosted checkout: open it in the system browser. 409 with `portal: true` if the user already subscribes. 400 when billing or that price is not set up. After paying, poll `GET /api/billing` until `plan.premium` is true. |
+| `POST /api/billing/portal` | `{url}` of Stripe's customer portal (cancel, change card, invoices). 404 if the user has never paid. |
+| `POST /api/billing/webhook` | Stripe only. Verified by signature, applied once per event id, 256 KB limit. Not for apps. |
+| `PUT /api/users/{id}/premium {until}` | Admin only. Gives Premium without Stripe until a date; `null` clears it. |
+
 ## Uploading (users with `can_upload`)
 
 Resumable, chunked (tus-style). Files go to review; nothing is public until an admin approves.

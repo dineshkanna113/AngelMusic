@@ -1,3 +1,4 @@
+import logging
 import secrets
 import sqlite3
 from datetime import datetime, timedelta, timezone
@@ -5,7 +6,8 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
-from .. import ingest
+from .. import entitlements, ingest
+from ..billing import GatewayError
 
 from ..security import (
     ACCESS,
@@ -23,6 +25,7 @@ from ..security import (
     verify_password,
 )
 
+log = logging.getLogger("yaapu.auth")
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 # A real hash so unknown usernames take as long to reject as wrong passwords.
@@ -69,6 +72,13 @@ def _device(request: Request, device: str | None) -> str:
     return (device or request.headers.get("user-agent", ""))[:120]
 
 
+def _account(request: Request, user: dict) -> dict:
+    """The user as apps see them: identity, roles and whether they have Premium."""
+    with request.app.state.db.connect() as conn:
+        premium = entitlements.is_premium(conn, request.app.state.settings, user["id"])
+    return {**public_user(user), "premium": premium}
+
+
 def _tokens(request: Request, user: dict, sid: str, secret: str) -> dict:
     settings = request.app.state.settings
     return {
@@ -78,7 +88,7 @@ def _tokens(request: Request, user: dict, sid: str, secret: str) -> dict:
         "refresh_token": f"{sid}.{secret}",
         "refresh_expires_in": settings.refresh_token_ttl,
         "session_id": sid,
-        "user": public_user(user),
+        "user": _account(request, user),
     }
 
 
@@ -223,20 +233,29 @@ def delete_account(body: DeleteAccount, request: Request, user: dict = Depends(c
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "Password is incorrect")
         if row["is_admin"] and conn.execute("SELECT COUNT(*) FROM users WHERE is_admin").fetchone()[0] <= 1:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "Make another user an admin before deleting the only admin")
+        sub = conn.execute("SELECT stripe_subscription_id, status FROM subscriptions WHERE user_id = ?", (user["id"],)).fetchone()
         staged = conn.execute(
             f"SELECT * FROM uploads WHERE user_id = ? AND status IN ({', '.join('?' * len(ingest.ACTIVE))})",
             (user["id"], *ingest.ACTIVE),
         ).fetchall()
         conn.execute("DELETE FROM uploads WHERE user_id = ? AND status IN ({})".format(", ".join("?" * len(ingest.ACTIVE))),
                      (user["id"], *ingest.ACTIVE))
+    # Stop billing first. If Stripe is unreachable the account is still deleted; the operator is told in the log.
+    if sub and sub["stripe_subscription_id"] and sub["status"] in ("active", "trialing", "past_due") and state.billing:
+        try:
+            state.billing.cancel_subscription(sub["stripe_subscription_id"])
+        except GatewayError:
+            log.error("Could not cancel Stripe subscription %s for a deleted account; cancel it in the Stripe dashboard",
+                      sub["stripe_subscription_id"])
+    with state.db.connect() as conn:
         conn.execute("DELETE FROM users WHERE id = ?", (user["id"],))
     for upload in staged:
         ingest.discard_file(state.settings, upload)
 
 
 @router.get("/me")
-def me(user: dict = Depends(current_user)):
-    return public_user(user)
+def me(request: Request, user: dict = Depends(current_user)):
+    return _account(request, user)
 
 
 @router.post("/stream-token")

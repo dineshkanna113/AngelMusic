@@ -8,13 +8,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import API_VERSION, __version__
+from . import API_VERSION, __version__, billing
 
 from .config import Settings, load_settings
 from .db import Database
 from .ingest import IngestWorker
 from .library import Library
-from .routes import auth, discover, drops, growth, library, live, me, recs, rooms, social, subsonic, uploads, users
+from .routes import auth, billing as billing_routes, discover, drops, growth, library, live, me, recs, rooms, social, subsonic, uploads, users
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("lossless")
@@ -44,6 +44,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.db = Database(settings.database_path)
     app.state.library = Library(app.state.db, settings.audio_dir)
     app.state.ingest = IngestWorker(app.state)
+    app.state.billing = billing.make_gateway(settings)
 
     app.add_middleware(
         CORSMiddleware,
@@ -117,6 +118,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(drops.router)
     app.include_router(drops.public)
     app.include_router(live.router)
+    app.include_router(billing_routes.router)
     app.include_router(recs.router)
     app.include_router(rooms.router)
     app.include_router(subsonic.router)
